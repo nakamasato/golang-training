@@ -8,6 +8,87 @@ test:
 - `go test -v`
 - `go test -race` race detector
 
+## Install Go
+
+- Modules
+
+    ```bash
+    go mod init <modulepath used "tmp">
+    ```
+- Debug: `Delve`
+- Lint: [golangci-lint](https://golangci-lint.run/)
+## [Hello World](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/hello-world)
+
+test
+
+```go
+func TestXXX(t *testing.T) {
+    if got != want {
+        t.Errorf("xxx")
+    }
+}
+```
+
+## [Integers](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/integers)
+
+```go
+Add(a, b int)
+```
+
+## [Iteration](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/iteration)
+
+- [Benchmarks](https://pkg.go.dev/testing#hdr-Benchmarks)
+    ```go
+    func BenchmarkXxx(*testing.B)
+    ```
+
+    Example:
+
+    ```go
+    func BenchmarkRandInt(b *testing.B) {
+        for i := 0; i < b.N; i++ {
+            rand.Int()
+        }
+    }
+    ```
+- [Examples](https://go.dev/blog/examples) + [Examples](https://pkg.go.dev/testing#hdr-Examples)
+
+    ```go
+    func ExampleRepeat() {
+        repeated := Repeat("ab", 3)
+        fmt.Println(repeated)
+        // Output: ababab
+    }
+    ```
+
+## [Arrays and slices](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/arrays-and-slices)
+
+- `range`
+    ```go
+    for _, s := range Numbers {
+        fmt.Println(s)
+    }
+    ```
+- `append`
+    ```go
+    SummedNumbers = append(SummedNumbers, Sum(numbers))
+    ```
+- `make`
+    ```go
+    sums := make([]int, lengthOfNumbers)
+    ```
+- [reflect.DeepEqual](https://golang.org/pkg/reflect/#DeepEqual)
+
+    ```go
+    want := []int{1, 2}
+    got := []int{2, 3}
+    if !reflect.DeepEqual(got, want) {
+        ...
+    }
+    ```
+
+## [](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/structs-methods-and-interfaces)
+
 ## [Dependency Injection](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/dependency-injection)
 
 ## [Mocking](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/mocking)
