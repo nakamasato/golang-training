@@ -87,6 +87,88 @@ Add(a, b int)
     }
     ```
 
+## [Structs, methods & interfaces](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/structs-methods-and-interfaces)
+
+- Struct
+    ```go
+    type Circle struct {
+        Radius float64
+    }
+- Method
+    ```go
+    func (c Circle) Area() {
+        return c.Radius * c.Radius * math.Pi
+    }
+- Interface
+    ```go
+    type Shape interface {
+        Area()
+    }
+    ```
+    - In Go interface resolution is implicit. All the struct that has `Area()` is recognized as `Shape`.
+    - Using interfaces to declare **only what you need** is very important in software design
+
+- Table driven test
+    ```go
+    areaTests := []struct {
+        name    string
+        shape   Shape
+        hasArea float64
+    }[
+        {name: "test", shape: Triangle(Base: 40.0, Height: 10.0), hasArea: 200.0},
+        ...
+    ]
+    for _, tt range areaTests {
+        t.Run(tt.name, func(t *testing.T) {...})
+    }
+    ```
+
+## [Pointers & errors](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/pointers-and-errors)
+
+- In Go, **when you call a function or a method the arguments are *copied*.**
+    ❌:
+    ```go
+    func (w Wallet) Deposit(amount int)  { // as w is a copy of whatever we called the method from
+    	w.balance += amount
+    }
+    ```
+    ⭕:
+    ```go
+    func (w *Wallet) Deposit(amount int)  {
+    	w.balance += amount
+    }
+    ```
+- the code above using (*w) is absolutely valid. However, the makers of Go deemed this notation cumbersome, so the language permits us to write w.balance, without an explicit dereference. ([automatic dereference](https://golang.org/ref/spec#Method_values))
+    ```go
+    func (w *Wallet) Balance() int {
+    return (*w).balance // we can write w.balance!
+    }
+    ```
+
+- `type Bitcoin int`: You can add domain specific functionality on top of existing types!!
+
+    ```go
+    func (b Bitcoin) String() string {
+        return fmt.Sprintf("%d BTC", b)
+    }
+    ```
+
+    -> We can use `"got %s want %s, got, want"`
+
+- `t.Fatal`: will stop the test if it is called.
+- `errcheck`: https://github.com/kisielk/errcheck
+
+    ```
+    go get -u github.com/kisielk/errcheck
+    ```
+
+    ```
+    errcheck .
+    wallet_test.go:15:24:   wallet.Withdraw(Bitcoin(10))
+    ```
+
+    If you can't find the command: https://githubmemory.com/repo/kisielk/errcheck/issues/194
+
 ## [](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/structs-methods-and-interfaces)
 
 ## [Dependency Injection](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/dependency-injection)
