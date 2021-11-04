@@ -169,13 +169,94 @@ Add(a, b int)
 
     If you can't find the command: https://githubmemory.com/repo/kisielk/errcheck/issues/194
 
-## [](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/structs-methods-and-interfaces)
+## [Maps](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/maps)
+
+- **Map:**
+    - An interesting property of maps is that you can modify them without passing as an address to it (e.g &myMap)
+        - *A map value is a pointer to a runtime.hmap structure.*
+    - ❌ `var m map[string]string` -> `nil`
+    - ⭕ `var dictionary = map[string]string{}`
+    - ⭕ `var dictionary = make(map[string]string)`
+- Constant Error: https://dave.cheney.net/2016/04/07/constant-errors
+    ```go
+    type DictionaryErr string
+    func (e DisctionaryErr) Error() string { // implements Error interface
+        return string(e)
+    }
 
 ## [Dependency Injection](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/dependency-injection)
 
+- **Our function doesn't need to care where or how the printing happens, so we should accept an interface rather than a concrete type.**
+
+- [fmt.Printf](https://pkg.go.dev/fmt#Printf)
+    ```go
+    // It returns the number of bytes written and any write error encountered.
+    func Printf(format string, a ...interface{}) (n int, err error) {
+        return Fprintf(os.Stdout, format, a...)
+    }
+    ```
+- `Fprintf`
+    ```go
+    func Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error) {
+        p := newPrinter()
+        p.doPrintf(format, a)
+        n, err = w.Write(p.buf)
+        p.free()
+        return
+    }
+    ```
+- `io.Writer`
+    ```go
+    type Writer interface {
+        Write(p []byte) (n int, err error)
+    }
+    ```
+- `os.Stdout` implements `io.Writer`; `Printf` passes `os.Stdout` to `Fprintf` which expetcs an `io.Writer`
+- [bytes.Buffer](https://pkg.go.dev/bytes#Buffer)
+
+Summary: With Dependency Injection
+- **Test our code** ( DI will motivate you to inject in a dependency (via an interface) which you can then mock out with something you can control in your tests.)
+- **Separate our concerns** decoupling where the data goes from how to generate it
+- **Allow our code to be re-used in different contexts**
+
 ## [Mocking](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/mocking)
 
-- use interface
+
+- Use interface
+    interface: `io.Writer` -> Implementation: `os.Stdout`, `bytes.Buffer`...
+- `time.Sleep` -> **Slow tests ruin developer productivity.**
+    - Let's define our dependency as an interface.
+    - `Sleeper` interface:
+        ```go
+        type Sleeper interface {
+            Sleep()
+        }
+        ```
+    - `DefaultSleeper` (implements `Sleeper`) in `main`:
+        ```go
+        sleeper := &DefaultSleeper{}
+        ```
+    - `SpySleeper` (implements `Sleeper`) in `test`:
+        ```go
+        spySleeper := &SpySleeper{}
+        ```
+    - `sleeper.Sleep()` in `Countdown()`
+- We need `countdown` -> `sleep` -> `countdown` -> `sleep` ...
+    - `SpyCountdownOperations` to capture the behavior of the actions `sleep` and `write`
+- Mocking is evil? (improve *bad abstraction*!)
+    - The thing you are testing is having to do too many things (because it has too many dependencies to mock)
+        - Break the module apart so it does less
+    - Its dependencies are too fine-grained
+        - Think about how you can consolidate some of these dependencies into one meaningful module
+    - Your test is too concerned with implementation details
+        - Favour testing expected behaviour rather than the implementation
+- **TDD**: more often than not poor test code is a result of bad design or put more nicely, well-designed code is easy to test.
+- [Mocking considered harmful](https://philippe.bourgau.net/careless-mocking-considered-harmful/)
+    - This is usually a sign of you testing too much *implementation detail*. Try to make it so your tests are testing *useful behaviour* unless the implementation is really important to how the system runs.
+        - [ ] **The definition of refactoring is that the code changes but the behaviour stays the same.**
+        - [ ] **Avoid testing private functions** as private functions are implementation detail to support public behaviour.
+        - [ ] **more than 3 mocks then it is a red flag**
+        - [ ] **Be sure you actually care about these details if you're going to spy on them**
 - [**test double**](https://martinfowler.com/bliki/TestDouble.html): *Test Double is a generic term for any case where you replace a production object for testing purposes.*
 
 ## [Concurrency](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/concurrency)
