@@ -261,6 +261,15 @@ Summary: With Dependency Injection
 
 ## [Concurrency](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/concurrency)
 
+- Dependency Injection
+    - `mockWebsiteChecker` or `slowStubWebsiteChecker` for testing.
+    - `type WebsiteChecker func(string) bool` -> `func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {` <- The target function to inject dependency.
+- ***Race condition***: a bug that occurs when the output of our software is dependent on the timing and sequence of events that we have no control over.
+    - Go can help us to spot race conditions with its built in [race detector](https://blog.golang.org/race-detector).
+    ```bash
+    go test -race
+    ```
+
 **Goroutine**: run in a separate process
 
 ```go
@@ -269,7 +278,7 @@ go func(u string) {
 }(url)
 ```
 
-**Channel**: help organize and control the communication between thedifferent processes, allowing us to avoid a *race condition* bug.
+**Channel**: a Go data structure that can both receive and send values. help organize and control the communication between thedifferent processes, allowing us to avoid a ***race condition*** bug.
 
 ```go
 resultChannel <- result{u, wc(u)}
@@ -284,8 +293,18 @@ In the mocking and dependency injection chapters, we covered how ideally we don'
 - Flaky
 - Can't test edge cases
 
+
+For HTTP server:
+
+- `net/http` to make the HTTP calls.
+- `net/http/httptest` to help us test them.
+- goroutines.
+- ***select*** to synchronise processes.
+
 **defer**: By prefixing a function call with defer it will now call that function at the end of the containing function.
 
+
+**select**: Synchronize process
 
 ```go
 func Racer(a, b string) (winner string) {
@@ -296,13 +315,28 @@ func Racer(a, b string) (winner string) {
         return b
     }
 }
+
+func ping(url string) chan struct{} { // return channel of struct{}
+    ch := make(chan struct{})
+    go func() {
+        http.Get(url)
+        close(ch) // close channel after completing getting http response
+    }()
+    return ch // return the channel
+}
 ```
 
-You can add the following code to set timeout:
-
-```go
-case <-time.After(10 * time.Second):
-```
+- `chan struct{}` is the smallest data type available from a memory perspective
+- **Always make channel**: For channels the zero value is nil and if you try and send to it with <- it will block forever because you cannot send to nil channels.
+    - ❌ `var ch chan struct{}`
+    - ⭕ `ch := make(chan struct{})`
+- You can add the following code to set timeout:
+    ```go
+    case <-time.After(10 * time.Second):
+    ```
+- **Slow tests**: needs to wait until timeout second.
+    - `ConfigurableRacer(a, b string, timeout time.Duration)` -> call `Racer(a, b string)`
+    - Test timeout case with `ConfigurableRacer`
 
 ## [Reflection](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/reflection)
 
@@ -311,12 +345,63 @@ case <-time.After(10 * time.Second):
 - This can be quite clumsy and difficult to read and is generally less performant (as you have to do checks at runtime).
 - In short **only use reflection** if you **really need to**.
 
+1. Make the test pass.
+
+    ```go
+    walk(x, func(input string ){
+        got = append(got, input)
+    })
+    ```
+
+    ```go
+    func walk(x struct{Name string}, fn func(input string)) {
+        fn(x.Name)
+    }
+    ```
+1. Use `interface` instead of a specific type.
+
+    ```go
+    val := reflect.ValueOf(x) // returns Value of a given variable
+	field := val.Field(0) // get the first field
+	fn(field.String()) // returns the underlying value as a string
+    ```
+1. **Table based test**
+    ```go
+    cases := []struct{ // you can freely define struct for each test case
+        Name string
+        Input interface{}
+        ExpectedCalls []string
+    } {
+        {// value
+            "Name"
+            struct{Name string}{"Chris"}
+            []string{"Chris"}
+        }
+    }
+    ```
+1. `val.NumField()`: Get number of fields in the value got by `reflect.ValueOf(x)`
+1. `val.Kind()`: Get kind of the value. An example of the returned value is `reflect.String`.
+1. `field.Interface()`: used to pass it again to the function as `interface`
+    ```go
+    if field.Kind() == reflect.Struct {
+		walk(field.Interface(), fn)
+	}
+    ```
+1. `val.Elem()`: extract the underlying value from pointer.
+1. `val.Len()`: get length of a slice.
+1. `val.Index(i)`: get element in a slice by index
+1. `for key := range val.MapKeys()` and `val.MapIndex(key)` to make loop for a map and get the value for the corresponding  key.
+1. `val.Recv()` to receive message from `Chan`
+    ```go
+    for v, ok := val.Recv(); ok; v, ok = val.Recv() {
+		walkValue(v)
+	}
+    ```
+1. `valFnResult := val.Call(nil)` call function in case `val` is function.
 - [reflect package](https://pkg.go.dev/reflect)
 - [The Laws of Reflection](https://go.dev/blog/laws-of-reflection)
 
 **Interface**: You may come across scenarios though where you want to write a function where you don't know the type at compile time. -> Go lets us get around this with the type interface{} which you can think of as just any type.
-
-For more details: [reflection](reflection)
 
 ## [Sync](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/sync)
 
