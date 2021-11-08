@@ -17,7 +17,7 @@ test:
     ```
 - Debug: `Delve`
 - Lint: [golangci-lint](https://golangci-lint.run/)
-## [Hello World](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/hello-world)
+## [Hello World](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/hello-world) [★☆☆☆☆]
 
 test
 
@@ -29,13 +29,13 @@ func TestXXX(t *testing.T) {
 }
 ```
 
-## [Integers](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/integers)
+## [Integers](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/integers) [★☆☆☆☆]
 
 ```go
 Add(a, b int)
 ```
 
-## [Iteration](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/iteration)
+## [Iteration](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/iteration) [★☆☆☆☆]
 
 - [Benchmarks](https://pkg.go.dev/testing#hdr-Benchmarks)
     ```go
@@ -61,7 +61,7 @@ Add(a, b int)
     }
     ```
 
-## [Arrays and slices](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/arrays-and-slices)
+## [Arrays and slices](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/arrays-and-slices) [★☆☆☆☆]
 
 - `range`
     ```go
@@ -87,7 +87,7 @@ Add(a, b int)
     }
     ```
 
-## [Structs, methods & interfaces](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/structs-methods-and-interfaces)
+## [Structs, methods & interfaces](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/structs-methods-and-interfaces) [★★☆☆☆]
 
 - Struct
     ```go
@@ -123,7 +123,7 @@ Add(a, b int)
     }
     ```
 
-## [Pointers & errors](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/pointers-and-errors)
+## [Pointers & errors](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/pointers-and-errors)　[★★☆☆☆]
 
 - In Go, **when you call a function or a method the arguments are *copied*.**
     ❌:
@@ -169,7 +169,7 @@ Add(a, b int)
 
     If you can't find the command: https://githubmemory.com/repo/kisielk/errcheck/issues/194
 
-## [Maps](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/maps)
+## [Maps](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/maps)　[★☆☆☆☆]
 
 - **Map:**
     - An interesting property of maps is that you can modify them without passing as an address to it (e.g &myMap)
@@ -184,7 +184,7 @@ Add(a, b int)
         return string(e)
     }
 
-## [Dependency Injection](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/dependency-injection)
+## [Dependency Injection](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/dependency-injection)　[★★★☆☆]
 
 - **Our function doesn't need to care where or how the printing happens, so we should accept an interface rather than a concrete type.**
 
@@ -219,7 +219,7 @@ Summary: With Dependency Injection
 - **Separate our concerns** decoupling where the data goes from how to generate it
 - **Allow our code to be re-used in different contexts**
 
-## [Mocking](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/mocking)
+## [Mocking](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/mocking)　[★★☆☆☆]
 
 
 - Use interface
@@ -259,7 +259,7 @@ Summary: With Dependency Injection
         - [ ] **Be sure you actually care about these details if you're going to spy on them**
 - [**test double**](https://martinfowler.com/bliki/TestDouble.html): *Test Double is a generic term for any case where you replace a production object for testing purposes.*
 
-## [Concurrency](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/concurrency)
+## [Concurrency](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/concurrency)　[★★★☆☆]
 
 - Dependency Injection
     - `mockWebsiteChecker` or `slowStubWebsiteChecker` for testing.
@@ -286,7 +286,7 @@ resultChannel <- result{u, wc(u)}
 r := <-resultChannel
 ```
 
-## [Select](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/select)
+## [Select](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/select)　[★★★☆☆]
 
 In the mocking and dependency injection chapters, we covered how ideally we don't want to be relying on external services to test our code because they can be
 - Slow
@@ -338,7 +338,7 @@ func ping(url string) chan struct{} { // return channel of struct{}
     - `ConfigurableRacer(a, b string, timeout time.Duration)` -> call `Racer(a, b string)`
     - Test timeout case with `ConfigurableRacer`
 
-## [Reflection](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/reflection)
+## [Reflection](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/reflection)　[★★★★☆]
 
 **Reflection** in computing is the ability of a program to examine its own structure, particularly through types; it's a form of metaprogramming. It's also a great source of confusion.
 
@@ -403,7 +403,7 @@ func ping(url string) chan struct{} { // return channel of struct{}
 
 **Interface**: You may come across scenarios though where you want to write a function where you don't know the type at compile time. -> Go lets us get around this with the type interface{} which you can think of as just any type.
 
-## [Sync](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/sync)
+## [Sync](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/sync)　[★★★☆☆]
 
 To make a function synchronized, we can add a lock.
 
@@ -425,7 +425,7 @@ func (c *Counter) Inc()  {
 }
 ```
 
-This looks nice but while programming is a hugely subjective discipline, this is bad and wrong.
+This looks nice but while programming is a hugely subjective discipline, this is **bad and wrong**.
 
 [sync.Mutex](https://pkg.go.dev/sync#Mutex)
 
@@ -435,5 +435,147 @@ This looks nice but while programming is a hugely subjective discipline, this is
 
 **channels and goroutines** vs **mutex**
 
-- Use channels when passing ownership of data
-- Use mutexes for managing state
+- Use **channels** when **passing ownership of data**
+- Use **mutexes** for **managing state**
+
+## [Context](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/context) [★★★★★]
+
+- **Context** helps us manage long-running processes
+
+> It's important that you derive your contexts so that cancellations are propagated throughout the call stack for a given request.
+
+```go
+data := make(chan string, 1)
+go func() {
+    data <- store.Fetch()
+}()
+
+select {
+case d := <-data: // if recieves message
+    fmt.Fprint(w, d) // print
+case <-ctx.Done(): // if canceled
+    store.Cancel() // cancel store
+}
+```
+
+In test:
+
+```go
+cancellingCtx. cancel := context.WithCancel(request.Context())
+time.AfterFunc(5 * time.Millisecond, cancel)
+request = request.WithContext(cancellingCtx)
+```
+
+> Incoming requests to a server should create a Context, and outgoing calls to servers should accept a Context. The chain of function calls between them must propagate the Context, optionally replacing it with a derived Context
+
+> At Google, we require that Go programmers pass a Context parameter as the first argument to every function on the call path between incoming and outgoing requests. This allows Go code developed by many different teams to interoperate well
+
+- [Go Doc](https://golang.org/pkg/context/)
+- [Go blog Context](https://blog.golang.org/context)
+
+```go
+type store interface {
+    Fetch(contex context.Context)
+}
+
+func (s *SpyStore) Fetch(context context.Context) {
+    select {
+    case: <-ctx.Done(): // canceled
+        return "", ctx.Err()
+    case: res := <- data: // successfully get result before cancellation
+        return res, nil
+    }
+}
+```
+
+Test for the case of cancellation
+
+```go
+type SpyResponseWriter struct { // implements http.ResponseWriter
+    written bool // set true if written
+}
+```
+
+Summary:
+- How to test a HTTP handler that has had the request cancelled by the client.
+- How to use context to manage cancellation.
+- How to write a function that accepts context and uses it to cancel itself by using goroutines, select and channels.
+- Follow Google's guidelines as to how to manage cancellation by propagating request scoped context through your call-stack.
+- How to roll your own spy for http.ResponseWriter if you need it.
+
+About `context.Values`
+
+The problem with `context.Values` is that it's just an untyped map so you have no type-safety. **if a function needs some values, put them as typed parameters rather than trying to fetch them from `context.Value`**
+
+- [Context should go away for Go 2 by Michal Strba](https://faiface.github.io/post/context-should-go-away-go2/)
+- [Go blog for motivation for context with examples](https://blog.golang.org/context)
+
+## [Intro to property based tests](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/roman-numerals)
+
+- table test
+    ```go
+    cases := []struct{
+        Arabic int
+        Roman String
+    }{
+        {Arabic: 1, Roman: "I"},
+        ....
+    }
+
+    for _, test := range cases {
+        t.Run(fmt.Sprintf("%d gets converted to %q", test.Arabic, test.Roman), func(t *testing.T){
+            got := ConvertToRoman(test.Arabic)
+            if test.Roman != got {
+                t.Errorf("got %s want %s", got, test.Roman)
+            }
+        })
+    }
+    ```
+- `strings.Builder`
+
+    ```go
+    var result strings.Builder
+	for i:=0; i<number; i++ {
+		result.WriteString("I")
+	}
+	return result.String()
+    ```
+- `allRomanNumerals` stores list of `RomanNumeral` struct containing `Value` and `Symbol`
+- numeral -> roman:
+    1. In a loop of `allRomanNumerals` (in descending order), check if the number is larger or equals to the value,
+    1. Set the symbol and subtract the value from the number.
+- roman -> numeral:
+    - `windowedRoman` takes care of extracting the numberals offering a `Symbols` method to retrieve them as a slice `[][]byte`
+
+        ```go
+        func (w windowedRoman) Symbols() (symbols [][]byte) {
+            for i := 0; i < len(w); i++ {
+                symbol := w[i]
+                notAtEnd := i+1 < len(w)
+                if notAtEnd && isSubtractive(symbol) && allRomanNumerals.Exists(symbol, w[i+1]) {
+                    symbols = append(symbols, []byte{symbol, w[i+1]})
+                    i++
+                } else {
+                    symbols = append(symbols, []byte{symbol})
+                }
+            }
+            return
+        }
+        ```
+- **property based tests** (by throwing random data at your code and verifying the rules you describe always hold true. ) <-> *example* based tests
+    - a few rules in the domain of Roman Numerals:
+        - Can't have more than 3 consecutive symbols
+        - Only I, X and C can be subtractors
+        - Taking the result of `ConvertToRoman(N)` and passing it to `ConvertToArabic` should return us `N`
+    - [testing/quick](https://golang.org/pkg/testing/quick/): `quick.Check` calls f repeatedly, with arbitrary values for each argument.
+    ```go
+    assertion := func(arabic int) bool {
+        roman := ConvertToRoman(arabic)
+        fromRoman := ConvertToArabic(roman)
+        return fromRoman == arabic
+    }
+    if err := quick.Check(assertion, nil); err != nil {
+        t.Error(xxx)
+    }
+    ```
+    - To exclude too large numbers, change the type `int` to `uint16` (uint16 is the set of all unsigned 16-bit integers. Range: 0 through 65535.)
