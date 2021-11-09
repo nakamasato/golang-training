@@ -510,7 +510,7 @@ The problem with `context.Values` is that it's just an untyped map so you have n
 - [Context should go away for Go 2 by Michal Strba](https://faiface.github.io/post/context-should-go-away-go2/)
 - [Go blog for motivation for context with examples](https://blog.golang.org/context)
 
-## [Intro to property based tests](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/roman-numerals)
+## [Intro to property based tests](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/roman-numerals) [★★★★☆]
 
 - table test
     ```go
@@ -579,3 +579,5 @@ The problem with `context.Values` is that it's just an untyped map so you have n
     }
     ```
     - To exclude too large numbers, change the type `int` to `uint16` (uint16 is the set of all unsigned 16-bit integers. Range: 0 through 65535.)
+
+## [Math](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/math)
