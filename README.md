@@ -580,4 +580,28 @@ The problem with `context.Values` is that it's just an untyped map so you have n
     ```
     - To exclude too large numbers, change the type `int` to `uint16` (uint16 is the set of all unsigned 16-bit integers. Range: 0 through 65535.)
 
-## [Math](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/math)
+## [Math](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/math) [★★★★☆]
+
+- modules imported in `16-math/clockface/main.go`
+
+    ```go
+    import (
+        "fmt"
+        "io"
+        "os"
+        "time"
+
+        "tmp/learn-go-with-tests/16-math" // "<your module name>/path/to/math"
+    )
+    ```
+
+- build:
+
+    ```
+    cd learn-go-with-tests/16-math/clockface
+    go build
+    ./clockface > clock.svg
+    ```
+- acceptance test
+
+![](learn-go-with-tests/16-math/clockface/clock.svg)
