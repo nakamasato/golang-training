@@ -605,3 +605,21 @@ The problem with `context.Values` is that it's just an untyped map so you have n
 - acceptance test
 
 ![](learn-go-with-tests/16-math/clockface/clock.svg)
+
+## [Reading files](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/reading-files)
+
+```go
+var posts []blogposts.Post
+posts = blogposts.NewPostsFromFS("some-folder")
+```
+
+- Go 1.16 introduced an abstraction for file systems; the [io/fs](https://golang.org/pkg/io/fs/) package.
+- Learning to leverage interfaces defined in Go's standard library (e.g. io.fs, io.Reader, io.Writer), is vital to writing loosely coupled packages.
+- For our tests, the package [testing/fstest](https://golang.org/pkg/testing/fstest/) offers us an implementation of [io/FS](https://golang.org/pkg/io/fs/#FS) to use, similar to the tools we're familiar with in [net/http/httptest](https://golang.org/pkg/net/http/httptest/).
+
+```go
+var posts blogposts.Post
+posts = blogposts.NewPostsFromFS(someFS)
+```
+
+from https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/reading-files#write-the-test-first
