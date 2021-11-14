@@ -25,14 +25,7 @@ func main() {
 		return
 	}
 
-	// select {
-	// case <-ctx.Done():
-	// 	fmt.Println("ctx canceled")
-	// 	err := deleteKindCluster(ctx, kindName)
-	// 	if err != nil {
-	// 		fmt.Println("failed to delete cluster")
-	// 	}
-	// }
+	fmt.Println("do something")
 }
 
 func createKindCluster(ctx context.Context, kindName string) error {
