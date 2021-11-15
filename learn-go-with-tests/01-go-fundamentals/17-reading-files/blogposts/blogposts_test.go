@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 	"testing/fstest"
-	"tmp/learn-go-with-tests/17-reading-files/blogposts"
+	"tmp/learn-go-with-tests/01-go-fundamentals/17-reading-files/blogposts"
 )
 
 func TestNewBlogPosts(t *testing.T)  {
