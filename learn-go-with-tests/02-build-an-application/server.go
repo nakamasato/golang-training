@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -18,14 +17,20 @@ type PlayerServer struct {
 }
 
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	player := strings.TrimPrefix(r.URL.Path, "/players/")
-
-	switch r.Method {
-    case http.MethodPost:
-        p.processWin(w, player)
-    case http.MethodGet:
-        p.showScore(w, player)
-    }
+	router := http.NewServeMux()
+    router.Handle("/league", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        w.WriteHeader(http.StatusOK)
+    }))
+    router.Handle("/players/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        player := strings.TrimPrefix(r.URL.Path, "/players/")
+        switch r.Method {
+        case http.MethodPost:
+            p.processWin(w, player)
+        case http.MethodGet:
+            p.showScore(w, player)
+        }
+    }))
+    router.ServeHTTP(w, r)
 }
 
 func (p *PlayerServer) showScore(w http.ResponseWriter, player string) {
@@ -38,25 +43,4 @@ func (p *PlayerServer) showScore(w http.ResponseWriter, player string) {
 func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
     p.store.RecordWin(player)
     w.WriteHeader(http.StatusAccepted)
-}
-
-func NewInMemoryPlayerStore() *InMemoryPlayerStore {
-    return &InMemoryPlayerStore{map[string]int{}}
-}
-
-type InMemoryPlayerStore struct{
-	store map[string]int
-}
-
-func (i *InMemoryPlayerStore) RecordWin(name string) {
-    i.store[name]++
-}
-
-func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
-    return i.store[name]
-}
-
-func main() {
-    server := &PlayerServer{NewInMemoryPlayerStore()}
-    log.Fatal(http.ListenAndServe(":5000", server))
 }

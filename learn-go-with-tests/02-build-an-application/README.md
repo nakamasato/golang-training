@@ -67,3 +67,12 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
 ```
+
+## Step 3: Routing with [ServeMux](https://golang.org/pkg/net/http/#ServeMux)
+
+```go
+router := http.NewServeMux()
+router.Handle("/league", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    w.WriteHeader(http.StatusOK)
+}))
+```
