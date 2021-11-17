@@ -26,3 +26,4 @@ test:
 - [Pragmatic Cases](pragmatic-cases)
     - [Expose Prometheus Metrics](pragmatic-cases/prometheus)
     - [Set up and tear down kind cluster](pragmatic-cases/kind)
+    - [Deploy and delete resources by Skaffold](pragmatic-cases/skaffold)
