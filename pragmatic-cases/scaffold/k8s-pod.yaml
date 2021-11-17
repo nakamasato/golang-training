@@ -4,5 +4,15 @@ metadata:
   name: test
 spec:
   containers:
-  - name: test
-    image: nginx
+    - name: test
+      image: nginx
+      readinessProbe:
+        tcpSocket:
+          port: 80
+        initialDelaySeconds: 2
+        periodSeconds: 10
+      livenessProbe:
+        tcpSocket:
+          port: 80
+        initialDelaySeconds: 12
+        periodSeconds: 20

@@ -26,3 +26,7 @@ Execute `skaffold dev` programmatically.
     ```
     go run main.go
     ```
+
+    1. Deploy a Pod with name `test` with `skaffold run`.
+    1. Get Pod list in `default` namespace with `client-go`.
+    1. Delete the deployed resources with `skaffold delete`.
