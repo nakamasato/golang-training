@@ -67,3 +67,104 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
 ```
+
+## Step 3: Routing with [ServeMux](https://golang.org/pkg/net/http/#ServeMux)
+
+```go
+router := http.NewServeMux()
+router.Handle("/league", http.HandlerFunc(funcA))
+router.Handle("/players/", http.HandlerFunc(funcB))
+
+func funcA(w http.ResponseWriter, r *http.Request) {
+    // logic for league
+}
+
+func funcB(w http.ResponseWriter, r *http.Request) {
+    // logic for player
+}
+```
+
+## Step 4: Set Routing in NewPlayerServer
+
+```go
+func NewPlayerServer(store PlayerStore) *PlayerServer {
+    p := &PlayerServer{
+        store,
+        http.NewServeMux(),
+    }
+    p.router.Handle("/league", http.HandlerFunc(p.leagueHandler))
+    p.router.Handle("/players/", http.HandlerFunc(p.playersHandler))
+    return p
+}
+```
+
+## Step 5: Replace `ServeHTTP()` with `http.Handler` in `PlayerServer` by ***embedding***
+
+https://pkg.go.dev/net/http#HandlerFunc.ServeHTTP
+
+![](docs/step5.drawio.svg)
+
+```go
+type PlayerServer struct {
+    store PlayerStore
+	http.Handler // embedding: our PlayerServer now has all the methods that http.Handler has, which is just ServeHTTP.
+}
+```
+
+[***embedding***](https://golang.org/doc/effective_go#embedding): *Go does not provide the typical, type-driven notion of subclassing, but it does have the ability to “borrow” pieces of an implementation by embedding types within a struct or interface.*
+
+
+```go
+func NewPlayerServer(store) *PlayerServer {
+    p := new(PlayerServer)
+    router := http.NewServerMux()
+    ..
+    p.Hander = router
+    return p
+}
+```
+
+We can call `ServeHTTP`
+
+```go
+store := StubPlayerStore{}
+server := NewPlayerServer(&store)
+server.ServeHTTP(w, r)
+```
+
+**Embedding** is a very interesting language feature. You can use it with interfaces to compose new interfaces. But you need to be careful with misuse (unintended exposion of methods of the embedded class).
+
+```go
+type Animal interface {
+    Eater
+    Sleeper
+}
+```
+
+**SideNote**: about http.Handler & ServeMux
+
+The process of the following code is nearly the same:
+1. set the handler with `Handle` func
+    ```go
+    http.Handle("/any/", anyHandler)
+    http.ListenAndServe(":8080", nil)
+    ```
+1. set the handler with `ServeMux`
+    ```go
+    mux := http.NewServeMux()
+    mux.Handle("/any/", anyHandler)
+    http.ListenAndServe(":8080", mux)
+    ```
+
+## Step 6: JSON encode and decode
+
+- Use `encoding/json` package
+- Encode `NewEncoder` with `io.Writer` (`http.ResponseWriter` in the example)
+    ```go
+    json.NewEncoder(w).Encode(leagueTable)
+    ```
+- Decode `newDecoder` with `io.Reader` (`response.Body` <- `*bytes.Buffer`)
+    ```go
+    obj := []Object
+    json.NewDecoder(r).Decode(&obj)
+    ```
