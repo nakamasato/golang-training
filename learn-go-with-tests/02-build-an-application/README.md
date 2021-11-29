@@ -132,7 +132,7 @@ server := NewPlayerServer(&store)
 server.ServeHTTP(w, r)
 ```
 
-Embedding is a very interesting language feature. You can use it with interfaces to compose new interfaces.
+**Embedding** is a very interesting language feature. You can use it with interfaces to compose new interfaces. But you need to be careful with misuse (unintended exposion of methods of the embedded class).
 
 ```go
 type Animal interface {
@@ -154,4 +154,17 @@ The process of the following code is nearly the same:
     mux := http.NewServeMux()
     mux.Handle("/any/", anyHandler)
     http.ListenAndServe(":8080", mux)
+    ```
+
+## Step 6: JSON encode and decode
+
+- Use `encoding/json` package
+- Encode `NewEncoder` with `io.Writer` (`http.ResponseWriter` in the example)
+    ```go
+    json.NewEncoder(w).Encode(leagueTable)
+    ```
+- Decode `newDecoder` with `io.Reader` (`response.Body` <- `*bytes.Buffer`)
+    ```go
+    obj := []Object
+    json.NewDecoder(r).Decode(&obj)
     ```
