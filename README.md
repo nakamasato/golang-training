@@ -27,3 +27,4 @@ test:
     - [Expose Prometheus Metrics](pragmatic-cases/prometheus)
     - [Set up and tear down kind cluster](pragmatic-cases/kind)
     - [Deploy and delete resources by Skaffold](pragmatic-cases/skaffold)
+    - [Cobra sample application](https://github.com/nakamasato/cobra-sample)
