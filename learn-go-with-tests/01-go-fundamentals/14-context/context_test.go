@@ -10,16 +10,16 @@ import (
 )
 
 type StubStore struct {
-    response string
+	response string
 }
 
 func (s *StubStore) Fetch() string {
-    return s.response
+	return s.response
 }
 
 type SpyStore struct {
-    response string
-	t *testing.T
+	response string
+	t        *testing.T
 }
 
 func (s *SpyStore) Fetch(ctx context.Context) (string, error) {
@@ -40,7 +40,7 @@ func (s *SpyStore) Fetch(ctx context.Context) (string, error) {
 		}
 		data <- result
 	}()
-    select {
+	select {
 	case <-ctx.Done():
 		return "", ctx.Err()
 	case res := <-data:
@@ -50,47 +50,47 @@ func (s *SpyStore) Fetch(ctx context.Context) (string, error) {
 
 // Our SpyResponseWriter implements http.ResponseWriter
 type SpyResponseWriter struct {
-    written bool
+	written bool
 }
 
 func (s *SpyResponseWriter) Header() http.Header {
-    s.written = true
-    return nil
+	s.written = true
+	return nil
 }
 
 func (s *SpyResponseWriter) Write([]byte) (int, error) {
-    s.written = true
-    return 0, errors.New("not implemented")
+	s.written = true
+	return 0, errors.New("not implemented")
 }
 
 func (s *SpyResponseWriter) WriteHeader(statusCode int) {
-    s.written = true
+	s.written = true
 }
 
 func TestServer(t *testing.T) {
-    data := "hello, world"
-    // svr := Server(&StubStore{data})
+	data := "hello, world"
+	// svr := Server(&StubStore{data})
 
-    // request := httptest.NewRequest(http.MethodGet, "/", nil)
-    // response := httptest.NewRecorder()
+	// request := httptest.NewRequest(http.MethodGet, "/", nil)
+	// response := httptest.NewRecorder()
 
-    // svr.ServeHTTP(response, request)
+	// svr.ServeHTTP(response, request)
 
-    // if response.Body.String() != data {
-    //     t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
-    // }
+	// if response.Body.String() != data {
+	//     t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
+	// }
 
-    t.Run("returns data from store", func(t *testing.T) {
+	t.Run("returns data from store", func(t *testing.T) {
 		data := "hello, world"
-        store := &SpyStore{response: data, t: t}
-        svr := Server(store)
-        request := httptest.NewRequest(http.MethodGet, "/", nil)
-        response := httptest.NewRecorder()
-        svr.ServeHTTP(response, request)
-        if response.Body.String() != data {
-            t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
-        }
-    })
+		store := &SpyStore{response: data, t: t}
+		svr := Server(store)
+		request := httptest.NewRequest(http.MethodGet, "/", nil)
+		response := httptest.NewRecorder()
+		svr.ServeHTTP(response, request)
+		if response.Body.String() != data {
+			t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
+		}
+	})
 
 	t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
 		store := &SpyStore{response: data, t: t}

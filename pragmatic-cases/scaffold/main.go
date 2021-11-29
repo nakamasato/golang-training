@@ -14,7 +14,7 @@ import (
 	"k8s.io/client-go/util/homedir"
 )
 
-type Skaffold struct {}
+type Skaffold struct{}
 
 func main() {
 	fmt.Println("started")
@@ -27,28 +27,27 @@ func main() {
 
 func listPod() {
 	var kubeconfig string
-    kubeconfig, ok := os.LookupEnv("KUBECONFIG")
-    if !ok {
-        kubeconfig = filepath.Join(homedir.HomeDir(), ".kube", "config")
-    }
+	kubeconfig, ok := os.LookupEnv("KUBECONFIG")
+	if !ok {
+		kubeconfig = filepath.Join(homedir.HomeDir(), ".kube", "config")
+	}
 
-    config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-    if err != nil {
-        panic(err)
-    }
-    clientset, err := kubernetes.NewForConfig(config)
-    if err != nil {
-        panic(err)
-    }
-
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	if err != nil {
+		panic(err)
+	}
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
 
 	pods, err := clientset.CoreV1().Pods("default").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		log.Fatal("failed to get pods")
 	}
 	for i, pod := range pods.Items {
-        fmt.Printf("Pod: [%d] %s\n", i, pod.GetName())
-    }
+		fmt.Printf("Pod: [%d] %s\n", i, pod.GetName())
+	}
 }
 
 func (s *Skaffold) run() {

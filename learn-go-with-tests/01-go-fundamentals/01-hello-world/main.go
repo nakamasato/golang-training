@@ -17,15 +17,15 @@ func Hello(name string, language string) string {
 
 func GetHello(language string) string {
 	switch language {
-    case "French":
-        return frenchHello
-    case "Spanish":
-        return helloSpanish
+	case "French":
+		return frenchHello
+	case "Spanish":
+		return helloSpanish
 	default:
 		return helloEnglish
-    }
+	}
 }
 
 func main() {
-    fmt.Println(Hello("John", "English"))
+	fmt.Println(Hello("John", "English"))
 }

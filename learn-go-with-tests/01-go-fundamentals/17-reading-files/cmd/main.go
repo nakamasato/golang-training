@@ -6,11 +6,10 @@ import (
 	"tmp/learn-go-with-tests/01-go-fundamentals/17-reading-files/blogposts"
 )
 
-
 func main() {
-    posts, err := blogposts.NewPostsFromFS(os.DirFS("posts"))
-    if err != nil {
-        log.Fatal(err)
-    }
-    log.Println(posts)
+	posts, err := blogposts.NewPostsFromFS(os.DirFS("posts"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(posts)
 }

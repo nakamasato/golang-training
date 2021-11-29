@@ -8,7 +8,7 @@ func Sum(numbers []int) int {
 	return total
 }
 
-func SumAll(AllNumbers... []int) []int {
+func SumAll(AllNumbers ...[]int) []int {
 	var SummedNumbers []int
 	for _, numbers := range AllNumbers {
 		SummedNumbers = append(SummedNumbers, Sum(numbers))
@@ -16,7 +16,7 @@ func SumAll(AllNumbers... []int) []int {
 	return SummedNumbers
 }
 
-func SumAllTails(AllNumbers... []int) []int {
+func SumAllTails(AllNumbers ...[]int) []int {
 	var SummedNumbers []int
 	for _, numbers := range AllNumbers {
 		if len(numbers) == 0 {
