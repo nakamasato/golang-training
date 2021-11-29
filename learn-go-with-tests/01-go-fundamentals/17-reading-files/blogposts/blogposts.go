@@ -10,16 +10,16 @@ import (
 )
 
 type Post struct {
-	Title string
+	Title       string
 	Description string
-	Tags []string
-	Body string
+	Tags        []string
+	Body        string
 }
 
 const (
 	titleSeparator       = "Title: "
-    descriptionSeparator = "Description: "
-	tagSeparator = "Tags: "
+	descriptionSeparator = "Description: "
+	tagSeparator         = "Tags: "
 )
 
 func NewPostsFromFS(fileSystem fs.FS) ([]Post, error) {
@@ -57,20 +57,20 @@ func newPost(postFile io.Reader) (Post, error) {
 	}
 
 	post := Post{
-		Title: readMetaLine(titleSeparator),
+		Title:       readMetaLine(titleSeparator),
 		Description: readMetaLine(descriptionSeparator),
-		Tags: strings.Split(readMetaLine(tagSeparator), ", "),
-		Body: readBody(scanner),
+		Tags:        strings.Split(readMetaLine(tagSeparator), ", "),
+		Body:        readBody(scanner),
 	}
 
 	return post, nil
 }
 
 func readBody(scanner *bufio.Scanner) string {
-    scanner.Scan() // ignore a line
-    buf := bytes.Buffer{}
-    for scanner.Scan() {
-        fmt.Fprintln(&buf, scanner.Text())
-    }
-    return strings.TrimSuffix(buf.String(), "\n")
+	scanner.Scan() // ignore a line
+	buf := bytes.Buffer{}
+	for scanner.Scan() {
+		fmt.Fprintln(&buf, scanner.Text())
+	}
+	return strings.TrimSuffix(buf.String(), "\n")
 }

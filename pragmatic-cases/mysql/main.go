@@ -12,7 +12,7 @@ import (
 
 func main() {
 	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, 30 * time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 	db, err := Connect(ctx)
 	if err != nil {
@@ -55,7 +55,7 @@ func Connect(ctx context.Context) (*sql.DB, error) {
 			}
 		}
 	}()
-    select {
+	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	case db := <-data:
@@ -67,8 +67,8 @@ func checkMySQLHasUser(db *sql.DB, mysqluser string) (bool, error) {
 	row := db.QueryRow("SELECT COUNT(*) FROM mysql.user where User = '" + mysqluser + "'")
 	var count int
 	if err := row.Scan(&count); err != nil {
-	    return false, err
+		return false, err
 	} else {
 		return count > 0, nil
-    }
+	}
 }
