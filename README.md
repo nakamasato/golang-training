@@ -1,6 +1,10 @@
 # Learn Go with tests
 https://quii.gitbook.io/
 
+## Version
+
+`go1.17.1`
+
 ## Commands
 
 test:
