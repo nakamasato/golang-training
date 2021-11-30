@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -39,7 +40,10 @@ const jsonContentType = "application/json"
 
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", jsonContentType)
-	json.NewEncoder(w).Encode(p.store.GetLeague())
+	err := json.NewEncoder(w).Encode(p.store.GetLeague())
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 type Player struct {

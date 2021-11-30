@@ -15,9 +15,9 @@ const (
 	secondsInHalfClock = 30
 	secondsInClock     = 2 * secondsInHalfClock
 	minutesInHalfClock = 30
-	minutesInClock     = 2 * minutesInHalfClock
-	hoursInHalfClock   = 6
-	hoursInClock       = 2 * hoursInHalfClock
+	// minutesInClock     = 2 * minutesInHalfClock
+	hoursInHalfClock = 6
+	hoursInClock     = 2 * hoursInHalfClock
 )
 
 // SecondHand is the unit vector of the second hand of an analogue clock at time `t`
