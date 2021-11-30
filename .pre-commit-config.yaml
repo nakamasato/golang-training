@@ -19,7 +19,7 @@ repos:
     #   args: [-over=15]
     # - id: validate-toml
     # - id: no-go-testing
-    # - id: golangci-lint # TODO
+    # - id: golangci-lint
     # - id: go-critic
     # - id: go-unit-tests
     # - id: go-build

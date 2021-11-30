@@ -16,12 +16,21 @@ const (
 
 //SVGWriter writes an SVG representation of an analogue clock, showing the time t, to the writer w
 func SVGWriter(w io.Writer, t time.Time) {
-	io.WriteString(w, svgStart)
-	io.WriteString(w, bezel)
+	_, err := io.WriteString(w, svgStart)
+	if err != nil {
+		return
+	}
+	_, err = io.WriteString(w, bezel)
+	if err != nil {
+		return
+	}
 	secondHand(w, t)
 	minuteHand(w, t)
 	hourHand(w, t)
-	io.WriteString(w, svgEnd)
+	_, err = io.WriteString(w, svgEnd)
+	if err != nil {
+		return
+	}
 }
 
 func secondHand(w io.Writer, t time.Time) {

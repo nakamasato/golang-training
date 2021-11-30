@@ -7,5 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      # https://golangci-lint.run/usage/install/#ci-installation
+      # - name: install golangci
+      #   run: |
+      #     curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.43.0
+      #     golangci-lint --version
       - uses: actions/setup-python@v2
       - uses: pre-commit/action@v2.0.0
