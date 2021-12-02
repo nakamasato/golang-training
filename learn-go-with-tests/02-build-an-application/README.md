@@ -168,3 +168,43 @@ The process of the following code is nearly the same:
     obj := []Object
     json.NewDecoder(r).Decode(&obj)
     ```
+
+## Step 7: Persist data with JSON file
+
+- `FileSystemPlayerStore` with `database` as `io.Reader`
+- Use `strings.NewReader`to create database with JSON string.
+    - `newDecoder` to read json as object.
+
+-> this implementation cannot read same thing twice once the Reader reachs the end
+
+## Step 8: ReadSeeker: Seek(offset, whence) enables us to read multiple times
+
+[ReadSeeker](https://golang.org/pkg/io/#ReadSeeker) interface
+
+```go
+type ReadSeeker struct {
+    Reader
+    Seeker
+}
+```
+
+You can set offset and whence with:
+
+```go
+f.database.Seek(0, 0)
+```
+
+Luckily, `string.NewReader` also implements `ReadSeeker`.
+
+## Step 9: ReadWriteSeeker
+
+`strings.Reader` does not implement `ReadWriteSeeker`
+
+- Create a temporary file: `*os.File` implements `ReadWriteSeeker`
+- Use a [filebuffer](https://github.com/mattetti/filebuffer) library [Mattetti](https://github.com/mattetti): implements the interface
+
+Replace `strings.Reader` with `*io.File` returned by `ioutil.TempFile("", "db")`.
+
+```go
+json.NewEncoder(f.database).Encode(league)
+```
