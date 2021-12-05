@@ -1,4 +1,7 @@
 # Learn Go with tests
+
+[![codecov](https://codecov.io/gh/nakamasato/go-practice/branch/main/graph/badge.svg?token=1RUXMSBB6N)](https://codecov.io/gh/nakamasato/go-practice)
+
 https://quii.gitbook.io/
 
 ## Version
