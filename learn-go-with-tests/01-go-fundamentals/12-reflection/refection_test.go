@@ -83,14 +83,15 @@ func TestWalk(t *testing.T) {
 			},
 			[]string{"London", "Reykjavík"},
 		},
-		{
-			"Maps",
-			map[string]string{
-				"Foo": "Bar",
-				"Baz": "Boz",
-			},
-			[]string{"Bar", "Boz"},
-		},
+		// moved to "with maps" as maps in Go do not guarantee order.
+		// {
+		// 	"Maps",
+		// 	map[string]string{
+		// 		"Foo": "Bar",
+		// 		"Baz": "Boz",
+		// 	},
+		// 	[]string{"Bar", "Boz"},
+		// },
 	}
 
 	for _, test := range cases {

@@ -35,3 +35,4 @@ test:
     - [kind cluster](pragmatic-cases/kind)
     - [Skaffold](pragmatic-cases/skaffold)
     - [Cobra](https://github.com/nakamasato/cobra-sample)
+    - [Ginkgo](pragmatic-cases/ginkgo)
