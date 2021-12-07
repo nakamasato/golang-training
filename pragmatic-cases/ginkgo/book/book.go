@@ -1,14 +1,14 @@
 package book
 
 type Book struct {
-	Title string
+	Title  string
 	Author string
-	Pages int
+	Pages  int
 }
 
 const (
 	SHORT_STORY = "SHORT STORY"
-	NOVEL = "NOVEL"
+	NOVEL       = "NOVEL"
 )
 
 func (b Book) CategoryByLength() string {
