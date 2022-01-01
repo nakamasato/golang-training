@@ -261,7 +261,7 @@ Separation of concern completed!
     }
 
     func (t *tape) Write(p []byte) (n int, err error) {
-        t.file.Truncate(0)
+        t.file.Truncate(0) // added
         t.file.Seek(0, 0)
         return t.file.Write(p)
     }
@@ -269,4 +269,4 @@ Separation of concern completed!
 
     -> The compiler will fail in a number of places. Fix them.
 
-    change **type FileSystemPlayerStore** from `io.Writer` to `*json.Encoder`
+    change **data's type** from `io.ReadWriteSeeker` to `*os.File`.

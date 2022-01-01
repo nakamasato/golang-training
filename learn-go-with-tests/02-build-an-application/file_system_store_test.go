@@ -1,13 +1,12 @@
 package main
 
 import (
-	"io"
 	"io/ioutil"
 	"os"
 	"testing"
 )
 
-func createTempFile(t testing.TB, initialData string) (io.ReadWriteSeeker, func()) {
+func createTempFile(t testing.TB, initialData string) (*os.File, func()) {
 	t.Helper()
 	tmpfile, err := ioutil.TempFile("", "db")
 	if err != nil {
