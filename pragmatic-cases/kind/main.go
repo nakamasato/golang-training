@@ -13,7 +13,7 @@ func main() {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	kindName := "test"
-	isLazy := true
+	isLazy := false
 
 	if !isLazy && checkKindCluster(ctx, kindName) {
 		err := deleteKindCluster(ctx, kindName)
@@ -51,7 +51,7 @@ func createKindCluster(ctx context.Context, kindName string) error {
 		"--name",
 		kindName,
 		"--kubeconfig",
-		"./.kubeconfig",
+		"./kubeconfig",
 	)
 	// cmd.Path = "."
 	cmd.Stdout = os.Stdout
