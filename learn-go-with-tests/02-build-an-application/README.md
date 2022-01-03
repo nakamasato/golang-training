@@ -595,7 +595,37 @@ Move `json.NewEncoder(f.database)` from `WriteWin` to `NewFileSystemPlayerStore`
 
 All tests passed! Do not forget `file.Seek(0, 0)` in `NewFileSystemPlayerStore`! You can also check the simplified version in [string to object](../pragmatic-cases/string-to-object).
 
+## [Step 15: Enable to initialize NewFileSystemPlayerStore with empty file](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#write-the-test-first-5)
 
+Add test first:
+
+```go
+	t.Run("works with an empty file", func(t *testing.T) {
+		database, cleanDatabase := createTempFile(t, "")
+		defer cleanDatabase()
+
+		_, err := NewFileSystemPlayerStore(database)
+
+		assertNoError(t, err)
+	})
+```
+
+Add logic to set `[]` for an empty file. To gudge if the target file is empty, we can use `file.Stat()`.
+
+```go
+	info, err := file.Stat()
+
+	if err != nil {
+		return nil, fmt.Errorf("problem getting file info from file %s, %v", file.Name(), err)
+	}
+
+	if info.Size() == 0 {
+		file.Write([]byte("[]"))
+		file.Seek(0, 0)
+	}
+```
+
+For refactoring, we move the logic to a separate function `initialisePlayerDBFile`.
 
 ## Reference
 
