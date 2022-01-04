@@ -775,6 +775,9 @@ func TestCLI(t *testing.T) {
 
     Then the test passed.
 
+1. Refactoring
+
+
 ## Reference
 
 - https://www.yunabe.jp/docs/golang_io.html
