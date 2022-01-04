@@ -1,4 +1,4 @@
-# Practice Go from Zero
+# Golang Training
 
 [![codecov](https://codecov.io/gh/nakamasato/go-practice/branch/main/graph/badge.svg?token=1RUXMSBB6N)](https://codecov.io/gh/nakamasato/go-practice)
 
@@ -34,6 +34,9 @@
 1. [Pragmatic Cases](pragmatic-cases)
     1. [Prometheus](pragmatic-cases/prometheus)
     1. [kind cluster](pragmatic-cases/kind)
+    1. [k8s client](pragmatic-cases/k8sclient)
     1. [Skaffold](pragmatic-cases/skaffold)
     1. [Cobra](https://github.com/nakamasato/cobra-sample)
     1. [Ginkgo](pragmatic-cases/ginkgo)
+    1. [MySQL](pragramtic-cases/mysql)
+    1. [String to Object](pragmatic-cases/string-to-object)
