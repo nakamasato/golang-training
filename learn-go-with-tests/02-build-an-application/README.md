@@ -627,6 +627,59 @@ Add logic to set `[]` for an empty file. To gudge if the target file is empty, w
 
 For refactoring, we move the logic to a separate function `initialisePlayerDBFile`.
 
+## [Step 16: Sorting](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#sorting)
+
+Add test:
+```go
+	t.Run("league sorted", func(t *testing.T) {
+		database, cleanDatabase := createTempFile(t, `[
+        {"Name": "Cleo", "Wins": 10},
+        {"Name": "Chris", "Wins": 33}]`)
+		defer cleanDatabase()
+
+		store, err := NewFileSystemPlayerStore(database)
+
+		assertNoError(t, err)
+
+		got := store.GetLeague()
+
+		want := []Player{
+			{"Chris", 33},
+			{"Cleo", 10},
+		}
+
+		assertLeague(t, got, want)
+
+		// read again
+		got = store.GetLeague()
+		assertLeague(t, got, want)
+	})
+```
+
+Sort by `sort.Slice` in `GetLeague`:
+
+```diff
++++ b/learn-go-with-tests/02-build-an-application/file_system_store.go
+@@ -4,6 +4,7 @@ import (
+        "encoding/json"
+        "fmt"
+        "os"
++       "sort"
+ )
+
+ type FileSystemPlayerStore struct {
+@@ -54,7 +55,10 @@ func initialisePlayerDBFile(file *os.File) error {
+ }
+
+ func (f *FileSystemPlayerStore) GetLeague() League {
+-       return f.league
++    sort.Slice(f.league, func(i, j int) bool {
++        return f.league[i].Wins > f.league[j].Wins
++    })
++    return f.league
+ }
+```
+
 ## Reference
 
 - https://www.yunabe.jp/docs/golang_io.html
