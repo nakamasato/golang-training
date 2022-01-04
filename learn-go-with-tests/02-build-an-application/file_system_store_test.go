@@ -14,7 +14,10 @@ func createTempFile(t testing.TB, initialData string) (io.ReadWriteSeeker, func(
 		t.Fatalf("could not create temp file %v", err)
 	}
 
-	tmpfile.Write([]byte(initialData))
+	_, err = tmpfile.Write([]byte(initialData))
+	if err != nil {
+		t.Fatalf("could not write iniital data to the temp file %v", err)
+	}
 
 	removeFile := func() {
 		tmpfile.Close()

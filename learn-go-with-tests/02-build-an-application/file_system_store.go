@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 )
 
@@ -10,7 +11,10 @@ type FileSystemPlayerStore struct {
 }
 
 func (f FileSystemPlayerStore) GetLeague() League {
-	f.database.Seek(0, 0)
+	_, err := f.database.Seek(0, 0)
+	if err != nil {
+		fmt.Println("database.Seek failed")
+	}
 	league, err := NewLeague(f.database)
 	if err != nil {
 		return []Player{}
@@ -34,6 +38,12 @@ func (f FileSystemPlayerStore) RecordWin(name string) {
 	} else {
 		league = append(league, Player{Name: name, Wins: 1})
 	}
-	f.database.Seek(0, 0)
-	json.NewEncoder(f.database).Encode(league)
+	_, err := f.database.Seek(0, 0)
+	if err != nil {
+		fmt.Println("database.Seek failed")
+	}
+	err = json.NewEncoder(f.database).Encode(league)
+	if err != nil {
+		fmt.Println("Encode failed")
+	}
 }
