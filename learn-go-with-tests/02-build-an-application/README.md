@@ -17,7 +17,7 @@ curl http://localhost:5000/players/Pepper
 curl -X POST http://localhost:5000/players/Pepper
 ```
 
-## Server
+## [HTTP Server](https://quii.gitbook.io/learn-go-with-tests/build-an-application/http-server)
 
 
 ### Step 1: Implement some function and make handler with HandlerFunc
@@ -68,7 +68,8 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-## Step 3: Routing with [ServeMux](https://golang.org/pkg/net/http/#ServeMux)
+## [JSON, routing and embedding](https://quii.gitbook.io/learn-go-with-tests/build-an-application/json)
+### Step 3: Routing with [ServeMux](https://golang.org/pkg/net/http/#ServeMux)
 
 ```go
 router := http.NewServeMux()
@@ -84,7 +85,7 @@ func funcB(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-## Step 4: Set Routing in NewPlayerServer
+### Step 4: Set Routing in NewPlayerServer
 
 ```go
 func NewPlayerServer(store PlayerStore) *PlayerServer {
@@ -98,7 +99,7 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 }
 ```
 
-## Step 5: Replace `ServeHTTP()` with `http.Handler` in `PlayerServer` by ***embedding***
+### Step 5: Replace `ServeHTTP()` with `http.Handler` in `PlayerServer` by ***embedding***
 
 https://pkg.go.dev/net/http#HandlerFunc.ServeHTTP
 
@@ -156,7 +157,7 @@ The process of the following code is nearly the same:
     http.ListenAndServe(":8080", mux)
     ```
 
-## Step 6: JSON encode and decode
+### Step 6: JSON encode and decode
 
 - Use `encoding/json` package
 - Encode `NewEncoder` with `io.Writer` (`http.ResponseWriter` in the example)
@@ -169,7 +170,8 @@ The process of the following code is nearly the same:
     json.NewDecoder(r).Decode(&obj)
     ```
 
-## Step 7: Persist data with JSON file
+## [IO and sorting](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io)
+### Step 7: Persist data with JSON file
 
 - `FileSystemPlayerStore` with `database` as `io.Reader`
 - Use `strings.NewReader`to create database with JSON string.
@@ -177,7 +179,7 @@ The process of the following code is nearly the same:
 
 -> this implementation cannot read same thing twice once the Reader reachs the end
 
-## Step 8: ReadSeeker: Seek(offset, whence) enables us to read multiple times
+### Step 8: ReadSeeker: Seek(offset, whence) enables us to read multiple times
 
 [ReadSeeker](https://golang.org/pkg/io/#ReadSeeker) interface
 
@@ -196,7 +198,7 @@ f.database.Seek(0, 0)
 
 Luckily, `string.NewReader` also implements `ReadSeeker`.
 
-## Step 9: ReadWriteSeeker
+### Step 9: ReadWriteSeeker
 
 `strings.Reader` does not implement `ReadWriteSeeker`
 
@@ -208,7 +210,7 @@ Replace `strings.Reader` with `*os.File` returned by `ioutil.TempFile("", "db")`
 ```go
 json.NewEncoder(f.database).Encode(league)
 ```
-## [Step 10: More refactoring and performance concerns](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#more-refactoring-and-performance-concerns)
+### [Step 10: More refactoring and performance concerns](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#more-refactoring-and-performance-concerns)
 
 **Problem**: Every time someone calls `GetLeague()` or `GetPlayerScore()` we are reading the **entire** file and parsing it into JSON. -> Wasteful
 **Solution**: Read the whole file only when starting up
@@ -258,7 +260,7 @@ json.NewEncoder(f.database).Encode(league)
     +}
     ```
 
-## [Step 11: Separate out the concern of the kind of data we write, from the writing](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#another-problem)
+### [Step 11: Separate out the concern of the kind of data we write, from the writing](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#another-problem)
 
 Problem: If new data is smaller than old data, the old data would remain at the end of the new data. e.g. Write `12345` -> Write `abc` -> Read `abc45` <- Wrong!!) -> Separate out the concern of the kind of **data we write**, from **the writing**
 
@@ -300,7 +302,7 @@ Problem: If new data is smaller than old data, the old data would remain at the 
 
 Separation of concern completed!
 
-## [Step 12 Enable to truncate the old data](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#write-the-test-first-4)
+### [Step 12 Enable to truncate the old data](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#write-the-test-first-4)
 
 1. Add test case: Write `12345` -> Write `abc` -> Read `abc` (`file` -> `&tape{file}` -> `tape.Write([]byte("abc"))`) `tape_test.go`
     ```go
@@ -399,7 +401,7 @@ Separation of concern completed!
             return &FileSystemPlayerStore{
     ```
 
-## [Step 13 Small refactor](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#one-other-small-refactor)
+### [Step 13 Small refactor](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#one-other-small-refactor)
 
 Move `json.NewEncoder(f.database)` from `WriteWin` to `NewFileSystemPlayerStore`. No need to encode every time we write.
 
@@ -455,7 +457,7 @@ Move `json.NewEncoder(f.database)` from `WriteWin` to `NewFileSystemPlayerStore`
         // server := NewPlayerServer(NewInMemoryPlayerStore())
 ```
 
-## [Step 14: Error handling](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#error-handling)
+### [Step 14: Error handling](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#error-handling)
 
 `league, _ := NewLeague(f.database)` -> `league, err := NewLeague(f.database)`
 
@@ -595,7 +597,7 @@ Move `json.NewEncoder(f.database)` from `WriteWin` to `NewFileSystemPlayerStore`
 
 All tests passed! Do not forget `file.Seek(0, 0)` in `NewFileSystemPlayerStore`! You can also check the simplified version in [string to object](../pragmatic-cases/string-to-object).
 
-## [Step 15: Enable to initialize NewFileSystemPlayerStore with empty file](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#write-the-test-first-5)
+### [Step 15: Enable to initialize NewFileSystemPlayerStore with empty file](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#write-the-test-first-5)
 
 Add test first:
 
@@ -627,7 +629,7 @@ Add logic to set `[]` for an empty file. To gudge if the target file is empty, w
 
 For refactoring, we move the logic to a separate function `initialisePlayerDBFile`.
 
-## [Step 16: Sorting](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#sorting)
+### [Step 16: Sorting](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#sorting)
 
 Add test:
 ```go
@@ -690,5 +692,5 @@ Sort by `sort.Slice` in `GetLeague`:
 1. [io.Writer](https://pkg.go.dev/io#Writer): interface with `Write(p []byte) (n int, err error)` method. Ususally not directly used.
 1. [io.ReadSeeker](https://pkg.go.dev/io#ReadSeeker): interface with `Reader` and `Seeker`.
 1. [io.ReadWriteSeeker](https://pkg.go.dev/io#ReadWriteSeeker): interface with `Reader`, `Writer`, and `Seeker`.
-1. [strings.Reader]https://pkg.go.dev/strings#Reader: A Reader implements the io.Reader...
+1. [strings.Reader](https://pkg.go.dev/strings#Reader): A Reader implements the io.Reader...
 1. `os.Open`: Open a file and return `*os.File`, which can be used for `io.Reader` and `io.Writer`.
