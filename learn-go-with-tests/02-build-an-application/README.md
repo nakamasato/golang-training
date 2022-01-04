@@ -777,10 +777,122 @@ func TestCLI(t *testing.T) {
 
 1. Refactoring
 
+At this point, `cli` app cannot call `RecordWin` with the given player.
+### [Step 19: Call RecordWin with the given player from CLI]
+
+1. Test: *Call with "Chris wins" -> winner should be "Chris". Call with "Cleo wins" -> winner should be "Cleo"*
+
+    ```go
+    func TestCLI(t *testing.T) {
+
+        t.Run("record chris win from user input", func(t *testing.T) {
+            in := strings.NewReader("Chris wins\n")
+            playerStore := &StubPlayerStore{}
+
+            cli := &CLI{playerStore, in}
+            cli.PlayPoker()
+
+            assertPlayerWin(t, playerStore, "Chris")
+        })
+
+        t.Run("record cleo win from user input", func(t *testing.T) {
+            in := strings.NewReader("Cleo wins\n")
+            playerStore := &StubPlayerStore{}
+
+            cli := &CLI{playerStore, in}
+            cli.PlayPoker()
+
+            assertPlayerWin(t, playerStore, "Cleo")
+        })
+
+    }
+    ```
+1. Enable to read the winner from `in` in `PlayPoker` function.
+
+    Use [bufio.Scanner](https://golang.org/pkg/bufio/)
+
+    ```diff
+    -import "io"
+    +import (
+    +       "bufio"
+    +       "io"
+    +       "strings"
+    +)
+
+     type CLI struct {
+            playerStore PlayerStore
+    @@ -8,5 +12,11 @@ type CLI struct {
+     }
+
+     func (cli *CLI) PlayPoker() {
+    -       cli.playerStore.RecordWin("Chris")
+    +       reader := bufio.NewScanner(cli.in)
+    +       reader.Scan()
+    +       cli.playerStore.RecordWin(extractWinner(reader.Text()))
+    +}
+    +
+    +func extractWinner(userInput string) string {
+    +       return strings.Replace(userInput, " wins", "", 1)
+     }
+    ```
+
+1. Wire up into `cmd/cli/main.go`.
+
+    ```go
+    package main
+
+    import (
+        "fmt"
+        "log"
+        "os"
+        "tmp/learn-go-with-tests/02-build-an-application"
+    )
+
+    const dbFileName = "game.db.json"
+
+    func main() {
+        fmt.Println("Let's play poker")
+        fmt.Println("Type {Name} wins to record a win")
+
+        db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
+
+        if err != nil {
+            log.Fatalf("problem opening %s %v", dbFileName, err)
+        }
+
+        store, err := poker.NewFileSystemPlayerStore(db)
+
+        if err != nil {
+            log.Fatalf("problem creating file system player store, %v ", err)
+        }
+        game := poker.CLI{store, os.Stdin}
+        game.PlayPoker()
+    }
+    ```
+
+    `go run main.go` because `playerStore` and `in` are not exposed ouside the package `poker`. we're calling from `main` package.
+    ```
+    ./main.go:27:20: implicit assignment of unexported field 'playerStore' in poker.CLI literal
+    ./main.go:27:29: implicit assignment of unexported field 'in' in poker.CLI literal
+    ```
+
+    1. Separate a package for testing (`_test` package) to just use **exposed** types. -> `package poker_test`
+    1. Test public API.
+    1. Put stubs and test helpers in `testing.go` as it's very convenient for users of the package.
+    1. Update `CLI.go`
+        1. Change the type of `in` from `io.Reader` to `*bufio.Scanner`.
+        1. Create `NewCLI()`, in which we convert `in io.Reader` to `in: bufio.NewScanner(in)`
+        1. Create `readLind()` to read by `cli.in.Scan()` and return `cli.in.Text()`
+    1. Use `NewCLI` in `cmd/cli/main.go` instead of initializing a raw `CLI`.
+
+    [Advanced Testing with Go](https://speakerdeck.com/mitchellh/advanced-testing-with-go)
+
+![](docs/step19.drawio.svg)
 
 ## Reference
 
-- https://www.yunabe.jp/docs/golang_io.html
+- [Go 言語 ファイル・I/O 関係のよく使う基本ライブラリ](https://www.yunabe.jp/docs/golang_io.html)
+- [Advanced Testing with Go](https://speakerdeck.com/mitchellh/advanced-testing-with-go)
 
 ## Appendix
 
@@ -790,3 +902,5 @@ func TestCLI(t *testing.T) {
 1. [io.ReadWriteSeeker](https://pkg.go.dev/io#ReadWriteSeeker): interface with `Reader`, `Writer`, and `Seeker`.
 1. [strings.Reader](https://pkg.go.dev/strings#Reader): A Reader implements the io.Reader...
 1. `os.Open`: Open a file and return `*os.File`, which can be used for `io.Reader` and `io.Writer`.
+1. [bufio.Scanner](https://golang.org/pkg/bufio/): `bufio.NewScanner(io.Reader) -> *bufio.Scanner` bufio implements buffered I/O.
+1. [os.Stdin](https://pkg.go.dev/os#Stdin): `*File` -> implements `io.Reader`

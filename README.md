@@ -40,3 +40,6 @@
     1. [Ginkgo](pragmatic-cases/ginkgo)
     1. [MySQL](pragramtic-cases/mysql)
     1. [String to Object](pragmatic-cases/string-to-object)
+
+## Reference
+- [Advanced Testing with Go](https://speakerdeck.com/mitchellh/advanced-testing-with-go)
