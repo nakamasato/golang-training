@@ -1,4 +1,4 @@
-package main
+package poker
 
 func NewInMemoryPlayerStore() *InMemoryPlayerStore {
 	return &InMemoryPlayerStore{map[string]int{}}

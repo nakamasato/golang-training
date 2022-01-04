@@ -682,6 +682,15 @@ Sort by `sort.Slice` in `GetLeague`:
  }
 ```
 
+## [Command line & package structure](https://quii.gitbook.io/learn-go-with-tests/build-an-application/command-line)
+
+**command line application** -> share the database with two applications
+
+### Step 17: Separate poker package from main
+
+1. Move `main.go` to `cmd/webserver/main.go`
+1. Change the package of all remaining files under the root directory from `main` to `poker`.
+1. Import `tmp/learn-go-with-tests/02-build-an-application` in `cmd/webserver/main.go` and use`poker` before the imported function and class.
 ## Reference
 
 - https://www.yunabe.jp/docs/golang_io.html
