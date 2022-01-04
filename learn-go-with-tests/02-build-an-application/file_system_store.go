@@ -19,6 +19,9 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 
 	// To support empty file with content ''
 	err = initialisePlayerDBFile(file)
+	if err != nil {
+		fmt.Println("failed to initialize player db")
+	}
 
 	league, err := NewLeague(file)
 	if err != nil {
@@ -38,8 +41,14 @@ func initialisePlayerDBFile(file *os.File) error {
 	}
 
 	if info.Size() == 0 {
-		file.Write([]byte("[]"))
-		file.Seek(0, 0)
+		_, err = file.Write([]byte("[]"))
+		if err != nil {
+			fmt.Println("Failed to write")
+		}
+		_, err = file.Seek(0, 0)
+		if err != nil {
+			fmt.Printf("Failed to seek")
+		}
 	}
 	return nil
 }
