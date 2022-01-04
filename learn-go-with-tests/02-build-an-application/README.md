@@ -221,3 +221,52 @@ json.NewEncoder(f.database).Encode(league)
     }
     ```
 1. `RecordWins` updates the member variable `league` and write with `f.database` (`io.ReadWriteSeeker`)
+
+## [Step 11: tape.go](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#write-enough-code-to-make-it-pass-4)
+
+Enable to delete data. (Case that new data is smaller than old data. e.g. Write `12345` -> Write `abc` -> Read `abc45` <- Wrong!!) -> Separate out the concern of the kind of **data we write**, from **the writing**
+
+1. Introduce `tape.go`: encapsulate our **"when we write we go from the beginning" functionality**.
+    ```go
+    type tape struct {
+        file io.ReadWriteSeeker
+    }
+    ```
+1. Update database of FileSystemPlayerStore from `io.ReadWriteSeeker` to `io.Writer`.
+    ```go
+    type FileSystemPlayerStore struct {
+        database io.Writer
+        league   League
+    }
+    ```
+1. Update constructor of `FileSystemPlayerStore` to use `type`.
+    ```go
+    func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
+        database.Seek(0, 0)
+        league, _ := NewLeague(database)
+        return &FileSystemPlayerStore{
+            database: &tape{database},
+            league:   league,
+        }
+    }
+    ```
+
+Separation of concern completed!
+
+1. Add test case: Write `12345` -> Write `abc` -> Read `abc` (`file` -> `&tape{file}` -> `tape.Write([]byte("abc"))`)
+1. `os.File` has a truncate function. Use the type instead of `io.ReadWriteSeeker`
+    ```go
+    type tape struct {
+        file *os.File
+    }
+
+    func (t *tape) Write(p []byte) (n int, err error) {
+        t.file.Truncate(0)
+        t.file.Seek(0, 0)
+        return t.file.Write(p)
+    }
+    ```
+
+    -> The compiler will fail in a number of places. Fix them.
+
+    change **type FileSystemPlayerStore** from `io.Writer` to `*json.Encoder`
