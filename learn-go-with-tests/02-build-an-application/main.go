@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -14,7 +15,7 @@ func main() {
 		log.Fatalf("problem opening %s %v", dbFileName, err)
 	}
 
-	store := &FileSystemPlayerStore{db, League{}}
+	store := &FileSystemPlayerStore{json.NewEncoder(db), League{}}
 	server := NewPlayerServer(store)
 	// server := NewPlayerServer(NewInMemoryPlayerStore())
 	log.Fatal(http.ListenAndServe(":5000", server))

@@ -213,6 +213,13 @@ json.NewEncoder(f.database).Encode(league)
 **Problem**: Every time someone calls `GetLeague()` or `GetPlayerScore()` we are reading the **entire** file and parsing it into JSON. -> Wasteful
 **Solution**: Read the whole file only when starting up
 
+1. Add `league` member variable to `FileSystemPlayerStore`.
+    ```diff
+     type FileSystemPlayerStore struct {
+            database io.ReadWriteSeeker
+    +       league   League
+     }
+    ```
 1. `GetLeague` just returns from the member variable
 
     ```go
@@ -221,52 +228,242 @@ json.NewEncoder(f.database).Encode(league)
     }
     ```
 1. `RecordWins` updates the member variable `league` and write with `f.database` (`io.ReadWriteSeeker`)
+    ```diff
+    -func (f FileSystemPlayerStore) RecordWin(name string) {
+    -       league := f.GetLeague()
+    -       player := league.Find(name)
+    +func (f *FileSystemPlayerStore) RecordWin(name string) {
+    +       player := f.league.Find(name)
+    +
+            if player != nil {
+                    player.Wins++
+            } else {
+    -               league = append(league, Player{Name: name, Wins: 1})
+    +               f.league = append(f.league, Player{Name: name, Wins: 1})
+            }
+    -       f.database.Seek(0, 0)
+    -       json.NewEncoder(f.database).Encode(league)
+    +       json.NewEncoder(f.database).Encode(f.league)
+     }
+    ```
+1. Use `NewFileSystemPlayerStore(database)` to initialize.
+    ```diff
+    +func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
+    +       database.Seek(0, 0)
+    +       league, _ := NewLeague(database)
+    +       return &FileSystemPlayerStore{
+    +               database: database,
+    +               league:   league,
+    +       }
+    +}
+    ```
 
-## [Step 11: tape.go](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#write-enough-code-to-make-it-pass-4)
+## [Step 11: Separate out the concern of the kind of data we write, from the writing](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#another-problem)
 
-Enable to delete data. (Case that new data is smaller than old data. e.g. Write `12345` -> Write `abc` -> Read `abc45` <- Wrong!!) -> Separate out the concern of the kind of **data we write**, from **the writing**
+Problem: If new data is smaller than old data, the old data would remain at the end of the new data. e.g. Write `12345` -> Write `abc` -> Read `abc45` <- Wrong!!) -> Separate out the concern of the kind of **data we write**, from **the writing**
 
 1. Introduce `tape.go`: encapsulate our **"when we write we go from the beginning" functionality**.
     ```go
+    package main
+
+    import "io"
+
     type tape struct {
-        file io.ReadWriteSeeker
+           file io.ReadWriteSeeker
+    }
+
+    func (t *tape) Write(p []byte) (n int, err error) {
+           t.file.Seek(0, 0)
+           return t.file.Write(p)
     }
     ```
 1. Update database of FileSystemPlayerStore from `io.ReadWriteSeeker` to `io.Writer`.
-    ```go
-    type FileSystemPlayerStore struct {
-        database io.Writer
-        league   League
-    }
+    ```diff
+     type FileSystemPlayerStore struct {
+    -       database io.ReadWriteSeeker
+    +       database io.Writer
+            league   League
+     }
     ```
 1. Update constructor of `FileSystemPlayerStore` to use `type`.
-    ```go
-    func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
-        database.Seek(0, 0)
-        league, _ := NewLeague(database)
-        return &FileSystemPlayerStore{
-            database: &tape{database},
-            league:   league,
-        }
-    }
+    ```diff
+    @@ -14,7 +14,7 @@ func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStor
+            database.Seek(0, 0)
+            league, _ := NewLeague(database)
+            return &FileSystemPlayerStore{
+    -               database: database,
+    +               database: &tape{database},
+                    league:   league,
+            }
+     }
     ```
 
 Separation of concern completed!
 
-1. Add test case: Write `12345` -> Write `abc` -> Read `abc` (`file` -> `&tape{file}` -> `tape.Write([]byte("abc"))`)
-1. `os.File` has a truncate function. Use the type instead of `io.ReadWriteSeeker`
-    ```go
-    type tape struct {
-        file *os.File
-    }
+## [Step 12 Enable to truncate the old data](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#write-the-test-first-4)
 
-    func (t *tape) Write(p []byte) (n int, err error) {
-        t.file.Truncate(0) // added
-        t.file.Seek(0, 0)
-        return t.file.Write(p)
+1. Add test case: Write `12345` -> Write `abc` -> Read `abc` (`file` -> `&tape{file}` -> `tape.Write([]byte("abc"))`) `tape_test.go`
+    ```go
+    package main
+
+    import (
+           "io/ioutil"
+           "testing"
+    )
+
+    func TestTape_Write(t *testing.T) {
+           file, clean := createTempFile(t, "12345")
+           defer clean()
+
+           tape := &tape{file}
+
+           tape.Write([]byte("abc"))
+
+           file.Seek(0, 0)
+           newFileContents, _ := ioutil.ReadAll(file)
+
+           got := string(newFileContents)
+           want := "abc"
+
+           if got != want {
+                   t.Errorf("got %q want %q", got, want)
+           }
     }
     ```
+1. `os.File` has a truncate function. Use the type instead of `io.ReadWriteSeeker`
+    ```diff
+     package main
 
-    -> The compiler will fail in a number of places. Fix them.
+    -import "io"
+    +import (
+    +       "os"
+    +)
 
-    change **data's type** from `io.ReadWriteSeeker` to `*os.File`.
+     type tape struct {
+    -       file io.ReadWriteSeeker
+    +       file *os.File
+     }
+
+     func (t *tape) Write(p []byte) (n int, err error) {
+    +       t.file.Truncate(0)
+            t.file.Seek(0, 0)
+            return t.file.Write(p)
+     }
+    ```
+
+    For more details about `io.Reader`, `io.Writer`, and `*os.File`, check [Appendix](##Appendix)
+
+1. Fix the compile errors (Change **data's type** from `io.ReadWriteSeeker` to `*os.File`).
+
+    `file_system_store_test.go`:
+
+    ```diff
+    +++ b/learn-go-with-tests/02-build-an-application/file_system_store_test.go
+    @@ -1,13 +1,12 @@
+     package main
+
+     import (
+    -       "io"
+            "io/ioutil"
+            "os"
+            "testing"
+     )
+
+    -func createTempFile(t testing.TB, initialData string) (io.ReadWriteSeeker, func()) {
+    +func createTempFile(t testing.TB, initialData string) (*os.File, func()) {
+            t.Helper()
+            tmpfile, err := ioutil.TempFile("", "db")
+            if err != nil {
+    ```
+
+    `file_system_store.go`:
+
+    ```diff
+    +++ b/learn-go-with-tests/02-build-an-application/file_system_store.go
+    @@ -3,6 +3,7 @@ package main
+     import (
+            "encoding/json"
+            "io"
+    +       "os"
+     )
+
+     type FileSystemPlayerStore struct {
+    @@ -10,7 +11,7 @@ type FileSystemPlayerStore struct {
+            league   League
+     }
+
+    -func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
+    +func NewFileSystemPlayerStore(database *os.File) *FileSystemPlayerStore {
+            database.Seek(0, 0)
+            league, _ := NewLeague(database)
+            return &FileSystemPlayerStore{
+    ```
+
+## [Step 13 Small refactor](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#one-other-small-refactor)
+
+Move `json.NewEncoder(f.database)` from `WriteWin` to `NewFileSystemPlayerStore`. No need to encode every time we write.
+
+`file_system_store.go`:
+
+```diff
+ import (
+        "encoding/json"
+-       "io"
+        "os"
+ )
+
+ type FileSystemPlayerStore struct {
+-       database io.Writer
++       database *json.Encoder
+        league   League
+ }
+@@ -15,7 +14,7 @@ func NewFileSystemPlayerStore(database *os.File) *FileSystemPlayerStore {
+        database.Seek(0, 0)
+        league, _ := NewLeague(database)
+        return &FileSystemPlayerStore{
+-               database: &tape{database},
++               database: json.NewEncoder(&tape{database}),
+                league:   league,
+        }
+ }
+@@ -40,5 +39,5 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
+        } else {
+                f.league = append(f.league, Player{Name: name, Wins: 1})
+        }
+-       json.NewEncoder(f.database).Encode(f.league)
++       f.database.Encode(f.league)
+ }
+```
+
+`main.go`:
+
+```diff
+ package main
+
+ import (
++       "encoding/json"
+        "log"
+        "net/http"
+        "os"
+@@ -14,7 +15,7 @@ func main() {
+                log.Fatalf("problem opening %s %v", dbFileName, err)
+        }
+
+-       store := &FileSystemPlayerStore{db, League{}}
++       store := &FileSystemPlayerStore{json.NewEncoder(db), League{}}
+        server := NewPlayerServer(store)
+        // server := NewPlayerServer(NewInMemoryPlayerStore())
+```
+
+
+## Reference
+
+- https://www.yunabe.jp/docs/golang_io.html
+
+## Appendix
+
+1. [io.Reader](https://pkg.go.dev/io#Reader): interface with `Read(p []byte) (n int, err error)` method. Usually not directly used.
+1. [io.Writer](https://pkg.go.dev/io#Writer): interface with `Write(p []byte) (n int, err error)` method. Ususally not directly used.
+1. [io.ReadSeeker](https://pkg.go.dev/io#ReadSeeker): interface with `Reader` and `Seeker`.
+1. [io.ReadWriteSeeker](https://pkg.go.dev/io#ReadWriteSeeker): interface with `Reader`, `Writer`, and `Seeker`.
+1. `os.Open`: Open a file and return `*os.File`, which can be used for `io.Reader` and `io.Writer`.
