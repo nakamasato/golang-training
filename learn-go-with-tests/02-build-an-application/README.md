@@ -692,5 +692,5 @@ Sort by `sort.Slice` in `GetLeague`:
 1. [io.Writer](https://pkg.go.dev/io#Writer): interface with `Write(p []byte) (n int, err error)` method. Ususally not directly used.
 1. [io.ReadSeeker](https://pkg.go.dev/io#ReadSeeker): interface with `Reader` and `Seeker`.
 1. [io.ReadWriteSeeker](https://pkg.go.dev/io#ReadWriteSeeker): interface with `Reader`, `Writer`, and `Seeker`.
-1. [strings.Reader]https://pkg.go.dev/strings#Reader: A Reader implements the io.Reader...
+1. [strings.Reader](https://pkg.go.dev/strings#Reader): A Reader implements the io.Reader...
 1. `os.Open`: Open a file and return `*os.File`, which can be used for `io.Reader` and `io.Writer`.
