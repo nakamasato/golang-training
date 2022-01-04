@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 )
 
 type FileSystemPlayerStore struct {
@@ -11,7 +12,7 @@ type FileSystemPlayerStore struct {
 	league   League
 }
 
-func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
+func NewFileSystemPlayerStore(database *os.File) *FileSystemPlayerStore {
 	_, err := database.Seek(0, 0)
 	if err != nil {
 		fmt.Println("seek failed")
@@ -43,7 +44,6 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 	} else {
 		f.league = append(f.league, Player{Name: name, Wins: 1})
 	}
-
 	err := json.NewEncoder(f.database).Encode(f.league)
 	if err != nil {
 		fmt.Println("Encode failed")
