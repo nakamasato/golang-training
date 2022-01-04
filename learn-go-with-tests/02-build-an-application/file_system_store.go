@@ -43,10 +43,7 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 	} else {
 		f.league = append(f.league, Player{Name: name, Wins: 1})
 	}
-<<<<<<< HEAD
 
-=======
->>>>>>> 4e6b25e ([learn go with tests][02-build-an-application] IO and sorting Step 10: More refactoring and performance concerns)
 	err := json.NewEncoder(f.database).Encode(f.league)
 	if err != nil {
 		fmt.Println("Encode failed")
