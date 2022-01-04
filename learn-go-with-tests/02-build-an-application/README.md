@@ -686,7 +686,7 @@ Sort by `sort.Slice` in `GetLeague`:
 
 **command line application** -> share the database with two applications
 
-### Step 17: Separate poker package from main
+### [Step 17: Separate poker package from main](https://quii.gitbook.io/learn-go-with-tests/build-an-application/command-line#some-project-refactoring-first)
 
 1. Move `main.go` to `cmd/webserver/main.go`
 1. Change the package of all remaining files under the root directory from `main` to `poker`.
@@ -695,6 +695,86 @@ Sort by `sort.Slice` in `GetLeague`:
 Check:
 - [x] `go test` pass
 - [x] `go run main.go` in `cmd/webserver` dir and `curl http://localhost:5000/league`
+
+### [Step 18: Create new cli application](https://quii.gitbook.io/learn-go-with-tests/build-an-application/command-line#walking-skeleton)
+
+
+1. `cmd/cli/main.go`:
+
+    ```go
+    package main
+
+    import "fmt"
+
+    func main() {
+        fmt.Println("Let's play poker")
+    }
+    ```
+
+1. Add a failing test: *Playing a poker with CLI would increment **winCalls** in the playstore configured for the CLI.*
+
+    ```go
+    package poker
+
+    import "testing"
+
+    func TestCLI(t *testing.T)  {
+        playerStore := &StubPlayerStore{}
+        cli:= &CLI{playerStore}
+        cli.PlayPoker()
+
+        if len(playerStore.winCalls) != 1 {
+            t.Fatal("expected a win call but didn't get any")
+        }
+    }
+    ```
+
+1. Add the minimum code `CLI.go`: *PlayPoker function calls **RecordWin** once with random random person, which increments **winCalls**.*
+
+    ```go
+    package poker
+
+    type CLI struct {
+        playerStore PlayerStore
+    }
+
+    func (cli *CLI) PlayPoker() {
+        cli.playerStore.RecordWin("Cleo")
+    }
+    ```
+
+    The test passes!
+
+1. Add another test: *Initialize CLI with `PlayStore` and `io.Reader` which has "Chris wins\n" as an input, and play once, then first **winCalls** in the `playStore` is expected to be "Chris"*
+
+```go
+func TestCLI(t *testing.T) {
+    in := strings.NewReader("Chris wins\n")
+    playerStore := &StubPlayerStore{}
+
+    cli := &CLI{playerStore, in}
+    cli.PlayPoker()
+
+    if len(playerStore.winCalls) != 1 {
+        t.Fatal("expected a win call but didn't get any")
+    }
+
+    got := playerStore.winCalls[0]
+    want := "Chris"
+
+    if got != want {
+        t.Errorf("didn't record correct winner, got %q, want %q", got, want)
+    }
+}
+```
+
+1. Update `CLI.go`:
+
+    - Add `in io.Reader` to `CLI` struct.
+    - Call `RecordWin` with `"Chris"`.
+
+    Then the test passed.
+
 ## Reference
 
 - https://www.yunabe.jp/docs/golang_io.html
