@@ -691,6 +691,10 @@ Sort by `sort.Slice` in `GetLeague`:
 1. Move `main.go` to `cmd/webserver/main.go`
 1. Change the package of all remaining files under the root directory from `main` to `poker`.
 1. Import `tmp/learn-go-with-tests/02-build-an-application` in `cmd/webserver/main.go` and use`poker` before the imported function and class.
+
+Check:
+- [x] `go test` pass
+- [x] `go run main.go` in `cmd/webserver` dir and `curl http://localhost:5000/league`
 ## Reference
 
 - https://www.yunabe.jp/docs/golang_io.html
