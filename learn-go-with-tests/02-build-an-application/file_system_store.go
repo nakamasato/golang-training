@@ -12,7 +12,10 @@ type FileSystemPlayerStore struct {
 }
 
 func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
-	database.Seek(0, 0)
+	_, err := database.Seek(0, 0)
+	if err != nil {
+		fmt.Println("seek failed")
+	}
 	league, _ := NewLeague(database)
 	return &FileSystemPlayerStore{
 		database: database,
