@@ -11,16 +11,19 @@ type FileSystemPlayerStore struct {
 	league   League
 }
 
-func NewFileSystemPlayerStore(database *os.File) *FileSystemPlayerStore {
-	_, err := database.Seek(0, 0)
+func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
+	_, err := file.Seek(0, 0)
 	if err != nil {
 		fmt.Println("seek failed")
 	}
-	league, _ := NewLeague(database)
-	return &FileSystemPlayerStore{
-		database: json.NewEncoder(&tape{database}),
-		league:   league,
+	league, err := NewLeague(file)
+	if err != nil {
+		return nil, fmt.Errorf("problem loading player store from file %s, %v", file.Name(), err)
 	}
+	return &FileSystemPlayerStore{
+		database: json.NewEncoder(&tape{file}),
+		league:   league,
+	}, nil
 }
 
 func (f *FileSystemPlayerStore) GetLeague() League {

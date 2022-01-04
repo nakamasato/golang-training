@@ -455,6 +455,147 @@ Move `json.NewEncoder(f.database)` from `WriteWin` to `NewFileSystemPlayerStore`
         // server := NewPlayerServer(NewInMemoryPlayerStore())
 ```
 
+## [Step 14: Error handling](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#error-handling)
+
+`league, _ := NewLeague(f.database)` -> `league, err := NewLeague(f.database)`
+
+
+`file_system_store.go`:
+
+```diff
++++ b/learn-go-with-tests/02-build-an-application/file_system_store.go
+@@ -2,6 +2,7 @@ package main
+
+ import (
+        "encoding/json"
++       "fmt"
+        "os"
+ )
+
+@@ -10,13 +11,16 @@ type FileSystemPlayerStore struct {
+        league   League
+ }
+
+-func NewFileSystemPlayerStore(database *os.File) *FileSystemPlayerStore {
+-       database.Seek(0, 0)
+-       league, _ := NewLeague(database)
++func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
++       file.Seek(0, 0)
++       league, err := NewLeague(file)
++       if err != nil {
++               return nil, fmt.Errorf("problem loading player store from file %s, %v", file.Name(), err)
++       }
+        return &FileSystemPlayerStore{
+-               database: json.NewEncoder(&tape{database}),
++               database: json.NewEncoder(&tape{file}),
+                league:   league,
+-       }
++       }, nil
+ }
+```
+
+`file_system_store_test.go`:
+
+```diff
+--- a/learn-go-with-tests/02-build-an-application/file_system_store_test.go
++++ b/learn-go-with-tests/02-build-an-application/file_system_store_test.go
+@@ -28,7 +28,8 @@ func TestFileSystemStore(t *testing.T) {
+             {"Name": "Cleo", "Wins": 10},
+             {"Name": "Chris", "Wins": 33}]`)
+                defer cleanDatabase()
+-               store := NewFileSystemPlayerStore(database)
++               store, err := NewFileSystemPlayerStore(database)
++               assertNoError(t, err)
+                got := store.GetLeague()
+                want := []Player{
+                        {"Cleo", 10},
+@@ -45,7 +46,7 @@ func TestFileSystemStore(t *testing.T) {
+                        {"Name": "Cleo", "Wins": 10},
+                        {"Name": "Chris", "Wins": 33}]`)
+                defer cleanDatabase()
+-               store := NewFileSystemPlayerStore(database)
++               store, _ := NewFileSystemPlayerStore(database)
+                got := store.GetPlayerScore("Chris")
+                want := 33
+                assertScoreEquals(t, got, want)
+@@ -56,7 +57,7 @@ func TestFileSystemStore(t *testing.T) {
+                        {"Name": "Cleo", "Wins": 10},
+                        {"Name": "Chris", "Wins": 33}]`)
+                defer cleanDatabase()
+-               store := NewFileSystemPlayerStore(database)
++               store, _ := NewFileSystemPlayerStore(database)
+                store.RecordWin("Chris")
+                got := store.GetPlayerScore("Chris")
+                want := 34
+@@ -68,7 +69,7 @@ func TestFileSystemStore(t *testing.T) {
+                        {"Name": "Cleo", "Wins": 10},
+                        {"Name": "Chris", "Wins": 33}]`)
+                defer cleanDatabase()
+-               store := NewFileSystemPlayerStore(database)
++               store, _ := NewFileSystemPlayerStore(database)
+                store.RecordWin("Pepper")
+                got := store.GetPlayerScore("Pepper")
+                want := 1
+@@ -81,3 +82,10 @@ func assertScoreEquals(t *testing.T, got, want int) {
+                t.Errorf("got %d want %d", got, want)
+        }
+ }
++
++func assertNoError(t testing.TB, err error) {
++       t.Helper()
++       if err != nil {
++               t.Fatalf("didn't expect an error but got one, %v", err)
++       }
++}
+```
+
+`main.go`:
+
+```diff
+@@ -1,7 +1,6 @@
+ package main
+
+ import (
+-       "encoding/json"
+        "log"
+        "net/http"
+        "os"
+@@ -15,7 +14,10 @@ func main() {
+                log.Fatalf("problem opening %s %v", dbFileName, err)
+        }
+
+-       store := &FileSystemPlayerStore{json.NewEncoder(db), League{}}
++       store, err := NewFileSystemPlayerStore(db)
++       if err != nil {
++               log.Fatalf("problem creating file system player store, %v ", err)
++       }
+        server := NewPlayerServer(store)
+        // server := NewPlayerServer(NewInMemoryPlayerStore())
+        log.Fatal(http.ListenAndServe(":5000", server))
+```
+
+`server_integration_test.go`:
+
+```diff
+--- a/learn-go-with-tests/02-build-an-application/server_intergration_test.go
++++ b/learn-go-with-tests/02-build-an-application/server_intergration_test.go
+@@ -37,9 +37,10 @@ func TestRecordingWinsAndRetrievingThemWithInMemoryStore(t *testing.T) {
+ }
+
+ func TestRecordingWinsAndRetrievingThemWithFileSystemStore(t *testing.T) {
+-       database, cleanDatabase := createTempFile(t, "")
++       database, cleanDatabase := createTempFile(t, `[]`)
+        defer cleanDatabase()
+-       store := NewFileSystemPlayerStore(database)
++       store, err := NewFileSystemPlayerStore(database)
++       assertNoError(t, err)
+        server := NewPlayerServer(store)
+        player := "Pepper"
+```
+
+All tests passed! Do not forget `file.Seek(0, 0)` in `NewFileSystemPlayerStore`! You can also check the simplified version in [string to object](../pragmatic-cases/string-to-object).
+
+
 
 ## Reference
 
@@ -466,4 +607,5 @@ Move `json.NewEncoder(f.database)` from `WriteWin` to `NewFileSystemPlayerStore`
 1. [io.Writer](https://pkg.go.dev/io#Writer): interface with `Write(p []byte) (n int, err error)` method. Ususally not directly used.
 1. [io.ReadSeeker](https://pkg.go.dev/io#ReadSeeker): interface with `Reader` and `Seeker`.
 1. [io.ReadWriteSeeker](https://pkg.go.dev/io#ReadWriteSeeker): interface with `Reader`, `Writer`, and `Seeker`.
+1. [strings.Reader]https://pkg.go.dev/strings#Reader: A Reader implements the io.Reader...
 1. `os.Open`: Open a file and return `*os.File`, which can be used for `io.Reader` and `io.Writer`.
