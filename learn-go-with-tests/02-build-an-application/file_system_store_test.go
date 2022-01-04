@@ -32,7 +32,7 @@ func TestFileSystemStore(t *testing.T) {
             {"Name": "Cleo", "Wins": 10},
             {"Name": "Chris", "Wins": 33}]`)
 		defer cleanDatabase()
-		store := FileSystemPlayerStore{database}
+		store := NewFileSystemPlayerStore(database)
 		got := store.GetLeague()
 		want := []Player{
 			{"Cleo", 10},
@@ -49,7 +49,7 @@ func TestFileSystemStore(t *testing.T) {
 			{"Name": "Cleo", "Wins": 10},
 			{"Name": "Chris", "Wins": 33}]`)
 		defer cleanDatabase()
-		store := FileSystemPlayerStore{database}
+		store := NewFileSystemPlayerStore(database)
 		got := store.GetPlayerScore("Chris")
 		want := 33
 		assertScoreEquals(t, got, want)
@@ -60,7 +60,7 @@ func TestFileSystemStore(t *testing.T) {
 			{"Name": "Cleo", "Wins": 10},
 			{"Name": "Chris", "Wins": 33}]`)
 		defer cleanDatabase()
-		store := FileSystemPlayerStore{database}
+		store := NewFileSystemPlayerStore(database)
 		store.RecordWin("Chris")
 		got := store.GetPlayerScore("Chris")
 		want := 34
@@ -72,7 +72,7 @@ func TestFileSystemStore(t *testing.T) {
 			{"Name": "Cleo", "Wins": 10},
 			{"Name": "Chris", "Wins": 33}]`)
 		defer cleanDatabase()
-		store := FileSystemPlayerStore{database}
+		store := NewFileSystemPlayerStore(database)
 		store.RecordWin("Pepper")
 		got := store.GetPlayerScore("Pepper")
 		want := 1

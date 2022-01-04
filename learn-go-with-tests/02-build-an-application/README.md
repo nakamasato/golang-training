@@ -203,8 +203,21 @@ Luckily, `string.NewReader` also implements `ReadSeeker`.
 - Create a temporary file: `*os.File` implements `ReadWriteSeeker`
 - Use a [filebuffer](https://github.com/mattetti/filebuffer) library [Mattetti](https://github.com/mattetti): implements the interface
 
-Replace `strings.Reader` with `*io.File` returned by `ioutil.TempFile("", "db")`.
+Replace `strings.Reader` with `*os.File` returned by `ioutil.TempFile("", "db")`.
 
 ```go
 json.NewEncoder(f.database).Encode(league)
 ```
+## [Step 10: More refactoring and performance concerns](https://quii.gitbook.io/learn-go-with-tests/build-an-application/io#more-refactoring-and-performance-concerns)
+
+**Problem**: Every time someone calls `GetLeague()` or `GetPlayerScore()` we are reading the **entire** file and parsing it into JSON. -> Wasteful
+**Solution**: Read the whole file only when starting up
+
+1. `GetLeague` just returns from the member variable
+
+    ```go
+    func (f *FileSystemPlayerStore) GetLeague() League {
+        return f.league
+    }
+    ```
+1. `RecordWins` updates the member variable `league` and write with `f.database` (`io.ReadWriteSeeker`)

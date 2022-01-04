@@ -8,21 +8,26 @@ import (
 
 type FileSystemPlayerStore struct {
 	database io.ReadWriteSeeker
+	league   League
 }
 
-func (f FileSystemPlayerStore) GetLeague() League {
-	_, err := f.database.Seek(0, 0)
+func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
+	_, err := database.Seek(0, 0)
 	if err != nil {
-		fmt.Println("database.Seek failed")
+		fmt.Println("seek failed")
 	}
-	league, err := NewLeague(f.database)
-	if err != nil {
-		return []Player{}
+	league, _ := NewLeague(database)
+	return &FileSystemPlayerStore{
+		database: database,
+		league:   league,
 	}
-	return league
 }
 
-func (f FileSystemPlayerStore) GetPlayerScore(name string) int {
+func (f *FileSystemPlayerStore) GetLeague() League {
+	return f.league
+}
+
+func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 	player := f.GetLeague().Find(name)
 	if player != nil {
 		return player.Wins
@@ -30,19 +35,16 @@ func (f FileSystemPlayerStore) GetPlayerScore(name string) int {
 	return 0
 }
 
-func (f FileSystemPlayerStore) RecordWin(name string) {
-	league := f.GetLeague()
-	player := league.Find(name)
+func (f *FileSystemPlayerStore) RecordWin(name string) {
+	player := f.league.Find(name)
+
 	if player != nil {
 		player.Wins++
 	} else {
-		league = append(league, Player{Name: name, Wins: 1})
+		f.league = append(f.league, Player{Name: name, Wins: 1})
 	}
-	_, err := f.database.Seek(0, 0)
-	if err != nil {
-		fmt.Println("database.Seek failed")
-	}
-	err = json.NewEncoder(f.database).Encode(league)
+
+	err := json.NewEncoder(f.database).Encode(f.league)
 	if err != nil {
 		fmt.Println("Encode failed")
 	}
