@@ -778,7 +778,7 @@ func TestCLI(t *testing.T) {
 1. Refactoring
 
 At this point, `cli` app cannot call `RecordWin` with the given player.
-### [Step 19: Call RecordWin with the given player from CLI]
+### [Step 19: Call RecordWin with the given player from CLI](https://quii.gitbook.io/learn-go-with-tests/build-an-application/command-line#write-the-test-first-2)
 
 1. Test: *Call with "Chris wins" -> winner should be "Chris". Call with "Cleo wins" -> winner should be "Cleo"*
 
@@ -888,6 +888,86 @@ At this point, `cli` app cannot call `RecordWin` with the given player.
     [Advanced Testing with Go](https://speakerdeck.com/mitchellh/advanced-testing-with-go)
 
 ![](docs/step19.drawio.svg)
+
+### [Step 20: [Refactor] Commonize openfile logic](https://quii.gitbook.io/learn-go-with-tests/build-an-application/command-line#refactor-1)
+
+1. Refactor duplicated `Openfile` and initialization of `FileSystemPlayerStore` -> `FileSystemPlayerStoreFromFile` in `file_system_store.go`, which calls `os.Openfile` with the given `path`.
+
+    ```go
+    func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, func(), error) {
+        db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
+
+        if err != nil {
+            return nil, nil, fmt.Errorf("problem opening %s %v", path, err)
+        }
+
+        closeFunc := func() {
+            db.Close()
+        }
+
+        store, err := NewFileSystemPlayerStore(db)
+
+        if err != nil {
+            return nil, nil, fmt.Errorf("problem creating file system player store, %v ", err)
+        }
+
+        return store, closeFunc, nil
+    }
+    ```
+
+1. Update `cmd/cli/main.go`
+
+    ```diff
+    +++ b/learn-go-with-tests/02-build-an-application/cmd/cli/main.go
+    @@ -13,13 +13,11 @@ func main() {
+            fmt.Println("Let's play poker")
+            fmt.Println("Type {Name} wins to record a win")
+
+    -       db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
+    -
+    +       store, close, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
+            if err != nil {
+    -               log.Fatalf("problem opening %s %v", dbFileName, err)
+    +               log.Fatal(err)
+            }
+    -
+    -       store, err := poker.NewFileSystemPlayerStore(db)
+    +       defer close()
+
+    ```
+
+1. Update `cmd/webserver/main.go`
+
+    ```diff
+    +++ b/learn-go-with-tests/02-build-an-application/cmd/webserver/main.go
+    @@ -10,15 +10,13 @@ import (
+     const dbFileName = "game.db.json"
+
+     func main() {
+    -       db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
+    -       if err != nil {
+    -               log.Fatalf("problem opening %s %v", dbFileName, err)
+    -       }
+    +       store, close, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
+
+    -       store, err := poker.NewFileSystemPlayerStore(db)
+            if err != nil {
+    -               log.Fatalf("problem creating file system player store, %v ", err)
+    +               log.Fatal(err)
+            }
+    +       defer close()
+    +
+    ```
+
+![](docs/step20.drawio.svg)
+
+### Wrap up
+
+1. Separate folders for `main` for different applications
+1. Unaccessible to unexported types from other packages
+1. `_text` package for testing in the same way as other packages use your code.
+1. `os.Stdin` implements `io.Reader`.
+1. `bufio.Scanner` to read line by line.
 
 ## Reference
 
