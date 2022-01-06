@@ -968,6 +968,91 @@ At this point, `cli` app cannot call `RecordWin` with the given player.
 1. `_text` package for testing in the same way as other packages use your code.
 1. `os.Stdin` implements `io.Reader`.
 1. `bufio.Scanner` to read line by line.
+## [Time](https://quii.gitbook.io/learn-go-with-tests/build-an-application/time)
+
+a group of people play Texas-Holdem Poker.
+### [Step 21: Periodic operation with time.AfterFunc](https://quii.gitbook.io/learn-go-with-tests/build-an-application/time)
+
+1. Create new test in `CLI_test.go`.
+
+    ```go
+	t.Run("it schedules printing of blind values", func(t *testing.T) {
+		in := strings.NewReader("Chris wins\n")
+		playerStore := &poker.StubPlayerStore{}
+		blindAlerter := &SpyBlindAlerter{}
+
+		cli := poker.NewCLI(playerStore, in, blindAlerter)
+		cli.PlayPoker()
+
+		if len(blindAlerter.alerts) != 1 {
+			t.Fatal("expected a blind alert to be scheduled")
+		}
+	})
+    ```
+1. Add `SpyBlindAlerter` in `CLI_test.go`
+
+    You can set an alert with `scheduledAt` adn `amount`.
+    ```go
+    type SpyBlindAlerter struct {
+        alerts []struct{
+            scheduledAt time.Duration
+            amount int
+        }
+    }
+
+    func (s *SpyBlindAlerter) ScheduleAlertAt(duration time.Duration, amount int) {
+        s.alerts = append(s.alerts, struct {
+            scheduledAt time.Duration
+            amount int
+        }{duration,  amount})
+    }
+    ```
+
+1. Create interface `BlindAlerter` and add new argument `alert BlindAlerter` to `NewCLI`.
+
+    ```go
+    type BlindAlerter interface {
+        ScheduleAlertAt(duration time.Duration, amount int)
+    }
+    ```
+1. Create an interface `BlindAlerterFunc`
+    ```go
+    type BlindAlerterFunc func(duration time.Duration, amount int)
+
+    func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int) {
+        a(duration, amount)
+    }
+
+    func StdOutAlerter(duration time.Duration, amount int) {
+        time.AfterFunc(duration, func(){
+            fmt.Fprintf(os.Stdout, "Blind is now %d\n", amount)
+        })
+    }
+    ```
+
+1. Update `cmd/cli/main.go`
+    ```go
+    poker.NewCLI(store, os.Stdin, poker.BlindAlerterFunc(poker.StdOutAlerter)).PlayPoker()
+    ```
+
+1. Run the app. (better to change `blindTime = blindTime + 10*time.Minute` from `Minute` to `Second`)
+    ```
+    go run main.go
+    ```
+
+    ```
+    Let's play poker
+    Type {Name} wins to record a win
+    Blind is now 100
+    Blind is now 200
+    Blind is now 300
+    Blind is now 400
+    Blind is now 500
+    Blind is now 600
+    Blind is now 800
+    Blind is now 1000
+    Blind is now 2000
+    ```
 
 ## Reference
 
