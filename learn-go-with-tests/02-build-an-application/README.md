@@ -1035,7 +1035,7 @@ a group of people play Texas-Holdem Poker.
     poker.NewCLI(store, os.Stdin, poker.BlindAlerterFunc(poker.StdOutAlerter)).PlayPoker()
     ```
 
-1. Run the app.
+1. Run the app. (better to change `blindTime = blindTime + 10*time.Minute` from `Minute` to `Second`)
     ```
     go run main.go
     ```

@@ -46,10 +46,10 @@ func (cli *CLI) PlayPoker() {
 
 func (cli *CLI) scheduleBlindAlerts() {
 	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
-	blindTime := 10 * time.Second
+	blindTime := 0 * time.Second
 	for _, blind := range blinds {
 		cli.alerter.ScheduleAlertAt(blindTime, blind)
-		blindTime = blindTime + 10*time.Second
+		blindTime = blindTime + 10*time.Minute
 	}
 }
 
