@@ -1094,7 +1094,9 @@ a group of people play Texas-Holdem Poker.
     ```
 1. Add a line to `PlayPoker()`.
     ```go
-    fmt.Fprintf(cli.out, "Please enter the number of players: ")
+    const PlayerPrompt = "..."
+    ...
+    fmt.Fprint(cli.out, PlayerPrompt)
     ```
 ## Reference
 
