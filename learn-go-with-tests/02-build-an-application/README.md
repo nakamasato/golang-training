@@ -1054,6 +1054,50 @@ a group of people play Texas-Holdem Poker.
     Blind is now 2000
     ```
 
+### [Step 22: Add Stdout to CLI](https://quii.gitbook.io/learn-go-with-tests/build-an-application/time#write-the-test-first-2)
+
+1. Add test with dummies.
+
+    ```go
+    var dummyBlindAlerter = &SpyBlindAlerter{}
+    var dummyPlayerStore = &poker.StubPlayerStore{}
+    var dummyStdIn = &bytes.Buffer{}
+    var dummyStdOut = &bytes.Buffer{}
+    ```
+
+    ```go
+	t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
+		stdout := &bytes.Buffer{}
+		cli := poker.NewCLI(dummyPlayerStore, dummyStdIn, stdout, dummyBlindAlerter)
+		cli.PlayPoker()
+
+		got := stdout.String()
+		want := "Please enter the number of players: "
+
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+    ```
+
+    For existing tests, use `dummyStdOut`
+1. Add `io.Writer` to `NewCLI`.
+    ```diff
+    -func NewCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *CLI {
+    +func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *CLI {
+    ```
+1. Add `out` to `CLI`.
+    ```diff
+    type CLI struct {
+
+    }
+    ```
+1. Add a line to `PlayPoker()`.
+    ```go
+    const PlayerPrompt = "..."
+    ...
+    fmt.Fprint(cli.out, PlayerPrompt)
+    ```
 ## Reference
 
 - [Go 言語 ファイル・I/O 関係のよく使う基本ライブラリ](https://www.yunabe.jp/docs/golang_io.html)
@@ -1065,7 +1109,8 @@ a group of people play Texas-Holdem Poker.
 1. [io.Writer](https://pkg.go.dev/io#Writer): interface with `Write(p []byte) (n int, err error)` method. Ususally not directly used.
 1. [io.ReadSeeker](https://pkg.go.dev/io#ReadSeeker): interface with `Reader` and `Seeker`.
 1. [io.ReadWriteSeeker](https://pkg.go.dev/io#ReadWriteSeeker): interface with `Reader`, `Writer`, and `Seeker`.
-1. [strings.Reader](https://pkg.go.dev/strings#Reader): A Reader implements the io.Reader...
-1. `os.Open`: Open a file and return `*os.File`, which can be used for `io.Reader` and `io.Writer`.
+1. [strings.Reader](https://pkg.go.dev/strings#Reader): A Reader implements the `io.Reader`.
+1. [os.File](https://pkg.go.dev/os#File): Can be used for `io.Reader` and `io.Writer`. You can get with `os.Open`.
 1. [bufio.Scanner](https://golang.org/pkg/bufio/): `bufio.NewScanner(io.Reader) -> *bufio.Scanner` bufio implements buffered I/O.
 1. [os.Stdin](https://pkg.go.dev/os#Stdin): `*File` -> implements `io.Reader`
+1. [bytes.Buffer](https://pkg.go.dev/bytes#Buffer): A Buffer is a variable-sized buffer of bytes with Read and Write methods. implements `io.Reader` and `io.Writer` (also studied in [Dependency Injection](../01-go-fundamentals/README.md##dependency-injection))
