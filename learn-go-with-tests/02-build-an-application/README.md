@@ -8,17 +8,21 @@
     - POST `/players/<player>`
 ## Run the app
 
-```
-go build
-```
+1. CLI:
 
-```
-curl http://localhost:5000/players/Pepper
-```
+1. Web app:
+    ```
+    cd cmd/webserver
+    go run main.go
+    ```
 
-```
-curl -X POST http://localhost:5000/players/Pepper
-```
+    ```
+    curl http://localhost:5000/players/Pepper
+    ```
+
+    ```
+    curl -X POST http://localhost:5000/players/Pepper
+    ```
 
 ## [HTTP Server](https://quii.gitbook.io/learn-go-with-tests/build-an-application/http-server)
 
@@ -1260,6 +1264,101 @@ Changes:
     1. `assertGameStartedWith` to check if the given number of players is set.
     1. `assertGameNotStarted` to check if `Start` is called.
     1. `assertMessagesSentToUser` to check if expected string is sent as stdout.
+
+## [Websockets](https://quii.gitbook.io/learn-go-with-tests/build-an-application/websockets)
+
+### [Step 26: Serve up an HTML to users when they hit /game](https://quii.gitbook.io/learn-go-with-tests/build-an-application/websockets#write-the-test-first)
+
+1. Write test to GET /game successfully in `server_test.go`.
+
+    ```go
+    func TestGame(t *testing.T) {
+        t.Run("GET /game returns 200", func(t *testing.T) {
+            server := NewPlayerServer(&StubPlayerStore{})
+
+            request, _ := http.NewRequest(http.MethodGet, "/game", nil)
+            response := httptest.NewRecorder()
+
+            server.ServeHTTP(response, request)
+
+            assertStatus(t, response.Code, http.StatusOK)
+        })
+    }
+    ```
+1. Add handler to the router in `server.go`.
+    ```go
+    func NewPlayerServer() {
+        ...
+        router.Handle("/game", http.HandlerFunc(p.game))
+        ...
+    }
+    ...
+    func (p *PlayerServer) game(w http.ResponseWriter, r *http.Request) {
+	    w.WriteHeader(http.StatusOK)
+    }
+    ```
+
+1. Prepare `game.html`
+
+    ```html
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Let's play poker</title>
+    </head>
+    <body>
+    <section id="game">
+        <div id="declare-winner">
+            <label for="winner">Winner</label>
+            <input type="text" id="winner"/>
+            <button id="winner-button">Declare winner</button>
+        </div>
+    </section>
+    </body>
+    <script type="application/javascript">
+
+        const submitWinnerButton = document.getElementById('winner-button')
+        const winnerInput = document.getElementById('winner')
+
+        if (window['WebSocket']) {
+            const conn = new WebSocket('ws://' + document.location.host + '/ws')
+
+            submitWinnerButton.onclick = event => {
+                conn.send(winnerInput.value)
+            }
+        }
+    </script>
+    </html>
+    ```
+1. Update `game` func in `server.go`.
+
+    ```go
+    import (
+	    "html/template"
+        ...
+    )
+    ...
+    func (p *PlayerServer) game(w http.ResponseWriter, r *http.Request) {
+    	tmpl, err := template.ParseFiles("game.html")
+
+        if err != nil {
+            http.Error(w, fmt.Sprintf("problem loading template %s", err.Error()), http.    StatusInternalServerError)
+            return
+        }
+
+        tmpl.Execute(w, nil)
+    }
+    ```
+
+1. Run
+    ```
+    cd cmd/webserver
+    ln -s ../../game.html game.html # need to create symlink
+    go run main.go
+    ```
+
+    ![](docs/step-26.png)
 ## Reference
 
 - [Go 言語 ファイル・I/O 関係のよく使う基本ライブラリ](https://www.yunabe.jp/docs/golang_io.html)
@@ -1276,3 +1375,4 @@ Changes:
 1. [bufio.Scanner](https://golang.org/pkg/bufio/): `bufio.NewScanner(io.Reader) -> *bufio.Scanner` bufio implements buffered I/O.
 1. [os.Stdin](https://pkg.go.dev/os#Stdin): `*File` -> implements `io.Reader`
 1. [bytes.Buffer](https://pkg.go.dev/bytes#Buffer): A Buffer is a variable-sized buffer of bytes with Read and Write methods. implements `io.Reader` and `io.Writer` (also studied in [Dependency Injection](../01-go-fundamentals/README.md##dependency-injection))
+1. [html/template](https://golang.org/pkg/html/template/)
