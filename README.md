@@ -1,6 +1,6 @@
 # Golang Training
 
-[![codecov](https://codecov.io/gh/nakamasato/go-practice/branch/main/graph/badge.svg?token=1RUXMSBB6N)](https://codecov.io/gh/nakamasato/go-practice)
+[![codecov](https://codecov.io/gh/nakamasato/golang-training/branch/main/graph/badge.svg?token=1RUXMSBB6N)](https://codecov.io/gh/nakamasato/golang-training)
 
 ## Version
 
