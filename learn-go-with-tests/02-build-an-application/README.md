@@ -1,8 +1,11 @@
 # Build an application
 
-- GET `/players/<player>`
-- POST `/players/<player>`
+## About the app
 
+1. **Command line app**. Prompts the user to enter the number of players in a game. From then on informs the players of what the "blind bet" value is, which increases over time. At any point a user can enter "{Playername} wins" to finish the game and record the victor in a store.
+1. **Web app**. Allows users to record winners of games and displays a league table. Shares the same store as the command line app.
+    - GET `/players/<player>`
+    - POST `/players/<player>`
 ## Run the app
 
 ```
@@ -1239,6 +1242,7 @@ Changes:
     }
     ```
 
+![](docs/step-24.drawio.svg)
 ### [Step 25: Error handling for wrong input](https://quii.gitbook.io/learn-go-with-tests/build-an-application/time#write-the-test-first-4)
 
 1. Return when failing to convert the given string into an integer in `CLI.go`.
