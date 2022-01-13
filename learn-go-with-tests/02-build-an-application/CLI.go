@@ -12,6 +12,7 @@ import (
 
 const PlayerPrompt = "Please enter the number of players: "
 const BadPlayerInputErrMsg = "Bad value received for number of players, please try again with a number"
+
 type CLI struct {
 	in   *bufio.Scanner
 	out  io.Writer
