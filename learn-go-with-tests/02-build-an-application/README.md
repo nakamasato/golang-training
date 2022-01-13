@@ -1238,6 +1238,24 @@ Changes:
         g.FinishedWith = winner
     }
     ```
+
+### [Step 25: Error handling for wrong input](https://quii.gitbook.io/learn-go-with-tests/build-an-application/time#write-the-test-first-4)
+
+1. Return when failing to convert the given string into an integer in `CLI.go`.
+    ```go
+    const BadPlayerInputErrMsg = "Bad value received for number of players, please try again with a number"
+
+	if err != nil {
+		fmt.Fprint(cli.out, BadPlayerInputErrMsg)
+		return
+	}
+    ```
+1. Refactor CLI_test.
+    1. `userSends` for common function to generate `io.Reader` for `in`.
+    1. `assertFinishCalledWith` to check the winner.
+    1. `assertGameStartedWith` to check if the given number of players is set.
+    1. `assertGameNotStarted` to check if `Start` is called.
+    1. `assertMessagesSentToUser` to check if expected string is sent as stdout.
 ## Reference
 
 - [Go 言語 ファイル・I/O 関係のよく使う基本ライブラリ](https://www.yunabe.jp/docs/golang_io.html)
