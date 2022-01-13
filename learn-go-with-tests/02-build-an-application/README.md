@@ -1167,6 +1167,77 @@ a group of people play Texas-Holdem Poker.
                     playerStore := &poker.StubPlayerStore{}
                     blindAlerter := &SpyBlindAlerter{}
     ```
+
+### [Step 24: Separate game from CLI](https://quii.gitbook.io/learn-go-with-tests/build-an-application/time#refactor-2)
+
+4 dependencies to setup CLI -> introduce `Game` for better test:
+- `Start`: need to know how many people are playing
+- `Finish`: need to declare the winner
+
+Changes:
+1. Create new type `Game` with `BlindAlerter` and `PlayerStore`.
+    ```go
+    type Game struct {
+        alerter BlindAlerter
+        store PlayerStore
+    }
+    ```
+1. Moved `CLI.scheduleBlindAlerts` to `Game.Start`.
+    ```go
+    func (p *Game) Start(numberOfPlayers int) {
+        blindIncrement := time.Duration(5+numberOfPlayers) * time.Minute
+
+        blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
+        blindTime := 0 * time.Second
+        for _, blind := range blinds {
+            p.alerter.ScheduleAlertAt(blindTime, blind)
+            blindTime = blindTime + blindIncrement
+        }
+    }
+    ```
+1. Moved `store.RecordWin` to `Game.Finish()`.
+    ```go
+    func (p *TexasHoldem) Finish(winner string) {
+        p.store.RecordWin(winner)
+    }
+    ```
+1. Use `Game` in `CLI`.
+    ```diff
+     type CLI struct {
+    -       playerStore PlayerStore
+    -       in          *bufio.Scanner
+    -       out         io.Writer
+    -       alerter     BlindAlerter
+    +       in   *bufio.Scanner
+    +       out  io.Writer
+    +       game Game
+     }
+    ```
+1. Move Game-specific tests from `CLI_test` to `game_test`.
+
+1. CLI no longer relies on a concrete Game! -> Make an interface for it.
+    ```go
+    type Game interface {
+    	Start(numberOfPlayers int)
+    	Finish(winner string)
+    }
+    ```
+1. Rename `Game` to `TexasHoldem` with `Game` interface. (`*Game` -> `Game` in CLI.)
+1. Create `GameSpy` in `CLI_test`
+    ```go
+    type GameSpy struct {
+        StartedWith  int
+        FinishedWith string
+    }
+
+    func (g *GameSpy) Start(numberOfPlayers int) {
+        g.StartedWith = numberOfPlayers
+    }
+
+    func (g *GameSpy) Finish(winner string) {
+        g.FinishedWith = winner
+    }
+    ```
 ## Reference
 
 - [Go 言語 ファイル・I/O 関係のよく使う基本ライブラリ](https://www.yunabe.jp/docs/golang_io.html)
