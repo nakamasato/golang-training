@@ -17,6 +17,8 @@ require (
 	sigs.k8s.io/controller-runtime v0.10.3
 )
 
+require github.com/gorilla/websocket v1.4.2
+
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
