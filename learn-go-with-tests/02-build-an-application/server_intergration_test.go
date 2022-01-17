@@ -8,7 +8,7 @@ import (
 
 func TestRecordingWinsAndRetrievingThemWithInMemoryStore(t *testing.T) {
 	store := NewInMemoryPlayerStore()
-	server := NewPlayerServer(store)
+	server, _ := NewPlayerServer(store)
 	player := "Pepper"
 
 	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
@@ -41,7 +41,7 @@ func TestRecordingWinsAndRetrievingThemWithFileSystemStore(t *testing.T) {
 	defer cleanDatabase()
 	store, err := NewFileSystemPlayerStore(database)
 	assertNoError(t, err)
-	server := NewPlayerServer(store)
+	server, _ := NewPlayerServer(store)
 	player := "Pepper"
 
 	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))

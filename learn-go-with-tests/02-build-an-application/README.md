@@ -1359,6 +1359,89 @@ Changes:
     ```
 
     ![](docs/step-26.png)
+
+### [Step 27: Introduce Websocket](https://quii.gitbook.io/learn-go-with-tests/build-an-application/websockets#write-the-test-first-1)
+
+1. Add test for websocket
+
+    ```go
+	t.Run("when we get a message over a websocket it is a winner of a game", func(t *testing.T) {
+		store := &StubPlayerStore{}
+		winner := "Ruth"
+		server := httptest.NewServer(NewPlayerServer(store))
+		defer server.Close()
+
+		wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws"
+
+		ws, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+		if err != nil {
+			t.Fatalf("could not open a ws connection on %s %v", wsURL, err)
+		}
+		defer ws.Close()
+
+		if err := ws.WriteMessage(websocket.TextMessage, []byte(winner)); err != nil {
+			t.Fatalf("could not send message over ws connection %v", err)
+		}
+
+		AssertPlayerWin(t, store, winner)
+	})
+    ```
+1. Add a handler for `ws`
+
+    ```diff
+    @@ -28,6 +30,7 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
+            router.Handle("/league", http.HandlerFunc(p.leagueHandler))
+            router.Handle("/players/", http.HandlerFunc(p.playerHandler))
+            router.Handle("/game", http.HandlerFunc(p.game))
+    +       router.Handle("/ws", http.HandlerFunc(p.webSocket))
+
+            p.Handler = router
+    ```
+
+    ```go
+    func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
+    	upgrader := websocket.Upgrader{
+            ReadBufferSize:  1024,
+            WriteBufferSize: 1024,
+        }
+    	conn, _ := upgrader.Upgrade(w, r, nil)
+    	_, winnerMsg, _ := conn.ReadMessage()
+    	p.store.RecordWin(string(winnerMsg))
+    }
+    ```
+
+1. Refactor
+
+    ```go
+    func mustMakePlayerServer(t *testing.T, store PlayerStore) *PlayerServer {
+        server, err := NewPlayerServer(store)
+        if err != nil {
+            t.Fatal("problem creating player server", err)
+        }
+        return server
+    }
+
+    func mustDialWS(t *testing.T, url string) *websocket.Conn {
+        ws, _, err := websocket.DefaultDialer.Dial(url, nil)
+
+        if err != nil {
+            t.Fatalf("could not open a ws connection on %s %v", url, err)
+        }
+
+        return ws
+    }
+
+    func writeWSMessage(t testing.TB, conn *websocket.Conn, message string) {
+        t.Helper()
+        if err := conn.WriteMessage(websocket.TextMessage, []byte(message)); err != nil {
+            t.Fatalf("could not send message over ws connection %v", err)
+        }
+    }
+    ```
+1. Run `main.go` in `cmd/webserver`.
+    -> You can play game with `/game` and check the result with `/league`
+
+
 ## Reference
 
 - [Go 言語 ファイル・I/O 関係のよく使う基本ライブラリ](https://www.yunabe.jp/docs/golang_io.html)
@@ -1376,3 +1459,4 @@ Changes:
 1. [os.Stdin](https://pkg.go.dev/os#Stdin): `*File` -> implements `io.Reader`
 1. [bytes.Buffer](https://pkg.go.dev/bytes#Buffer): A Buffer is a variable-sized buffer of bytes with Read and Write methods. implements `io.Reader` and `io.Writer` (also studied in [Dependency Injection](../01-go-fundamentals/README.md##dependency-injection))
 1. [html/template](https://golang.org/pkg/html/template/)
+1. [gorilla/websocket](https://github.com/gorilla/websocket)
