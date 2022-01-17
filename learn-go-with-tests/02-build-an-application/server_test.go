@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -104,6 +105,27 @@ func TestLeague(t *testing.T) {
 		assertLeague(t, got, wantedLeague)
 		assertContentType(t, response, jsonContentType)
 	})
+}
+
+func TestGame(t *testing.T) {
+	t.Run("GET /game returns 200", func(t *testing.T) {
+		server := NewPlayerServer(&StubPlayerStore{})
+
+		request := newGameRequest()
+		response := httptest.NewRecorder()
+
+		server.ServeHTTP(response, request)
+
+		assertStatus(t, response.Code, http.StatusOK)
+	})
+}
+
+func newGameRequest() *http.Request {
+	request, err := http.NewRequest(http.MethodGet, "/game", nil)
+	if err != nil {
+		log.Fatal(fmt.Printf("error when creating a request %v", err))
+	}
+	return request
 }
 
 func getLeagueFromResponse(t testing.TB, body io.Reader) (league League) {
