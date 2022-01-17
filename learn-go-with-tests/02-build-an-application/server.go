@@ -22,7 +22,7 @@ const htmlTemplatePath = "game.html"
 type PlayerServer struct {
 	store        PlayerStore
 	http.Handler // embedding
-	template *template.Template
+	template     *template.Template
 }
 
 func NewPlayerServer(store PlayerStore) (*PlayerServer, error) {
@@ -30,8 +30,8 @@ func NewPlayerServer(store PlayerStore) (*PlayerServer, error) {
 
 	tmpl, err := template.ParseFiles("game.html")
 	if err != nil {
-        return nil, fmt.Errorf("problem opening %s %v", htmlTemplatePath, err)
-    }
+		return nil, fmt.Errorf("problem opening %s %v", htmlTemplatePath, err)
+	}
 	p.template = tmpl
 	p.store = store
 
@@ -96,8 +96,8 @@ func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
 }
 
 var wsUpgrader = websocket.Upgrader{
-    ReadBufferSize:  1024,
-    WriteBufferSize: 1024,
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 }
 
 func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
