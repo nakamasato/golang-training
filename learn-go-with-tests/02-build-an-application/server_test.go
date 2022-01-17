@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -122,7 +123,7 @@ func TestGame(t *testing.T) {
 func newGameRequest() *http.Request {
 	request, err := http.NewRequest(http.MethodGet, "/game", nil)
 	if err != nil {
-		fmt.Errorf("error when creating a request %v", err)
+		log.Fatal(fmt.Printf("error when creating a request %v", err))
 	}
 	return request
 }

@@ -56,7 +56,10 @@ func (p *PlayerServer) game(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl.Execute(w, nil)
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 type Player struct {
