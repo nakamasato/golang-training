@@ -3,7 +3,6 @@ package poker
 import (
 	"fmt"
 	"io"
-	"os"
 	"time"
 )
 
