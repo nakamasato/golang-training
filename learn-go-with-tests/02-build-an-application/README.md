@@ -1246,7 +1246,7 @@ Changes:
     }
     ```
 
-![](docs/step-24.drawio.svg)
+![](docs/step24.drawio.svg)
 ### [Step 25: Error handling for wrong input](https://quii.gitbook.io/learn-go-with-tests/build-an-application/time#write-the-test-first-4)
 
 1. Return when failing to convert the given string into an integer in `CLI.go`.
@@ -1358,7 +1358,7 @@ Changes:
     go run main.go
     ```
 
-    ![](docs/step-26.png)
+    ![](docs/step26.png)
 
 ### [Step 27: Introduce Websocket](https://quii.gitbook.io/learn-go-with-tests/build-an-application/websockets#write-the-test-first-1)
 
@@ -1502,6 +1502,226 @@ I might have forgotten update the package for test to `poker_test`.
 1. Run. Successfully record winner.
 
 ![](docs/step29.drawio.svg)
+
+### [Step 30: Enable BlindAlerter in WebSockets](https://quii.gitbook.io/learn-go-with-tests/build-an-application/websockets#refactor-2)
+
+1. Refactor (Separate WebSockets from PlayerServer)
+    1. Create new type `PlayerServerWS`.
+
+        ```go
+        type playerServerWS struct {
+            *websocket.Conn
+        }
+
+        func newPlayerServerWS(w http.ResponseWriter, r *http.Request) *playerServerWS {
+            conn, err := wsUpgrader.Upgrade(w, r, nil)
+
+            if err != nil {
+                log.Printf("problem upgrading connection to WebSockets %v\n", err)
+            }
+
+            return &playerServerWS{conn}
+        }
+
+        func (w *playerServerWS) WaitForMsg() string {
+            _, msg, err := w.ReadMessage()
+            if err != nil {
+                log.Printf("error reading from websocket %v\n", err)
+            }
+            return string(msg)
+        }
+        ```
+
+    1. Update `webSocket` function in `server.go`
+
+        ```diff
+        func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
+        -       conn, _ := wsUpgrader.Upgrade(w, r, nil)
+        -       _, numberOfPlayersMsg, _ := conn.ReadMessage()
+        +       ws := newPlayerServerWS(w, r)
+        +
+        +
+        +       numberOfPlayersMsg := ws.WaitForMsg()
+                numberOfPlayers, _ := strconv.Atoi(string(numberOfPlayersMsg))
+                p.game.Start(numberOfPlayers, io.Discard) //todo: Don't discard the blinds messages!
+        -       _, winner, _ := conn.ReadMessage()
+        +
+        +       winner := ws.WaitForMsg()
+                p.game.Finish(string(winner))
+        }
+        ```
+1. Update `GameSpy` in `CLI_test.go`.
+
+    ```diff
+     type GameSpy struct {
+    -       StartedWith  int
+    -       FinishedWith string
+    -       StartCalled  bool
+    +       StartCalled     bool
+    +       StartCalledWith int
+    +       BlindAlert      []byte
+    +
+    +       FinishedCalled   bool
+    +       FinishCalledWith string
+     }
+
+    -func (g *GameSpy) Start(numberOfPlayers int, alertDestination io.Writer) {
+    -       g.StartedWith = numberOfPlayers
+    +func (g *GameSpy) Start(numberOfPlayers int, out io.Writer) {
+    +       g.StartCalledWith = numberOfPlayers
+            g.StartCalled = true
+    +       out.Write(g.BlindAlert)
+     }
+
+     func (g *GameSpy) Finish(winner string) {
+    -       g.FinishedWith = winner
+    +       g.FinishCalledWith = winner
+     }
+    ```
+
+1. Update test in `server_test.go`.
+
+    ```diff
+    @@ -126,9 +126,11 @@ func TestGame(t *testing.T) {
+                    assertStatus(t, response.Code, http.StatusOK)
+            })
+
+    -       t.Run("start a game with 3 players and declare Ruth the winner", func(t *testing.    T) {
+    -               game := &GameSpy{}
+    +       t.Run("start a game with 3 players, send some blind alerts down WS and declare     Ruth the winner", func(t *testing.T) {
+    +               wantedBlindAlert := "Blind is 100"
+                    winner := "Ruth"
+    +
+    +               game := &GameSpy{BlindAlert: []byte(wantedBlindAlert)}
+                    server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore,     game))
+                    ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
+
+    @@ -141,6 +143,12 @@ func TestGame(t *testing.T) {
+                    time.Sleep(10 * time.Millisecond)
+                    assertGameStartedWith(t, game, 3)
+                    assertFinishCalledWith(t, game, winner)
+    +
+    +               _, gotBlindAlert, _ := ws.ReadMessage()
+    +
+    +               if string(gotBlindAlert) != wantedBlindAlert {
+    +                       t.Errorf("got blind alert %q, want %q", string(gotBlindAlert),     wantedBlindAlert)
+    +               }
+            })
+     }
+    ```
+
+    -> Run tests -> hang forever as `ws.ReadMessage()` will block!
+
+1. make it time out.
+
+    ```go
+    func within(t testing.TB, d time.Duration, assert func()) {
+    	t.Helper()
+
+    	done := make(chan struct{}, 1)
+
+    	go func() {
+    		assert()
+    		done <- struct{}{}
+    	}()
+
+    	select {
+    	case <-time.After(d):
+    		t.Error("timed out")
+    	case <-done:
+    	}
+    }
+    ```
+
+    helper function:
+
+    ```go
+    func assertWebsocketGotMsg(t *testing.T, ws *websocket.Conn, want string) {
+    	_, msg, _ := ws.ReadMessage()
+    	if string(msg) != want {
+    		t.Errorf(`got "%s", want "%s"`, string(msg), want)
+    	}
+    }
+    ```
+
+1. Update the test with `within`.
+
+    ```
+    within(t, tenMS, func() { assertWebsocketGotMsg(t, ws, wantedBlindAlert) })
+    ```
+
+    -> `got "", want "Blind is 100"`
+
+
+1. Use `ws` in `p.game.Start(numberOfPlayers, ws)` instead of `io.Discard`.
+
+    ```diff
+    - p.game.Start(numberOfPlayers, io.Discard)
+    + p.game.Start(numberOfPlayers, ws)
+    ```
+1. Implement `Write` in `playerServerWS`.
+
+    `*websocket.Conn` to use `WriteMessage` to send the message down the websocket.
+
+    ```go
+    func (w *playerServerWS) Write(p []byte) (n int, err error) {
+    	err = w.WriteMessage(websocket.TextMessage, p)
+
+    	if err != nil {
+    		return 0, err
+    	}
+
+    	return len(p), nil
+    }
+    ```
+
+    You'll see `Blind`!
+
+    ![](docs/step30.png)
+
+    The test also passes!
+
+1. Refactor tests (Remove `time.Sleep` by `retryUntil`).
+
+    ```diff
+     func assertFinishCalledWith(t testing.TB, game *GameSpy, winner string) {
+    -       if game.FinishedWith != winner {
+    -               t.Errorf("wanted winner %s but got %s", winner, game.FinishedWith)
+    +       t.Helper()
+    +
+    +       passed := retryUntil(500*time.Millisecond, func() bool {
+    +               return game.FinishCalledWith == winner
+    +       })
+    +
+    +       if !passed {
+    +               t.Errorf("expected finish called with %q but got %q", winner, game.    FinishCalledWith)
+            }
+     }
+
+    +func retryUntil(d time.Duration, f func() bool) bool {
+    +       deadline := time.Now().Add(d)
+    +       for time.Now().Before(deadline) {
+    +               if f() {
+    +                       return true
+    +               }
+    +       }
+    +       return false
+    +}
+    +
+     func assertGameStartedWith(t testing.TB, game *GameSpy, numberOfPlayers int) {
+    -       if game.StartedWith != numberOfPlayers {
+    -               t.Errorf("wanted Start called with %d but got %d", numberOfPlayers, game.    StartedWith)
+    +       t.Helper()
+    +
+    +       passed := retryUntil(500*time.Millisecond, func() bool {
+    +               return game.StartCalledWith != numberOfPlayers
+    +       })
+    +       if !passed {
+    +               t.Errorf("wanted Start called with %d but got %d", numberOfPlayers, game.    StartCalledWith)
+            }
+     }
+    ```
+
 ## Reference
 
 - [Go 言語 ファイル・I/O 関係のよく使う基本ライブラリ](https://www.yunabe.jp/docs/golang_io.html)

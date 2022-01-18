@@ -3,8 +3,10 @@ package poker_test
 import (
 	"bytes"
 	"io"
+	"log"
 	"strings"
 	"testing"
+	"time"
 
 	"tmp/learn-go-with-tests/02-build-an-application"
 )
@@ -16,18 +18,25 @@ var dummyStdIn = &bytes.Buffer{}
 var dummyStdOut = &bytes.Buffer{}
 
 type GameSpy struct {
-	StartedWith  int
-	FinishedWith string
-	StartCalled  bool
+	StartCalled     bool
+	StartCalledWith int
+	BlindAlert      []byte
+
+	FinishedCalled   bool
+	FinishCalledWith string
 }
 
-func (g *GameSpy) Start(numberOfPlayers int, alertDestination io.Writer) {
-	g.StartedWith = numberOfPlayers
+func (g *GameSpy) Start(numberOfPlayers int, out io.Writer) {
+	g.StartCalledWith = numberOfPlayers
 	g.StartCalled = true
+	_, err := out.Write(g.BlindAlert)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (g *GameSpy) Finish(winner string) {
-	g.FinishedWith = winner
+	g.FinishCalledWith = winner
 }
 
 func TestCLI(t *testing.T) {
@@ -77,14 +86,35 @@ func userSends(input ...string) io.Reader {
 }
 
 func assertFinishCalledWith(t testing.TB, game *GameSpy, winner string) {
-	if game.FinishedWith != winner {
-		t.Errorf("wanted winner %s but got %s", winner, game.FinishedWith)
+	t.Helper()
+
+	passed := retryUntil(500*time.Millisecond, func() bool {
+		return game.FinishCalledWith == winner
+	})
+
+	if !passed {
+		t.Errorf("expected finish called with %q but got %q", winner, game.FinishCalledWith)
 	}
 }
 
+func retryUntil(d time.Duration, f func() bool) bool {
+	deadline := time.Now().Add(d)
+	for time.Now().Before(deadline) {
+		if f() {
+			return true
+		}
+	}
+	return false
+}
+
 func assertGameStartedWith(t testing.TB, game *GameSpy, numberOfPlayers int) {
-	if game.StartedWith != numberOfPlayers {
-		t.Errorf("wanted Start called with %d but got %d", numberOfPlayers, game.StartedWith)
+	t.Helper()
+
+	passed := retryUntil(500*time.Millisecond, func() bool {
+		return game.StartCalledWith == numberOfPlayers
+	})
+	if !passed {
+		t.Errorf("wanted Start called with %d but got %d", numberOfPlayers, game.StartCalledWith)
 	}
 }
 
