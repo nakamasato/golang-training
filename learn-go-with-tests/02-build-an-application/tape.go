@@ -5,18 +5,18 @@ import (
 	"os"
 )
 
-type tape struct {
-	file *os.File
+type Tape struct {
+	File *os.File
 }
 
-func (t *tape) Write(p []byte) (n int, err error) {
-	err = t.file.Truncate(0)
+func (t *Tape) Write(p []byte) (n int, err error) {
+	err = t.File.Truncate(0)
 	if err != nil {
 		fmt.Println("truncate failed")
 	}
-	_, err = t.file.Seek(0, 0)
+	_, err = t.File.Seek(0, 0)
 	if err != nil {
 		fmt.Println("seek failed")
 	}
-	return t.file.Write(p)
+	return t.File.Write(p)
 }
