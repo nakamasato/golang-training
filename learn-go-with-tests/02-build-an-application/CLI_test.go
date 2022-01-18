@@ -111,7 +111,7 @@ func assertGameStartedWith(t testing.TB, game *GameSpy, numberOfPlayers int) {
 	t.Helper()
 
 	passed := retryUntil(500*time.Millisecond, func() bool {
-		return game.StartCalledWith != numberOfPlayers
+		return game.StartCalledWith == numberOfPlayers
 	})
 	if !passed {
 		t.Errorf("wanted Start called with %d but got %d", numberOfPlayers, game.StartCalledWith)
