@@ -12,14 +12,14 @@ func main() {
 	store, close, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("problem creating file system player store, %v ", err)
 	}
 	defer close()
 
-	game := poker.NewGame(poker.BlindAlerterFunc(poker.Alerter), store)
+	game := poker.NewTexasHoldem(poker.BlindAlerterFunc(poker.Alerter), store)
 	server, err := poker.NewPlayerServer(store, game)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("problem creating player server %v", err)
 	}
 	// server := NewPlayerServer(NewInMemoryPlayerStore())
 	log.Fatal(http.ListenAndServe(":5000", server))
