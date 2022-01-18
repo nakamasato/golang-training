@@ -3,6 +3,7 @@ package poker_test
 import (
 	"bytes"
 	"io"
+	"log"
 	"strings"
 	"testing"
 	"time"
@@ -28,7 +29,10 @@ type GameSpy struct {
 func (g *GameSpy) Start(numberOfPlayers int, out io.Writer) {
 	g.StartCalledWith = numberOfPlayers
 	g.StartCalled = true
-	out.Write(g.BlindAlert)
+	_, err := out.Write(g.BlindAlert)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (g *GameSpy) Finish(winner string) {
