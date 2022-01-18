@@ -1442,6 +1442,20 @@ Changes:
     -> You can play game with `/game` and check the result with `/league`
 
 
+### [Step 28: Add alertDestination to ScheduleAlertAt](https://quii.gitbook.io/learn-go-with-tests/build-an-application/websockets#refactor-1)
+
+1. Change `game.html`.
+    1. Input textbox: `Number of players` -> Click `Start` button.
+    1. Input textbox: `Winner` -> Click `Declare winner` button.
+    1. `Another great game of poker everyone!` message will appear.
+1. `Game.Start` and `Game.Finish` can be used here too.
+1. Enable BlindValue. -> We need to change `BlindAlerter`.
+    1. Add `io.Writer` to `ScheduleAlertAt` function in `CLI.go`.
+    1. Rename `StdOutAlerter` to `Alerter` because we can pass the destination by the argument `to`.
+    1. Add `alertsDestination io.Writer` to `Start` in `Game` interface.
+    1. Update the implementation of `Start` in `TexasHoldem`.
+    1. Use `io.Discard` for `io.Writer` in test.
+
 ## Reference
 
 - [Go 言語 ファイル・I/O 関係のよく使う基本ライブラリ](https://www.yunabe.jp/docs/golang_io.html)
@@ -1451,6 +1465,7 @@ Changes:
 
 1. [io.Reader](https://pkg.go.dev/io#Reader): interface with `Read(p []byte) (n int, err error)` method. Usually not directly used.
 1. [io.Writer](https://pkg.go.dev/io#Writer): interface with `Write(p []byte) (n int, err error)` method. Ususally not directly used.
+1. [io.Discard](https://pkg.go.dev/io#Writer): Discard is an `io.Writer` on which all Write calls succeed without doing anything. <- Can be used in tests.
 1. [io.ReadSeeker](https://pkg.go.dev/io#ReadSeeker): interface with `Reader` and `Seeker`.
 1. [io.ReadWriteSeeker](https://pkg.go.dev/io#ReadWriteSeeker): interface with `Reader`, `Writer`, and `Seeker`.
 1. [strings.Reader](https://pkg.go.dev/strings#Reader): A Reader implements the `io.Reader`.
