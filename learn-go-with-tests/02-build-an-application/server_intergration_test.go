@@ -1,14 +1,16 @@
-package poker
+package poker_test
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"tmp/learn-go-with-tests/02-build-an-application"
 )
 
 func TestRecordingWinsAndRetrievingThemWithInMemoryStore(t *testing.T) {
-	store := NewInMemoryPlayerStore()
-	server, _ := NewPlayerServer(store)
+	store := poker.NewInMemoryPlayerStore()
+	server, _ := poker.NewPlayerServer(store, &GameSpy{})
 	player := "Pepper"
 
 	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
@@ -29,7 +31,7 @@ func TestRecordingWinsAndRetrievingThemWithInMemoryStore(t *testing.T) {
 		assertStatus(t, response.Code, http.StatusOK)
 
 		got := getLeagueFromResponse(t, response.Body)
-		want := []Player{
+		want := []poker.Player{
 			{"Pepper", 3},
 		}
 		assertLeague(t, got, want)
@@ -39,9 +41,9 @@ func TestRecordingWinsAndRetrievingThemWithInMemoryStore(t *testing.T) {
 func TestRecordingWinsAndRetrievingThemWithFileSystemStore(t *testing.T) {
 	database, cleanDatabase := createTempFile(t, `[]`)
 	defer cleanDatabase()
-	store, err := NewFileSystemPlayerStore(database)
+	store, err := poker.NewFileSystemPlayerStore(database)
 	assertNoError(t, err)
-	server, _ := NewPlayerServer(store)
+	server, _ := poker.NewPlayerServer(store, &GameSpy{})
 	player := "Pepper"
 
 	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
@@ -62,7 +64,7 @@ func TestRecordingWinsAndRetrievingThemWithFileSystemStore(t *testing.T) {
 		assertStatus(t, response.Code, http.StatusOK)
 
 		got := getLeagueFromResponse(t, response.Body)
-		want := []Player{
+		want := []poker.Player{
 			{"Pepper", 3},
 		}
 		assertLeague(t, got, want)

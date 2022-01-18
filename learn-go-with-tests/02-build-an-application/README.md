@@ -1441,7 +1441,6 @@ Changes:
 1. Run `main.go` in `cmd/webserver`.
     -> You can play game with `/game` and check the result with `/league`
 
-
 ### [Step 28: Add alertDestination to ScheduleAlertAt](https://quii.gitbook.io/learn-go-with-tests/build-an-application/websockets#refactor-1)
 
 1. Change `game.html`.
@@ -1456,6 +1455,53 @@ Changes:
     1. Update the implementation of `Start` in `TexasHoldem`.
     1. Use `io.Discard` for `io.Writer` in test.
 
+### [Step 29: Use Game.Start and Game.Finish in websockets](https://quii.gitbook.io/learn-go-with-tests/build-an-application/websockets#write-the-test-first-2)
+
+The requirements of CLI and Server are the same! It's just the delivery mechanism is different.
+
+I might have forgotten update the package for test to `poker_test`.
+
+1. Added `game Game` in `PlayerServer`.
+1. Rename `game` method to `playGame`.
+1. Update `NewPlayerServer`
+
+    ```diff
+    -func NewPlayerServer(store PlayerStore) (*PlayerServer, error) {
+    +func NewPlayerServer(store PlayerStore, game Game) (*PlayerServer, error) {
+            p := new(PlayerServer)
+
+            tmpl, err := template.ParseFiles("game.html")
+    @@ -38,10 +41,11 @@ func NewPlayerServer(store PlayerStore) (*PlayerServer, error) {
+            router := http.NewServeMux()
+            router.Handle("/league", http.HandlerFunc(p.leagueHandler))
+            router.Handle("/players/", http.HandlerFunc(p.playerHandler))
+    -       router.Handle("/game", http.HandlerFunc(p.game))
+    +       router.Handle("/game", http.HandlerFunc(p.playGame))
+            router.Handle("/ws", http.HandlerFunc(p.webSocket))
+
+            p.Handler = router
+    +       p.game = game
+
+            return p, nil
+     }
+    ```
+1. Call `game.Start` and `game.Finish` in `webSocket`.
+
+    ```diff
+     func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
+            conn, _ := wsUpgrader.Upgrade(w, r, nil)
+    -       _, winnerMsg, _ := conn.ReadMessage()
+    -       p.store.RecordWin(string(winnerMsg))
+    +       _, numberOfPlayersMsg, _ := conn.ReadMessage()
+    +       numberOfPlayers, _ := strconv.Atoi(string(numberOfPlayersMsg))
+    +       p.game.Start(numberOfPlayers, io.Discard) //todo: Don't discard the blinds messages!
+    +       _, winner, _ := conn.ReadMessage()
+    +       p.game.Finish(string(winner))
+     }
+    ```
+1. Run. Successfully record winner.
+
+![](docs/step29.drawio.svg)
 ## Reference
 
 - [Go 言語 ファイル・I/O 関係のよく使う基本ライブラリ](https://www.yunabe.jp/docs/golang_io.html)
