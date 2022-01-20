@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"io"
 	"io/ioutil"
+	"log"
 	"os/exec"
 	"strings"
 )
@@ -23,9 +24,18 @@ func getXMLFromCommand() io.Reader {
 	cmd := exec.Command("cat", "msg.xml")
 	out, _ := cmd.StdoutPipe()
 
-	cmd.Start()
-	data, _ := ioutil.ReadAll(out)
-	cmd.Wait()
+	err := cmd.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+	data, err := ioutil.ReadAll(out)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = cmd.Wait()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	return bytes.NewReader(data)
 }
