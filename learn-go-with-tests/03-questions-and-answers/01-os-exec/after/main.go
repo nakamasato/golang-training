@@ -16,7 +16,10 @@ type Payload struct {
 
 func GetData(data io.Reader) string {
 	var payload Payload
-	xml.NewDecoder(data).Decode(&payload)
+	err := xml.NewDecoder(data).Decode(&payload)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return strings.ToUpper(payload.Message)
 }
 
