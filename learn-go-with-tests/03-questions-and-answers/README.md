@@ -105,16 +105,12 @@ After:
 - test
 
     ```go
-    got, isStatusErr := err.(BadStatusError)
+    var got BadStatusError
+    isBadStatusError := errors.As(err, &got)
+    want := BadStatusError{URL: svr.URL, Status: http.StatusTeapot}
 
-	if !isStatusErr {
+	if !isBadStatusError {
 		t.Fatalf("was not a BadStatusError, got %T", err)
-	}
-
-	want := BadStatusError{URL: svr.URL, Status: http.StatusTeapot}
-
-	if got != want {
-		t.Errorf("got %v, want %v", got, want)
 	}
     ```
 - improvements
