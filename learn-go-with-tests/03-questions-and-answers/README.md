@@ -117,3 +117,33 @@ After:
     - `DumbGetter` gets simpler
     - Enable more sophisticated error handling with a type assertion
     - Still an `error`. we can treat it in the same way as other errors.
+
+## [Context-aware Reader](https://quii.gitbook.io/learn-go-with-tests/questions-and-answers/context-aware-reader)
+
+What we want to achieve is:
+
+So rather than reading everything, we could:
+- Supply a fixed-size byte array that doesnt fit all the contents
+- Send a cancel signal
+- Try and read again and this should return an error with 0 bytes read
+
+Implementation scenario:
+
+- Creating a context.Context with cancellation so we can cancel after the first read
+- For our code to work we'll need to pass ctx to our function
+- We then assert that post-cancel nothing was read
+
+```go
+type readerCtx struct {
+	ctx      context.Context
+	delegate io.Reader
+}
+func (r readerCtx) Read(p []byte) (n int, err error) {
+    if err := r.ctx.Err(); err != nil {
+		return 0, err
+	}
+	return r.delegate.Read(p)
+}
+```
+
+[Delegation pattern](https://en.wikipedia.org/wiki/Delegation_pattern) is an object-oriented design pattern that allows object composition to achieve the same code reuse as inheritance.
