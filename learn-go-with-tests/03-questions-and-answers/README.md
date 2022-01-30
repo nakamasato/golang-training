@@ -55,3 +55,69 @@ Answer: [Dependency Injection](https://quii.gitbook.io/learn-go-with-tests/go-fu
         }
     }
     ```
+
+## [Error types](https://quii.gitbook.io/learn-go-with-tests/questions-and-answers/error-types)
+
+***Creating your own types for errors can be an elegant way of tidying up your code, making your code easier to use and test.***
+
+
+Before:
+
+- code
+    ```go
+    if res.StatusCode != http.StatusOK {
+        return "", fmt.Errorf("did not get 200 from %s, got %d", url, res.StatusCode)
+    }
+    ```
+- test
+    ```go
+	want := fmt.Sprintf("did not get 200 from %s, got %d", svr.URL, http.StatusTeapot)
+	got := err.Error()
+
+	if got != want {
+		t.Errorf(`got "%v", want "%v"`, got, want)
+	}
+    ```
+- problems
+    - same string in prod code and test codes
+    - annoying to read and write
+    - exact error message is not what we're concerned with
+
+After:
+- Use custom Error type
+
+    ```go
+    type BadStatusError struct {
+        URL    string
+        Status int
+    }
+
+    func (b BadStatusError) Error() string {
+        return fmt.Sprintf("did not get 200 from %s, got %d", b.URL, b.Status)
+    }
+    ```
+- code
+    ```go
+	if res.StatusCode != http.StatusOK {
+		return "", BadStatusError{URL: url, Status: res.StatusCode}
+	}
+    ```
+- test
+
+    ```go
+    got, isStatusErr := err.(BadStatusError)
+
+	if !isStatusErr {
+		t.Fatalf("was not a BadStatusError, got %T", err)
+	}
+
+	want := BadStatusError{URL: svr.URL, Status: http.StatusTeapot}
+
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+    ```
+- improvements
+    - `DumbGetter` gets simpler
+    - Enable more sophisticated error handling with a type assertion
+    - Still an `error`. we can treat it in the same way as other errors.
