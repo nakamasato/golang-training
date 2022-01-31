@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -67,6 +68,6 @@ func main() {
 	server := NewUserServer(mongoService)
 	err := http.ListenAndServe(":8000", http.HandlerFunc(server.RegisterUser))
 	if err != nil {
-		fmt.Errorf("error %v", err)
+		log.Fatal(err)
 	}
 }
