@@ -147,3 +147,160 @@ func (r readerCtx) Read(p []byte) (n int, err error) {
 ```
 
 [Delegation pattern](https://en.wikipedia.org/wiki/Delegation_pattern) is an object-oriented design pattern that allows object composition to achieve the same code reuse as inheritance.
+
+## [Revisiting HTTP Handlers](https://quii.gitbook.io/learn-go-with-tests/questions-and-answers/http-handlers-revisited)
+
+How do I test a http handler which has mongodb dependency?
+
+> If your tests are causing you pain, listen to that signal and think about the design of your code.
+
+```go
+func Registration(w http.ResponseWriter, r *http.Request) {
+...
+}
+```
+
+1. Write HTTP responses, send headers, status codes, etc.
+1. Decode the request's body into a User
+1. Connect to a database (and all the details around that)
+1. Query the database and applying some business logic depending on the result
+1. Generate a password
+1. Insert a record
+
+This is too much!
+
+Tips:
+- [Separation of Concerns](https://en.wikipedia.org/wiki/Separation_of_concerns)
+- [Single Responsibility principle](https://en.wikipedia.org/wiki/Single-responsibility_principle)
+
+Usual HTTP handler:
+1. Accept a HTTP request, parse and validate it.
+1. Call some ServiceThing to do ImportantBusinessLogic with the data I got from step 1.
+1. Send an appropriate HTTP response depending on what ServiceThing returns.
+
+Go's Handler: [http.HandlerFunc](https://golang.org/pkg/net/http/#HandlerFunc)
+
+`type HandlerFunc func(ResponseWriter, *Request)`: *The HandlerFunc type is an adapter to allow the use of ordinary functions as HTTP handlers.*
+
+```go
+func Teapot(res http.ResponseWriter, req *http.Request) {
+	res.WriteHeader(http.StatusTeapot)
+}
+```
+
+Separation of concerns:
+1. Decode the request's body into a User
+1. Call a `UserService.Register(user)`
+1. If there's an error act on it, I'll just have a catch-all handler of a `500 internal server error` for now.
+1. If there's no error, `201 Created` with the ID as the response body
+
+
+```go
+type UserServer struct {
+	service UserService
+}
+
+func (u *UserServer) RegisterUser(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	// request parsing and validation
+	var newUser User
+	err := json.NewDecoder(r.Body).Decode(&newUser)
+
+	if err != nil {
+		http.Error(w, fmt.Sprintf("could not decode user payload: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	// call a service thing to take care of the hard work
+	insertedID, err := u.service.Register(newUser)
+
+	// depending on what we get back, respond accordingly
+	if err != nil {
+		//todo: handle different kinds of errors differently
+		http.Error(w, fmt.Sprintf("problem registering new user: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	fmt.Fprint(w, insertedID)
+}
+```
+
+> Our RegisterUser method matches the shape of http.HandlerFunc so we're good to go.
+
+![](04-revisiting-http-handlers/diagram.drawio.svg)
+
+```go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+type User struct {
+	Name string
+}
+
+type UserService interface {
+	Register(user User) (insertedID string, err error)
+}
+
+type UserServer struct {
+	service UserService
+}
+
+func NewUserServer(service UserService) *UserServer {
+	return &UserServer{service: service}
+}
+
+func (u *UserServer) RegisterUser(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	// request parsing and validation
+	var newUser User
+	err := json.NewDecoder(r.Body).Decode(&newUser)
+
+	if err != nil {
+		http.Error(w, fmt.Sprintf("could not decode user payload: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	// call a service thing to take care of the hard work
+	insertedID, err := u.service.Register(newUser)
+
+	// depending on what we get back, respond accordingly
+	if err != nil {
+		//todo: handle different kinds of errors differently
+		http.Error(w, fmt.Sprintf("problem registering new user: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	fmt.Fprint(w, insertedID)
+}
+
+type MongoUserService struct {
+}
+
+func NewMongoUserService() *MongoUserService {
+	//todo: pass in DB URL as argument to this function
+	//todo: connect to db, create a connection pool
+	return &MongoUserService{}
+}
+
+func (m MongoUserService) Register(user User) (insertedID string, err error) {
+	// use m.mongoConnection to perform queries
+	panic("implement me")
+}
+
+func main() {
+	mongoService := NewMongoUserService()
+	server := NewUserServer(mongoService)
+	http.ListenAndServe(":8000", http.HandlerFunc(server.RegisterUser))
+}
+```
+
+**Go's http handlers are just functions**
