@@ -8,7 +8,6 @@ on:
 
 jobs:
   check:
-    name: Broken Link Check
     runs-on: ubuntu-latest
     steps:
       - name: Broken Link Check

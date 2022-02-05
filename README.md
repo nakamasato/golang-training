@@ -40,7 +40,7 @@
     1. [Skaffold](pragmatic-cases/skaffold)
     1. [Cobra](https://github.com/nakamasato/cobra-sample)
     1. [Ginkgo](pragmatic-cases/ginkgo)
-    1. [MySQL](pragramtic-cases/mysql)
+    1. [MySQL](pragamtic-cases/mysql)
     1. [String to Object](pragmatic-cases/string-to-object)
 
 ## Reference
