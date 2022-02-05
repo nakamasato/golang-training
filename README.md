@@ -32,6 +32,7 @@
     1. [Go fundamentails](learn-go-with-tests/01-go-fundamentals)
     1. [Build an application](learn-go-with-tests/02-build-an-application)
     1. [Questions and answers](learn-go-with-tests/03-questions-and-answers)
+    1. [Meta](learn-go-with-tests/04-meta)
 1. [Pragmatic Cases](pragmatic-cases)
     1. [Prometheus](pragmatic-cases/prometheus)
     1. [kind cluster](pragmatic-cases/kind)
