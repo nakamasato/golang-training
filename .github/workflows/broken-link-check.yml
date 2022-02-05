@@ -6,7 +6,6 @@ on:
     types: [check-link]
   push:
 
-name: Broken Link Check
 jobs:
   check:
     name: Broken Link Check
