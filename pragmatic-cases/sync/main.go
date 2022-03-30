@@ -33,7 +33,7 @@ func (c *Counter) Print10() {
 	c.lock.L.Lock()
 	for !c.condition() {
 		fmt.Println("Print10: Waiting")
-	    c.lock.Wait()
+		c.lock.Wait()
 		// Wait atomically unlocks c.L and suspends execution of the calling goroutine.
 		// After later resuming execution, Wait locks c.L before returning.
 		// Unlike in other systems, Wait cannot return unless awoken by Broadcast or Signal.
@@ -44,7 +44,7 @@ func (c *Counter) Print10() {
 }
 
 func (c *Counter) condition() bool {
-	return c.num > 0 && c.num % 10 == 0
+	return c.num > 0 && c.num%10 == 0
 }
 
 func main() {
