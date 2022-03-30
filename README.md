@@ -40,8 +40,11 @@
     1. [Skaffold](pragmatic-cases/skaffold)
     1. [Cobra](https://github.com/nakamasato/cobra-sample)
     1. [Ginkgo](pragmatic-cases/ginkgo)
-    1. [MySQL](pragamtic-cases/mysql)
+    1. [MySQL](pragmatic-cases/mysql)
     1. [String to Object](pragmatic-cases/string-to-object)
 
-## Reference
-- [Advanced Testing with Go](https://speakerdeck.com/mitchellh/advanced-testing-with-go)
+## References & readings
+1. [Learn Go with Tests](https://quii.gitbook.io/)
+1. [Advanced Testing with Go](https://speakerdeck.com/mitchellh/advanced-testing-with-go)
+1. [よくわかるcontextの使い方](https://zenn.dev/hsaki/books/golang-context)
+1. [Goでの並行処理を徹底解剖！](https://zenn.dev/hsaki/books/golang-concurrency)
