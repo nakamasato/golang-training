@@ -9,6 +9,7 @@
 ## Basics
 
 1. Install Go: https://go.dev/doc/install
+    1. If you want to manage multiple versions, use [gvm](https://github.com/moovweb/gvm).
 1. Run Go test:
     - `go test -cover`
     - `go test -v`
