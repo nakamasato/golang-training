@@ -36,6 +36,7 @@ jobs:
         working-directory: pragmatic-cases/ent
 
       - name: check postgres records
+        working-directory: pragmatic-cases/ent
         run: |
           docker-compose exec postgres psql -U postgres postgres -c 'select * from users'
           docker-compose exec postgres psql -U postgres postgres -c 'select * from users' | grep '4 rows'
