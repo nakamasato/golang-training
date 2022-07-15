@@ -6,6 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"tmp/pragmatic-cases/ent/ent/car"
+	"tmp/pragmatic-cases/ent/ent/group"
 	"tmp/pragmatic-cases/ent/ent/user"
 
 	"entgo.io/ent"
@@ -31,7 +33,9 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		user.Table: user.ValidColumn,
+		car.Table:   car.ValidColumn,
+		group.Table: group.ValidColumn,
+		user.Table:  user.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {
