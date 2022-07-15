@@ -16,7 +16,7 @@
     - `go test -race` race detector
 1. Init a module.
     ```bash
-    go mod init <modulepath used "tmp">
+    go mod init <modulepath e.g. "tmp">
     ```
 1. Tools:
     - Test:

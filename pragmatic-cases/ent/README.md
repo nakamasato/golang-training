@@ -93,3 +93,87 @@
     ```
 
 ### Create entity (postgres)
+
+1. Create a `ent.client` in `start/start.go`.
+
+    ```go
+    package main
+
+    import (
+        "context"
+        "fmt"
+        "log"
+
+        "tmp/pragmatic-cases/ent/ent"
+
+        _ "github.com/lib/pq"
+    )
+
+    func main() {
+        client, err := ent.Open("postgres", "host=localhost port=5432 user=postgres dbname=postgres password=postgres") // hardcoding
+        if err != nil {
+            log.Fatalf("failed opening connection to postgres: %v", err)
+        }
+        defer client.Close()
+        // Run the auto migration tool.
+        if err := client.Schema.Create(context.Background()); err != nil {
+            log.Fatalf("failed creating schema resources: %v", err)
+        }
+    }
+
+    func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
+        u, err := client.User.
+            Create().
+            SetAge(30).
+            SetName("a8m").
+            Save(ctx)
+        if err != nil {
+            return nil, fmt.Errorf("failed creating user: %w", err)
+        }
+        log.Println("user was created: ", u)
+        return u, nil
+    }
+    ```
+
+### Query entity
+
+Add the following code to `start/start.go`
+
+```go
+func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
+	u, err := client.User.
+		Query().
+		Where(user.Name("a8m")).
+		// `Only` fails if no user found,
+		// or more than 1 user returned.
+		Only(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed querying user: %w", err)
+	}
+	log.Println("user returned: ", u)
+	return u, nil
+}
+```
+
+### Add first Edge (Relation)
+
+Add another entity `Car`
+
+```
+go run entgo.io/ent/cmd/ent init Car Group
+```
+
+
+
+### Run
+1. Run postgres with docker.
+
+```
+docker run --name postgres \
+           -e POSTGRES_PASSWORD=password \
+           -e POSTGRES_INITDB_ARGS="--encoding=UTF8 --no-locale" \
+           -e TZ=Asia/Tokyo \
+           -v postgresdb:/var/lib/postgresql/data \
+           -p 5432:5432 \
+           -d postgres
+```
