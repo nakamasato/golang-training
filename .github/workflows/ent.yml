@@ -1,0 +1,40 @@
+name: ent
+
+on:
+  pull_request:
+    paths:
+      - '**.go'
+      - 'go.*'
+      - .github/workflows/test.yml
+  push:
+    branches:
+      - main
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: [ '1.17' ]
+    name: ${{ matrix.go }}
+    steps:
+      - name: set up
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go }}
+      - uses: actions/checkout@v3
+      - name: start postgres
+        working-directory: pragmatic-cases/ent
+        run: |
+          docker-compose up -d
+          while ! docker-compose ps | grep healthy; do echo 'postgres not ready. sleeping 3 sec'; sleep 3; done
+          echo 'postgres is ready!'
+      - name: run start/start.go
+        run: go run start/start.go
+        working-directory: pragmatic-cases/ent
+
+      - name: check postgres records
+        run: |
+          docker-compose exec postgres psql -U postgres postgres -c 'select * from users' | grep '4 rows'
+          docker-compose exec postgres psql -U postgres postgres -c 'select * from cars' | grep '5 rows'
+          docker-compose exec postgres psql -U postgres postgres -c 'select * from groups' | grep '2 rows'
+          docker-compose exec postgres psql -U postgres postgres -c 'select * from group_users' | grep '3 rows'
