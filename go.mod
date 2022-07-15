@@ -6,7 +6,7 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.15.0
-	github.com/prometheus/client_golang v1.12.1
+	github.com/prometheus/client_golang v1.12.2
 	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f // indirect
 	golang.org/x/oauth2 v0.0.0-20210514164344-f6687ab2804c // indirect
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
