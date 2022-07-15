@@ -46,4 +46,4 @@ jobs:
           docker-compose exec -T postgres psql -U postgres postgres -c 'select * from groups'
           docker-compose exec -T postgres psql -U postgres postgres -c 'select * from groups' | grep '2 rows'
           docker-compose exec -T postgres psql -U postgres postgres -c 'select * from group_users'
-          docker-compose exec -T postgres psql -U postgres postgres -c 'select * from group_users' | grep '3 rows'
+          docker-compose exec -T postgres psql -U postgres postgres -c 'select * from group_users' | grep '10 rows'
