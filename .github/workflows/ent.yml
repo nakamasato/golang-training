@@ -3,9 +3,9 @@ name: ent
 on:
   pull_request:
     paths:
-      - '**.go'
+      - 'pragmatic-cases/ent/**.go'
       - 'go.*'
-      - .github/workflows/test.yml
+      - .github/workflows/ent.yml
   push:
     branches:
       - main
