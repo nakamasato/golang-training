@@ -471,15 +471,136 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
     }
     ```
 
+1. Update `main()` in `start/start.go` to create records.
+
+    1. Create schema: `client.Schema.Create(ctx)`
+    1. Create entities and query them.
+
+    ```go
+    func main() {
+        client, err := ent.Open("postgres", "host=localhost port=5432 user=postgres dbname=postgres password=password sslmode=disable") // hardcoding
+        if err != nil {
+            log.Fatalf("failed opening connection to postgres: %v", err)
+        }
+        defer client.Close()
+        ctx := context.Background()
+        // Run the auto migration tool.
+        if err := client.Schema.Create(ctx); err != nil {
+            log.Fatalf("failed creating schema resources: %v", err)
+        }
+
+        if _, err = CreateUser(ctx, client); err != nil {
+            log.Fatal(err)
+        }
+        if _, err = QueryUser(ctx, client); err != nil {
+            log.Fatal(err)
+        }
+        a8m, err := CreateCars(ctx, client)
+        if err != nil {
+            log.Fatal(err)
+        }
+        if err := QueryCars(ctx, a8m); err != nil {
+            log.Fatal(err)
+        }
+        if err := QueryCarUsers(ctx, a8m); err != nil {
+            log.Fatal(err)
+        }
+        if err := CreateGraph(ctx, client); err != nil {
+            log.Fatal(err)
+        }
+        if err := QueryGithub(ctx, client); err != nil {
+            log.Fatal(err)
+        }
+        if err := QueryArielCars(ctx, client); err != nil {
+            log.Fatal(err)
+        }
+        if err := QueryGroupWithUsers(ctx, client); err != nil {
+            log.Fatal(err)
+        }
+    }
+    ```
+
 ### Run
+
 1. Run postgres with docker.
 
-```
-docker run --name postgres \
-           -e POSTGRES_PASSWORD=password \
-           -e POSTGRES_INITDB_ARGS="--encoding=UTF8 --no-locale" \
-           -e TZ=Asia/Tokyo \
-           -v postgresdb:/var/lib/postgresql/data \
-           -p 5432:5432 \
-           -d postgres
-```
+    ```
+    docker run --name postgres \
+            -e POSTGRES_PASSWORD=password \
+            -e POSTGRES_INITDB_ARGS="--encoding=UTF8 --no-locale" \
+            -e TZ=Asia/Tokyo \
+            -v postgresdb:/var/lib/postgresql/data \
+            -p 5432:5432 \
+            -d postgres
+    ```
+
+1. Run `start/start.go`.
+
+    ```
+    go run start/start.go
+    2022/07/15 14:40:26 user was created:  User(id=1, age=30, name=a8m)
+    2022/07/15 14:40:26 user returned:  User(id=1, age=30, name=a8m)
+    2022/07/15 14:40:26 car was created:  Car(id=1, model=Tesla, registered_at=Fri Jul 15 14:40:26 2022)
+    2022/07/15 14:40:26 car was created:  Car(id=2, model=Ford, registered_at=Fri Jul 15 14:40:26 2022)
+    2022/07/15 14:40:26 user was created:  User(id=2, age=30, name=a8m)
+    2022/07/15 14:40:26 returned cars: [Car(id=1, model=Tesla, registered_at=Fri Jul 15 14:40:26 2022) Car(id=2, model=Ford, registered_at=Fri Jul 15 14:40:26 2022)]
+    2022/07/15 14:40:26 Car(id=2, model=Ford, registered_at=Fri Jul 15 14:40:26 2022)
+    2022/07/15 14:40:26 car "Tesla" owner: "a8m"
+    2022/07/15 14:40:26 car "Ford" owner: "a8m"
+    2022/07/15 14:40:26 The graph was created successfully
+    2022/07/15 14:40:26 cars returned: [Car(id=3, model=Tesla, registered_at=Fri Jul 15 14:40:26 2022) Car(id=4, model=Mazda, registered_at=Fri Jul 15 14:40:26 2022)]
+    2022/07/15 14:40:26 cars returned: [Car(id=3, model=Tesla, registered_at=Fri Jul 15 14:40:26 2022) Car(id=5, model=Ford, registered_at=Fri Jul 15 14:40:26 2022)]
+    2022/07/15 14:40:26 groups returned: [Group(id=2, name=GitHub) Group(id=1, name=GitLab)]
+    ```
+
+1. Check the schema.
+
+    ```
+    docker exec -it postgres psql -U postgres -c '\dt'
+                List of relations
+     Schema |    Name     | Type  |  Owner
+    --------+-------------+-------+----------
+     public | cars        | table | postgres
+     public | group_users | table | postgres
+     public | groups      | table | postgres
+     public | users       | table | postgres
+    (4 rows)
+    ```
+
+1. Check records.
+
+    ```
+    docker exec -it postgres psql -U postgres -c 'select * from users'
+     id | age | name
+    ----+-----+-------
+      1 |  30 | a8m
+      2 |  30 | a8m
+      3 |  30 | Ariel
+      4 |  28 | Neta
+    (4 rows)
+
+    docker exec -it postgres psql -U postgres -c 'select * from cars'
+     id | model |         registered_at         | user_cars
+    ----+-------+-------------------------------+-----------
+      1 | Tesla | 2022-07-15 14:40:26.003466+09 |         2
+      2 | Ford  | 2022-07-15 14:40:26.015701+09 |         2
+      3 | Tesla | 2022-07-15 14:40:26.074102+09 |         3
+      4 | Mazda | 2022-07-15 14:40:26.078375+09 |         3
+      5 | Ford  | 2022-07-15 14:40:26.081656+09 |         4
+    (5 rows)
+
+    docker exec -it postgres psql -U postgres -c 'select * from groups'
+     id |  name
+    ----+--------
+      1 | GitLab
+      2 | GitHub
+    (2 rows)
+
+    docker exec -it postgres psql -U postgres -c 'select * from group_users'
+     group_id | user_id
+    ----------+---------
+            1 |       4
+            1 |       3
+            2 |       3
+    (3 rows)
+    ```
