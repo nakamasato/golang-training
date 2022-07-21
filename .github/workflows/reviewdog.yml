@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - '**.go'
+      - 'go.**'
 jobs:
   golangci-lint:
     strategy:
