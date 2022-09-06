@@ -20,7 +20,7 @@ require (
 require (
 	entgo.io/ent v0.11.2
 	github.com/gorilla/websocket v1.5.0
-	github.com/lib/pq v1.10.5
+	github.com/lib/pq v1.10.7
 )
 
 require (
