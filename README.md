@@ -4,7 +4,7 @@
 
 ## Version
 
-`go1.18`
+go1.19
 
 ## Basics
 
