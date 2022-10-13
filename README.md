@@ -35,7 +35,7 @@ go1.19
     1. [Questions and answers](learn-go-with-tests/03-questions-and-answers)
     1. [Meta](learn-go-with-tests/04-meta)
 1. [Pragmatic Cases](pragmatic-cases)
-    1. [ent](pragmatic-cases/ent)
+    1. [ent](pragmatic-cases/ent) (go1.17 is removed when upgrading to ent@0.11.3 #85)
     1. [Prometheus](pragmatic-cases/prometheus)
     1. [kind cluster](pragmatic-cases/kind)
     1. [k8s client](pragmatic-cases/k8sclient)
