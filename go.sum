@@ -4,6 +4,8 @@ ariga.io/atlas v0.5.1-0.20220717122844-8593d7eb1a8e h1:/r1xGMwmLg4LZ2V3/wWui9TtM
 ariga.io/atlas v0.5.1-0.20220717122844-8593d7eb1a8e/go.mod h1:ofVetkJqlaWle3mvYmaS2uyFGFcc7dSq436tmxa/Mzk=
 ariga.io/atlas v0.7.2-0.20220927111110-867ee0cca56a h1:6/nt4DODfgxzHTTg3tYy7YkVzruGQGZ/kRvXpA45KUo=
 ariga.io/atlas v0.7.2-0.20220927111110-867ee0cca56a/go.mod h1:ft47uSh5hWGDCmQC9DsztZg6Xk+KagM5Ts/mZYKb9JE=
+ariga.io/atlas v0.7.3-0.20221011160332-3ca609863edd h1:c3F2jvvEZzsoH/KUpDNhTsCVeUPnpXaF8kADZvUSiU0=
+ariga.io/atlas v0.7.3-0.20221011160332-3ca609863edd/go.mod h1:ft47uSh5hWGDCmQC9DsztZg6Xk+KagM5Ts/mZYKb9JE=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.38.0/go.mod h1:990N+gfupTy94rShfmMCWGDn0LpTmnzTp2qbd1dvSRU=
@@ -49,6 +51,8 @@ entgo.io/ent v0.11.2 h1:UM2/BUhF2FfsxPHRxLjQbhqJNaDdVlOwNIAMLs2jyto=
 entgo.io/ent v0.11.2/go.mod h1:YGHEQnmmIUgtD5b1ICD5vg74dS3npkNnmC5K+0J+IHU=
 entgo.io/ent v0.11.3 h1:F5FBGAWiDCGder7YT+lqMnyzXl6d0xU3xMBM/SO3CMc=
 entgo.io/ent v0.11.3/go.mod h1:mvDhvynOzAsOe7anH7ynPPtMjA/eeXP96kAfweevyxc=
+entgo.io/ent v0.11.4 h1:grwVY0fp31BZ6oEo3YrXenAuv8VJmEw7F/Bi6WqeH3Q=
+entgo.io/ent v0.11.4/go.mod h1:fnQIXL36RYnCk/9nvG4aE7YHBFZhCycfh7wMjY5p7SE=
 github.com/Azure/go-ansiterm v0.0.0-20210608223527-2377c96fe795/go.mod h1:LmzpDX56iTiv29bbRTIsUNlaFfuhWRQBWjQdVyAevI8=
 github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1/go.mod h1:xomTg63KZ2rFqZQzSB4Vz2SUXa1BpHTVz9L5PTmPC4E=
 github.com/Azure/go-autorest v14.2.0+incompatible/go.mod h1:r+4oMnoxhatjLLJ6zxSWATqVooLgysK6ZNox3g/xq24=
