@@ -14,8 +14,6 @@ type Tx struct {
 	config
 	// Item is the client for interacting with the Item builders.
 	Item *ItemClient
-	// ItemCategory is the client for interacting with the ItemCategory builders.
-	ItemCategory *ItemCategoryClient
 
 	// lazily loaded.
 	client     *Client
@@ -148,7 +146,6 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Item = NewItemClient(tx.config)
-	tx.ItemCategory = NewItemCategoryClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

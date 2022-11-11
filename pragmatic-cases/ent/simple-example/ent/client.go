@@ -11,7 +11,6 @@ import (
 	"tmp/pragmatic-cases/ent/simple-example/ent/migrate"
 
 	"tmp/pragmatic-cases/ent/simple-example/ent/item"
-	"tmp/pragmatic-cases/ent/simple-example/ent/itemcategory"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -24,8 +23,6 @@ type Client struct {
 	Schema *migrate.Schema
 	// Item is the client for interacting with the Item builders.
 	Item *ItemClient
-	// ItemCategory is the client for interacting with the ItemCategory builders.
-	ItemCategory *ItemCategoryClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -40,7 +37,6 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Item = NewItemClient(c.config)
-	c.ItemCategory = NewItemCategoryClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -72,10 +68,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		Item:         NewItemClient(cfg),
-		ItemCategory: NewItemCategoryClient(cfg),
+		ctx:    ctx,
+		config: cfg,
+		Item:   NewItemClient(cfg),
 	}, nil
 }
 
@@ -93,10 +88,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		Item:         NewItemClient(cfg),
-		ItemCategory: NewItemCategoryClient(cfg),
+		ctx:    ctx,
+		config: cfg,
+		Item:   NewItemClient(cfg),
 	}, nil
 }
 
@@ -126,7 +120,6 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Item.Use(hooks...)
-	c.ItemCategory.Use(hooks...)
 }
 
 // ItemClient is a client for the Item schema.
@@ -217,94 +210,4 @@ func (c *ItemClient) GetX(ctx context.Context, id string) *Item {
 // Hooks returns the client hooks.
 func (c *ItemClient) Hooks() []Hook {
 	return c.hooks.Item
-}
-
-// ItemCategoryClient is a client for the ItemCategory schema.
-type ItemCategoryClient struct {
-	config
-}
-
-// NewItemCategoryClient returns a client for the ItemCategory from the given config.
-func NewItemCategoryClient(c config) *ItemCategoryClient {
-	return &ItemCategoryClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `itemcategory.Hooks(f(g(h())))`.
-func (c *ItemCategoryClient) Use(hooks ...Hook) {
-	c.hooks.ItemCategory = append(c.hooks.ItemCategory, hooks...)
-}
-
-// Create returns a builder for creating a ItemCategory entity.
-func (c *ItemCategoryClient) Create() *ItemCategoryCreate {
-	mutation := newItemCategoryMutation(c.config, OpCreate)
-	return &ItemCategoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of ItemCategory entities.
-func (c *ItemCategoryClient) CreateBulk(builders ...*ItemCategoryCreate) *ItemCategoryCreateBulk {
-	return &ItemCategoryCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for ItemCategory.
-func (c *ItemCategoryClient) Update() *ItemCategoryUpdate {
-	mutation := newItemCategoryMutation(c.config, OpUpdate)
-	return &ItemCategoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *ItemCategoryClient) UpdateOne(ic *ItemCategory) *ItemCategoryUpdateOne {
-	mutation := newItemCategoryMutation(c.config, OpUpdateOne, withItemCategory(ic))
-	return &ItemCategoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *ItemCategoryClient) UpdateOneID(id int) *ItemCategoryUpdateOne {
-	mutation := newItemCategoryMutation(c.config, OpUpdateOne, withItemCategoryID(id))
-	return &ItemCategoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for ItemCategory.
-func (c *ItemCategoryClient) Delete() *ItemCategoryDelete {
-	mutation := newItemCategoryMutation(c.config, OpDelete)
-	return &ItemCategoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *ItemCategoryClient) DeleteOne(ic *ItemCategory) *ItemCategoryDeleteOne {
-	return c.DeleteOneID(ic.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ItemCategoryClient) DeleteOneID(id int) *ItemCategoryDeleteOne {
-	builder := c.Delete().Where(itemcategory.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &ItemCategoryDeleteOne{builder}
-}
-
-// Query returns a query builder for ItemCategory.
-func (c *ItemCategoryClient) Query() *ItemCategoryQuery {
-	return &ItemCategoryQuery{
-		config: c.config,
-	}
-}
-
-// Get returns a ItemCategory entity by its id.
-func (c *ItemCategoryClient) Get(ctx context.Context, id int) (*ItemCategory, error) {
-	return c.Query().Where(itemcategory.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *ItemCategoryClient) GetX(ctx context.Context, id int) *ItemCategory {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *ItemCategoryClient) Hooks() []Hook {
-	return c.hooks.ItemCategory
 }

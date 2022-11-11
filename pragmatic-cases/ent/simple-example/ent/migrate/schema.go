@@ -21,20 +21,9 @@ var (
 		Columns:    ItemsColumns,
 		PrimaryKey: []*schema.Column{ItemsColumns[0]},
 	}
-	// ItemCategoriesColumns holds the columns for the "item_categories" table.
-	ItemCategoriesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-	}
-	// ItemCategoriesTable holds the schema information for the "item_categories" table.
-	ItemCategoriesTable = &schema.Table{
-		Name:       "item_categories",
-		Columns:    ItemCategoriesColumns,
-		PrimaryKey: []*schema.Column{ItemCategoriesColumns[0]},
-	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ItemsTable,
-		ItemCategoriesTable,
 	}
 )
 
