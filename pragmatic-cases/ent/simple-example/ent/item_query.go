@@ -19,13 +19,13 @@ import (
 // ItemQuery is the builder for querying Item entities.
 type ItemQuery struct {
 	config
-	limit        *int
-	offset       *int
-	unique       *bool
-	order        []OrderFunc
-	fields       []string
-	predicates   []predicate.Item
-	withCategory *CategoryQuery
+	limit          *int
+	offset         *int
+	unique         *bool
+	order          []OrderFunc
+	fields         []string
+	predicates     []predicate.Item
+	withCategories *CategoryQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -62,8 +62,8 @@ func (iq *ItemQuery) Order(o ...OrderFunc) *ItemQuery {
 	return iq
 }
 
-// QueryCategory chains the current query on the "category" edge.
-func (iq *ItemQuery) QueryCategory() *CategoryQuery {
+// QueryCategories chains the current query on the "categories" edge.
+func (iq *ItemQuery) QueryCategories() *CategoryQuery {
 	query := &CategoryQuery{config: iq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := iq.prepareQuery(ctx); err != nil {
@@ -76,7 +76,7 @@ func (iq *ItemQuery) QueryCategory() *CategoryQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(item.Table, item.FieldID, selector),
 			sqlgraph.To(category.Table, category.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, item.CategoryTable, item.CategoryColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, item.CategoriesTable, item.CategoriesPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
 		return fromU, nil
@@ -260,12 +260,12 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 		return nil
 	}
 	return &ItemQuery{
-		config:       iq.config,
-		limit:        iq.limit,
-		offset:       iq.offset,
-		order:        append([]OrderFunc{}, iq.order...),
-		predicates:   append([]predicate.Item{}, iq.predicates...),
-		withCategory: iq.withCategory.Clone(),
+		config:         iq.config,
+		limit:          iq.limit,
+		offset:         iq.offset,
+		order:          append([]OrderFunc{}, iq.order...),
+		predicates:     append([]predicate.Item{}, iq.predicates...),
+		withCategories: iq.withCategories.Clone(),
 		// clone intermediate query.
 		sql:    iq.sql.Clone(),
 		path:   iq.path,
@@ -273,14 +273,14 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 	}
 }
 
-// WithCategory tells the query-builder to eager-load the nodes that are connected to
-// the "category" edge. The optional arguments are used to configure the query builder of the edge.
-func (iq *ItemQuery) WithCategory(opts ...func(*CategoryQuery)) *ItemQuery {
+// WithCategories tells the query-builder to eager-load the nodes that are connected to
+// the "categories" edge. The optional arguments are used to configure the query builder of the edge.
+func (iq *ItemQuery) WithCategories(opts ...func(*CategoryQuery)) *ItemQuery {
 	query := &CategoryQuery{config: iq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	iq.withCategory = query
+	iq.withCategories = query
 	return iq
 }
 
@@ -358,7 +358,7 @@ func (iq *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 		nodes       = []*Item{}
 		_spec       = iq.querySpec()
 		loadedTypes = [1]bool{
-			iq.withCategory != nil,
+			iq.withCategories != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -379,44 +379,71 @@ func (iq *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := iq.withCategory; query != nil {
-		if err := iq.loadCategory(ctx, query, nodes,
-			func(n *Item) { n.Edges.Category = []*Category{} },
-			func(n *Item, e *Category) { n.Edges.Category = append(n.Edges.Category, e) }); err != nil {
+	if query := iq.withCategories; query != nil {
+		if err := iq.loadCategories(ctx, query, nodes,
+			func(n *Item) { n.Edges.Categories = []*Category{} },
+			func(n *Item, e *Category) { n.Edges.Categories = append(n.Edges.Categories, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (iq *ItemQuery) loadCategory(ctx context.Context, query *CategoryQuery, nodes []*Item, init func(*Item), assign func(*Item, *Category)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[string]*Item)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
+func (iq *ItemQuery) loadCategories(ctx context.Context, query *CategoryQuery, nodes []*Item, init func(*Item), assign func(*Item, *Category)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[string]*Item)
+	nids := make(map[string]map[*Item]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
 		if init != nil {
-			init(nodes[i])
+			init(node)
 		}
 	}
-	query.withFKs = true
-	query.Where(predicate.Category(func(s *sql.Selector) {
-		s.Where(sql.InValues(item.CategoryColumn, fks...))
-	}))
-	neighbors, err := query.All(ctx)
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(item.CategoriesTable)
+		s.Join(joinT).On(s.C(category.FieldID), joinT.C(item.CategoriesPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(item.CategoriesPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(item.CategoriesPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]any, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]any{new(sql.NullString)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []any) error {
+			outValue := values[0].(*sql.NullString).String
+			inValue := values[1].(*sql.NullString).String
+			if nids[inValue] == nil {
+				nids[inValue] = map[*Item]struct{}{byID[outValue]: {}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.item_category
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "item_category" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		nodes, ok := nids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "item_category" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected "categories" node returned %v`, n.ID)
 		}
-		assign(node, n)
+		for kn := range nodes {
+			assign(kn, n)
+		}
 	}
 	return nil
 }

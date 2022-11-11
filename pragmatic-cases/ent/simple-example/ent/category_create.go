@@ -35,23 +35,19 @@ func (cc *CategoryCreate) SetID(s string) *CategoryCreate {
 	return cc
 }
 
-// SetItemsID sets the "items" edge to the Item entity by ID.
-func (cc *CategoryCreate) SetItemsID(id string) *CategoryCreate {
-	cc.mutation.SetItemsID(id)
+// AddItemIDs adds the "items" edge to the Item entity by IDs.
+func (cc *CategoryCreate) AddItemIDs(ids ...string) *CategoryCreate {
+	cc.mutation.AddItemIDs(ids...)
 	return cc
 }
 
-// SetNillableItemsID sets the "items" edge to the Item entity by ID if the given value is not nil.
-func (cc *CategoryCreate) SetNillableItemsID(id *string) *CategoryCreate {
-	if id != nil {
-		cc = cc.SetItemsID(*id)
+// AddItems adds the "items" edges to the Item entity.
+func (cc *CategoryCreate) AddItems(i ...*Item) *CategoryCreate {
+	ids := make([]string, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
 	}
-	return cc
-}
-
-// SetItems sets the "items" edge to the Item entity.
-func (cc *CategoryCreate) SetItems(i *Item) *CategoryCreate {
-	return cc.SetItemsID(i.ID)
+	return cc.AddItemIDs(ids...)
 }
 
 // Mutation returns the CategoryMutation object of the builder.
@@ -176,10 +172,10 @@ func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 	}
 	if nodes := cc.mutation.ItemsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
 			Table:   category.ItemsTable,
-			Columns: []string{category.ItemsColumn},
+			Columns: category.ItemsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -191,7 +187,6 @@ func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.item_category = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

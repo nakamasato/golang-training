@@ -223,7 +223,7 @@ func (c *CategoryClient) QueryItems(ca *Category) *ItemQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(category.Table, category.FieldID, id),
 			sqlgraph.To(item.Table, item.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, category.ItemsTable, category.ItemsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, category.ItemsTable, category.ItemsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(ca.driver.Dialect(), step)
 		return fromV, nil
@@ -321,15 +321,15 @@ func (c *ItemClient) GetX(ctx context.Context, id string) *Item {
 	return obj
 }
 
-// QueryCategory queries the category edge of a Item.
-func (c *ItemClient) QueryCategory(i *Item) *CategoryQuery {
+// QueryCategories queries the categories edge of a Item.
+func (c *ItemClient) QueryCategories(i *Item) *CategoryQuery {
 	query := &CategoryQuery{config: c.config}
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := i.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(item.Table, item.FieldID, id),
 			sqlgraph.To(category.Table, category.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, item.CategoryTable, item.CategoryColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, item.CategoriesTable, item.CategoriesPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
 		return fromV, nil

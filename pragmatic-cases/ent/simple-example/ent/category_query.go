@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 	"tmp/pragmatic-cases/ent/simple-example/ent/category"
@@ -25,7 +26,6 @@ type CategoryQuery struct {
 	fields     []string
 	predicates []predicate.Category
 	withItems  *ItemQuery
-	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,7 +76,7 @@ func (cq *CategoryQuery) QueryItems() *ItemQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(category.Table, category.FieldID, selector),
 			sqlgraph.To(item.Table, item.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, category.ItemsTable, category.ItemsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, category.ItemsTable, category.ItemsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -356,18 +356,11 @@ func (cq *CategoryQuery) prepareQuery(ctx context.Context) error {
 func (cq *CategoryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Category, error) {
 	var (
 		nodes       = []*Category{}
-		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
 		loadedTypes = [1]bool{
 			cq.withItems != nil,
 		}
 	)
-	if cq.withItems != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, category.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Category).scanValues(nil, columns)
 	}
@@ -387,8 +380,9 @@ func (cq *CategoryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cat
 		return nodes, nil
 	}
 	if query := cq.withItems; query != nil {
-		if err := cq.loadItems(ctx, query, nodes, nil,
-			func(n *Category, e *Item) { n.Edges.Items = e }); err != nil {
+		if err := cq.loadItems(ctx, query, nodes,
+			func(n *Category) { n.Edges.Items = []*Item{} },
+			func(n *Category, e *Item) { n.Edges.Items = append(n.Edges.Items, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -396,30 +390,59 @@ func (cq *CategoryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cat
 }
 
 func (cq *CategoryQuery) loadItems(ctx context.Context, query *ItemQuery, nodes []*Category, init func(*Category), assign func(*Category, *Item)) error {
-	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*Category)
-	for i := range nodes {
-		if nodes[i].item_category == nil {
-			continue
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[string]*Category)
+	nids := make(map[string]map[*Category]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
 		}
-		fk := *nodes[i].item_category
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.Where(item.IDIn(ids...))
-	neighbors, err := query.All(ctx)
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(category.ItemsTable)
+		s.Join(joinT).On(s.C(item.FieldID), joinT.C(category.ItemsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(category.ItemsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(category.ItemsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]any, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]any{new(sql.NullString)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []any) error {
+			outValue := values[0].(*sql.NullString).String
+			inValue := values[1].(*sql.NullString).String
+			if nids[inValue] == nil {
+				nids[inValue] = map[*Category]struct{}{byID[outValue]: {}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
+		nodes, ok := nids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "item_category" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected "items" node returned %v`, n.ID)
 		}
-		for i := range nodes {
-			assign(nodes[i], n)
+		for kn := range nodes {
+			assign(kn, n)
 		}
 	}
 	return nil

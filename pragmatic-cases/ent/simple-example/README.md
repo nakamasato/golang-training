@@ -60,32 +60,43 @@
     go generate ./ent
     ```
 1. Create a script `start/start.go`
-    1. Create Schema
+    1. Init Client
         ```go
         client, err := ent.Open("postgres", "host=localhost port=5432 user=postgres dbname=ent_simple_example password=postgres sslmode=disable") // hardcoding
         if err != nil {
             log.Fatalf("failed opening connection to postgres: %v", err)
         }
         defer client.Close()
+        ```
+    1. Create Schema
+        ```go
         // Run the auto migration tool.
         if err := client.Schema.Create(context.Background()); err != nil {
             log.Fatalf("failed creating schema resources: %v", err)
         }
         ```
-    1. Create (Upsert) entity (postgres)
+    1. Create (Upsert) `Item` (postgres)
 
         ```go
-        func UpsertItem(ctx context.Context, client *ent.Client) (string, error) {
+        // Create Item
+        itemId, _ := UpsertItem(ctx, client, "item_id_1", "Item 1")
+        fmt.Printf("id: %s\n", itemId)
+        itemId2, _ := UpsertItem(ctx, client, "item_id_2", "Item 2")
+        fmt.Printf("id: %s\n", itemId2)
+        ```
+
+        ```go
+        func UpsertItem(ctx context.Context, client *ent.Client, itemId, itemName string) (string, error) {
             id, err := client.Debug().Item.
                 Create().
-                SetID("item_id_1").
-                SetName("Item 1").
+                SetID(itemId).
+                SetName(itemName).
                 SetStatus(1).
                 OnConflict(
                     sql.ConflictColumns(item.FieldID),
                 ).
                 Update(func(u *ent.ItemUpsert) {
-                    u.SetName("Item 1")
+                    u.SetName(itemName)
                     u.SetStatus(1)
                 }).
                 ID(ctx)
@@ -93,13 +104,20 @@
         }
         ```
 
-    1. Query entity (postgres)
+    1. Query `Item` (postgres)
 
         ```go
-        func QueryItem(ctx context.Context, client *ent.Client) (*ent.Item, error) {
-            i, err := client.Item.
+        item, err := QueryItem(ctx, client, "Item 1")
+        if err != nil {
+            log.Fatal(err)
+        }
+        ```
+
+        ```go
+        func QueryItem(ctx context.Context, client *ent.Client, name string) (*ent.Item, error) {
+            i, err := client.Debug().Item.
                 Query().
-                Where(item.Name("Item 1")).
+                Where(item.Name(name)).
                 Only(ctx)
             if err != nil {
                 return nil, fmt.Errorf("failed querying item: %w", err)
@@ -111,19 +129,11 @@
 1. Run [start/start.go](start/start.go) (rerunnable)
     ```
     go run start/start.go
-    2022/11/11 10:20:34 driver.Query: query=INSERT INTO "items" ("name", "status", "created_at", "id") VALUES ($1, $2, $3, $4) ON CONFLICT ("id") DO UPDATE SET "name" = $5, "status" = $6 RETURNING "id" args=[a8m 1 2022-11-11 10:20:34.8543 +0900 JST m=+0.083714918 A0001 a8m 1]
-    id: A0001
-    2022/11/11 10:20:34 driver.Query: query=SELECT DISTINCT "items"."id", "items"."name", "items"."status", "items"."created_at" FROM "items" WHERE "items"."name" = $1 LIMIT 2 args=[a8m]
-    2022/11/11 10:20:34 item returned:  Item(id=A0001, name=a8m, status=1, created_at=Fri Nov 11 01:20:06 2022)
     ```
 1. Check db
 
     ```
     docker exec -it postgres psql -U postgres -d ent_simple_example -c 'select * from items;'
-      id   | name | status |          created_at
-    -------+------+--------+-------------------------------
-     A0001 | a8m  |      1 | 2022-11-11 01:20:06.742316+00
-    (1 row)
     ```
 
 ## 2. Create Edge (`Item` -> `Categories`) [O2M]
@@ -152,7 +162,7 @@
     // Edges of the Item.
     func (Item) Edges() []ent.Edge {
         return []ent.Edge{
-            edge.To("category", Category.Type),
+            edge.To("categories", Category.Type),
         }
     }
     ```
@@ -193,99 +203,40 @@
 1. Run
     ```
     go run start/start.go
-    2022/11/11 10:40:23 driver.Query: query=INSERT INTO "items" ("name", "status", "created_at", "id") VALUES ($1, $2, $3, $4) ON CONFLICT ("id") DO UPDATE SET "name" = $5, "status" = $6 RETURNING "id" args=[a8m 1 2022-11-11 10:40:23.994703 +0900 JST m=+0.105566626 A0001 a8m 1]
-    id: A0001
-    2022/11/11 10:40:23 driver.Query: query=SELECT DISTINCT "items"."id", "items"."name", "items"."status", "items"."created_at" FROM "items" WHERE "items"."name" = $1 LIMIT 2 args=[a8m]
-    2022/11/11 10:40:24 item returned:  Item(id=A0001, name=a8m, status=1, created_at=Fri Nov 11 01:31:29 2022)
-    2022/11/11 10:40:24 driver.Query: query=INSERT INTO "categories" ("name", "id") VALUES ($1, $2) ON CONFLICT ("id") DO UPDATE SET "name" = $3 RETURNING "id" args=[Category 1 category_id_1 Category 1]
-    id: category_id_1
-    2022/11/11 10:40:24 driver.Query: query=SELECT DISTINCT "categories"."id", "categories"."name" FROM "categories" WHERE "categories"."name" = $1 LIMIT 2 args=[Category 1]
-    2022/11/11 10:40:24 category returned:  Category(id=category_id_1, name=Category 1)
     ```
 1. Check DB
     ```
     docker exec -it postgres psql -U postgres -d ent_simple_example -c 'select * from categories;'
-          id       |    name    | item_categories
-    ---------------+------------+-----------------
-     category_id_1 | Category 1 |
-    (1 row)
     ```
 1. Add `Edge` to the existing `Item`.
 
     ```go
-    client.Debug().Item.UpdateOneID("A0001").AddCategory(category).Save(ctx)
+	client.Debug().Item.UpdateOneID("item_id_1").AddCategories(category).Save(ctx)
+	client.Debug().Item.UpdateOneID("item_id_2").AddCategories(category).Save(ctx)
     ```
 
 1. Run `start/start.go`
 
     ```
     go run start/start.go
-    2022/11/11 10:49:50 driver.Query: query=INSERT INTO "items" ("name", "status", "created_at", "id") VALUES ($1, $2, $3, $4) ON CONFLICT ("id") DO UPDATE SET "name" = $5, "status" = $6 RETURNING "id" args=[a8m 1 2022-11-11 10:49:50.084698 +0900 JST m=+0.112350835 A0001 a8m 1]
-    id: A0001
-    2022/11/11 10:49:50 driver.Query: query=SELECT DISTINCT "items"."id", "items"."name", "items"."status", "items"."created_at" FROM "items" WHERE "items"."name" = $1 LIMIT 2 args=[a8m]
-    2022/11/11 10:49:50 item returned:  Item(id=A0001, name=a8m, status=1, created_at=Fri Nov 11 01:31:29 2022)
-    2022/11/11 10:49:50 driver.Query: query=INSERT INTO "categories" ("name", "id") VALUES ($1, $2) ON CONFLICT ("id") DO UPDATE SET "name" = $3 RETURNING "id" args=[Category 1 category_id_1 Category 1]
-    id: category_id_1
-    2022/11/11 10:49:50 driver.Query: query=SELECT DISTINCT "categories"."id", "categories"."name" FROM "categories" WHERE "categories"."name" = $1 LIMIT 2 args=[Category 1]
-    2022/11/11 10:49:50 category returned:  Category(id=category_id_1, name=Category 1)
-    2022/11/11 10:49:50 driver.Tx(59aef2b3-be70-4b55-89f8-8eae7b01c2e5): started
-    2022/11/11 10:49:50 Tx(59aef2b3-be70-4b55-89f8-8eae7b01c2e5).Exec: query=UPDATE "categories" SET "item_categories" = $1 WHERE "id" = $2 AND "item_categories" IS NULL args=[A0001 category_id_1]
-    2022/11/11 10:49:50 Tx(59aef2b3-be70-4b55-89f8-8eae7b01c2e5).Query: query=SELECT "id", "name", "status", "created_at" FROM "items" WHERE "id" = $1 args=[A0001]
-    2022/11/11 10:49:50 Tx(59aef2b3-be70-4b55-89f8-8eae7b01c2e5): committed
     ```
 
 1. Check schema
 
     ```
-     go run -mod=mod entgo.io/ent/cmd/ent describe ./ent/schema
-    Category:
-            +-------+--------+--------+----------+----------+---------+---------------+-----------+-----------------------+------------+
-            | Field |  Type  | Unique | Optional | Nillable | Default | UpdateDefault | Immutable |       StructTag       | Validators |
-            +-------+--------+--------+----------+----------+---------+---------------+-----------+-----------------------+------------+
-            | id    | string | false  | false    | false    | false   | false         | false     | json:"oid,omitempty"  |          0 |
-            | name  | string | false  | false    | false    | false   | false         | false     | json:"name,omitempty" |          0 |
-            +-------+--------+--------+----------+----------+---------+---------------+-----------+-----------------------+------------+
-
-    Item:
-            +------------+-----------+--------+----------+----------+---------+---------------+-----------+-----------------------------    +------------+
-            |   Field    |   Type    | Unique | Optional | Nillable | Default | UpdateDefault | Immutable |          StructTag          |     Validators |
-            +------------+-----------+--------+----------+----------+---------+---------------+-----------+-----------------------------    +------------+
-            | id         | string    | false  | false    | false    | false   | false         | false     | json:"oid,    omitempty"        |          0 |
-            | name       | string    | false  | false    | false    | false   | false         | false     | json:"name,    omitempty"       |          0 |
-            | status     | int       | false  | false    | false    | false   | false         | false     | json:"status,    omitempty"     |          0 |
-            | created_at | time.Time | false  | false    | false    | true    | false         | false     | json:"created_at,    omitempty" |          0 |
-            +------------+-----------+--------+----------+----------+---------+---------------+-----------+-----------------------------    +------------+
-            +------------+----------+---------+---------+----------+--------+----------+
-            |    Edge    |   Type   | Inverse | BackRef | Relation | Unique | Optional |
-            +------------+----------+---------+---------+----------+--------+----------+
-            | categories | Category | false   |         | O2M      | false  | true     |
-            +------------+----------+---------+---------+----------+--------+----------+
+    go run -mod=mod entgo.io/ent/cmd/ent describe ./ent/schema
     ```
 1. Check `categories` table. `item_categories` field is added.
 
     ```sql
     docker exec -it postgres psql -U postgres -d ent_simple_example -c 'select * from categories;'
-          id       |    name    | item_categories
-    ---------------+------------+-----------------
-     category_id_1 | Category 1 | A0001
-    (1 row)
     ```
 
     ```sql
     docker exec -it postgres psql -U postgres -d ent_simple_example -c '\d categories'
-                          Table "public.categories"
-         Column      |       Type        | Collation | Nullable | Default
-    -----------------+-------------------+-----------+----------+---------
-     id              | character varying |           | not null |
-     name            | character varying |           | not null |
-     item_categories | character varying |           |          |
-    Indexes:
-        "categories_pkey" PRIMARY KEY, btree (id)
-    Foreign-key constraints:
-        "categories_items_categories" FOREIGN KEY (item_categories) REFERENCES items(id) ON DELETE SET NULL
     ```
 
-## 3. Add Inverse Edge (`Category` -> `Item`)
+## 3. Add Inverse Edge (`Category` -> `Item`) [M2M]
 
 ![](item-categories-backref.drawio.svg)
 
@@ -300,7 +251,7 @@
             // explicitly using the `Ref` method.
             edge.From("items", Item.Type).
                 Ref("categories").
-                Unique(),
+            //   Unique(), Not add Unique to make it M2M. Otherwise, O2M
         }
     }
     ```
@@ -318,7 +269,7 @@
         }
         // Query the inverse edge.
         for _, i := range items {
-            category, err := i.QueryCategory().Only(ctx)
+            category, err := i.QueryCategories().Only(ctx)
             if err != nil {
                 return fmt.Errorf("failed querying item %q category: %w", i.Name, err)
             }
@@ -333,19 +284,109 @@
     go run start/start.go
     ```
 
+    <details>
+
     ```
-    2022/11/11 14:20:52 driver.Query: query=INSERT INTO "items" ("name", "status", "created_at", "id") VALUES ($1, $2, $3, $4) ON CONFLICT ("id") DO UPDATE SET "name" = $5, "status" = $6 RETURNING "id" args=[Item 1 1 2022-11-11 14:20:52.592921 +0900 JST m=+0.118637209 item_id_1 Item 1 1]
+    2022/11/11 15:46:43 driver.Query: query=INSERT INTO "items" ("name", "status", "created_at", "id") VALUES ($1, $2, $3, $4) ON CONFLICT ("id") DO UPDATE SET "name" = $5, "status" = $6 RETURNING "id" args=[Item 1 1 2022-11-11 15:46:43.514825 +0900 JST m=+0.081970043 item_id_1 Item 1 1]
     id: item_id_1
-    2022/11/11 14:20:52 driver.Query: query=SELECT DISTINCT "items"."id", "items"."name", "items"."status", "items"."created_at" FROM "items" WHERE "items"."name" = $1 LIMIT 2 args=[Item 1]
-    2022/11/11 14:20:52 item returned:  Item(id=item_id_1, name=Item 1, status=1, created_at=Fri Nov 11 05:16:09 2022)
-    2022/11/11 14:20:52 driver.Query: query=INSERT INTO "categories" ("name", "id") VALUES ($1, $2) ON CONFLICT ("id") DO UPDATE SET "name" = $3 RETURNING "id" args=[Category 1 category_id_1 Category 1]
+    2022/11/11 15:46:43 driver.Query: query=INSERT INTO "items" ("name", "status", "created_at", "id") VALUES ($1, $2, $3, $4) ON CONFLICT ("id") DO UPDATE SET "name" = $5, "status" = $6 RETURNING "id" args=[Item 2 1 2022-11-11 15:46:43.518207 +0900 JST m=+0.085351626 item_id_2 Item 2 1]
+    id: item_id_2
+    2022/11/11 15:46:43 driver.Query: query=SELECT DISTINCT "items"."id", "items"."name", "items"."status", "items"."created_at" FROM "items" WHERE "items"."name" = $1 LIMIT 2 args=[Item 1]
+    2022/11/11 15:46:43 item returned:  Item(id=item_id_1, name=Item 1, status=1, created_at=Fri Nov 11 06:46:43 2022)
+    2022/11/11 15:46:43 driver.Query: query=INSERT INTO "categories" ("name", "id") VALUES ($1, $2) ON CONFLICT ("id") DO UPDATE SET "name" = $3 RETURNING "id" args=[Category 1 category_id_1 Category 1]
     id: category_id_1
-    2022/11/11 14:20:52 driver.Query: query=SELECT DISTINCT "categories"."id", "categories"."name" FROM "categories" WHERE "categories"."name" = $1 LIMIT 2 args=[Category 1]
-    2022/11/11 14:20:52 category returned:  Category(id=category_id_1, name=Category 1)
-    2022/11/11 14:20:52 driver.Tx(12204e0b-c154-432b-a6ac-5a5098e01cc9): started
-    2022/11/11 14:20:52 Tx(12204e0b-c154-432b-a6ac-5a5098e01cc9).Exec: query=UPDATE "categories" SET "item_category" = $1 WHERE "id" = $2 AND "item_category" IS NULL args=[A0001 category_id_1]
-    2022/11/11 14:20:52 Tx(12204e0b-c154-432b-a6ac-5a5098e01cc9): rollbacked
-    2022/11/11 14:20:52 driver.Query: query=SELECT DISTINCT "items"."id", "items"."name", "items"."status", "items"."created_at" FROM "items" JOIN (SELECT "item_category" FROM "categories" WHERE "id" = $1) AS "t1" ON "items"."id" = "t1"."item_category" args=[category_id_1]
-    2022/11/11 14:20:52 driver.Query: query=SELECT DISTINCT "categories"."id", "categories"."name" FROM "categories" WHERE "item_category" = $1 LIMIT 2 args=[A0001]
-    2022/11/11 14:20:52 item "a8m" category: "Category 1"
+    2022/11/11 15:46:43 driver.Query: query=SELECT DISTINCT "categories"."id", "categories"."name" FROM "categories" WHERE "categories"."name" = $1 LIMIT 2 args=[Category 1]
+    2022/11/11 15:46:43 category returned:  Category(id=category_id_1, name=Category 1)
+    2022/11/11 15:46:43 driver.Tx(8e7aed02-ecfb-4cb6-8269-265995e09895): started
+    2022/11/11 15:46:43 Tx(8e7aed02-ecfb-4cb6-8269-265995e09895).Exec: query=INSERT INTO "item_categories" ("item_id", "category_id") VALUES ($1, $2) args=[item_id_1 category_id_1]
+    2022/11/11 15:46:43 Tx(8e7aed02-ecfb-4cb6-8269-265995e09895).Query: query=SELECT "id", "name", "status", "created_at" FROM "items" WHERE "id" = $1 args=[item_id_1]
+    2022/11/11 15:46:43 Tx(8e7aed02-ecfb-4cb6-8269-265995e09895): committed
+    2022/11/11 15:46:43 driver.Tx(8b4e10ac-db46-4c57-89e4-f8944586180f): started
+    2022/11/11 15:46:43 Tx(8b4e10ac-db46-4c57-89e4-f8944586180f).Exec: query=INSERT INTO "item_categories" ("item_id", "category_id") VALUES ($1, $2) args=[item_id_2 category_id_1]
+    2022/11/11 15:46:43 Tx(8b4e10ac-db46-4c57-89e4-f8944586180f).Query: query=SELECT "id", "name", "status", "created_at" FROM "items" WHERE "id" = $1 args=[item_id_2]
+    2022/11/11 15:46:43 Tx(8b4e10ac-db46-4c57-89e4-f8944586180f): committed
+    2022/11/11 15:46:43 driver.Tx(c4f325ad-1dba-49c2-be9c-edb3a1073f32): started
+    2022/11/11 15:46:43 Tx(c4f325ad-1dba-49c2-be9c-edb3a1073f32).Exec: query=INSERT INTO "item_categories" ("item_id", "category_id") VALUES ($1, $2) args=[item_id_1 category_id_1]
+    2022/11/11 15:46:43 Tx(c4f325ad-1dba-49c2-be9c-edb3a1073f32): rollbacked
+    2022/11/11 15:46:43 driver.Query: query=SELECT DISTINCT "items"."id", "items"."name", "items"."status", "items"."created_at" FROM "items" JOIN (SELECT "item_categories"."item_id" FROM "item_categories" WHERE "item_categories"."category_id" = $1) AS "t1" ON "items"."id" = "t1"."item_id" args=[category_id_1]
+    2022/11/11 15:46:43 driver.Query: query=SELECT DISTINCT "categories"."id", "categories"."name" FROM "categories" JOIN (SELECT "item_categories"."category_id" FROM "item_categories" WHERE "item_categories"."item_id" = $1) AS "t1" ON "categories"."id" = "t1"."category_id" LIMIT 2 args=[item_id_1]
+    2022/11/11 15:46:43 item "Item 1" category: "Category 1"
+    2022/11/11 15:46:43 driver.Query: query=SELECT DISTINCT "categories"."id", "categories"."name" FROM "categories" JOIN (SELECT "item_categories"."category_id" FROM "item_categories" WHERE "item_categories"."item_id" = $1) AS "t1" ON "categories"."id" = "t1"."category_id" LIMIT 2 args=[item_id_2]
+    2022/11/11 15:46:43 item "Item 2" category: "Category 1"
     ```
+
+    </details>
+
+1. Check schema (M2M)
+
+    ```
+    go run -mod=mod entgo.io/ent/cmd/ent describe ./ent/schema
+    ```
+
+    <details>
+
+    ```
+    Category:
+            +-------+--------+--------+----------+----------+---------+---------------+-----------+-----------------------+------------+
+            | Field |  Type  | Unique | Optional | Nillable | Default | UpdateDefault | Immutable |       StructTag       | Validators |
+            +-------+--------+--------+----------+----------+---------+---------------+-----------+-----------------------+------------+
+            | id    | string | false  | false    | false    | false   | false         | false     | json:"oid,omitempty"  |          0 |
+            | name  | string | false  | false    | false    | false   | false         | false     | json:"name,omitempty" |          0 |
+            +-------+--------+--------+----------+----------+---------+---------------+-----------+-----------------------+------------+
+            +-------+------+---------+------------+----------+--------+----------+
+            | Edge  | Type | Inverse |  BackRef   | Relation | Unique | Optional |
+            +-------+------+---------+------------+----------+--------+----------+
+            | items | Item | true    | categories | M2M      | false  | true     |
+            +-------+------+---------+------------+----------+--------+----------+
+
+    Item:
+            +------------+-----------+--------+----------+----------+---------+---------------+-----------+-----------------------------+------------+
+            |   Field    |   Type    | Unique | Optional | Nillable | Default | UpdateDefault | Immutable |          StructTag          | Validators |
+            +------------+-----------+--------+----------+----------+---------+---------------+-----------+-----------------------------+------------+
+            | id         | string    | false  | false    | false    | false   | false         | false     | json:"oid,omitempty"        |          0 |
+            | name       | string    | false  | false    | false    | false   | false         | false     | json:"name,omitempty"       |          0 |
+            | status     | int       | false  | false    | false    | false   | false         | false     | json:"status,omitempty"     |          0 |
+            | created_at | time.Time | false  | false    | false    | true    | false         | false     | json:"created_at,omitempty" |          0 |
+            +------------+-----------+--------+----------+----------+---------+---------------+-----------+-----------------------------+------------+
+            +------------+----------+---------+---------+----------+--------+----------+
+            |    Edge    |   Type   | Inverse | BackRef | Relation | Unique | Optional |
+            +------------+----------+---------+---------+----------+--------+----------+
+            | categories | Category | false   |         | M2M      | false  | true     |
+            +------------+----------+---------+---------+----------+--------+----------+
+    ```
+
+    </details>
+
+1. Check DB
+
+    ```
+    docker exec -it postgres psql -U postgres -d ent_simple_example -c 'select * from categories;'
+    docker exec -it postgres psql -U postgres -d ent_simple_example -c 'select * from items;'
+    docker exec -it postgres psql -U postgres -d ent_simple_example -c 'select * from item_categories;'
+    ```
+
+    <details>
+
+    ```
+    ➜  simple-example git:(update-ent) ✗ docker exec -it postgres psql -U postgres -d ent_simple_example -c 'select * from     categories;'
+          id       |    name
+    ---------------+------------
+     category_id_1 | Category 1
+    (1 row)
+
+    ➜  simple-example git:(update-ent) ✗ docker exec -it postgres psql -U postgres -d ent_simple_example -c 'select * from     items;'
+        id     |  name  | status |          created_at
+    -----------+--------+--------+-------------------------------
+     item_id_1 | Item 1 |      1 | 2022-11-11 06:46:43.514825+00
+     item_id_2 | Item 2 |      1 | 2022-11-11 06:46:43.518207+00
+    (2 rows)
+
+    ➜  simple-example git:(update-ent) ✗ docker exec -it postgres psql -U postgres -d ent_simple_example -c 'select * from     item_categories;'
+      item_id  |  category_id
+    -----------+---------------
+     item_id_1 | category_id_1
+     item_id_2 | category_id_1
+    (2 rows)
+    ```
+
+    </details>

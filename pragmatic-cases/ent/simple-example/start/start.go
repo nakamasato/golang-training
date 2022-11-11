@@ -26,12 +26,12 @@ func main() {
 	ctx := context.Background()
 
 	// Create Item
-	itemId, err := UpsertItem(ctx, client)
-	if err != nil {
-		log.Fatal(err)
-	}
+	itemId, _ := UpsertItem(ctx, client, "item_id_1", "Item 1")
 	fmt.Printf("id: %s\n", itemId)
-	_, err = QueryItem(ctx, client)
+	itemId2, _ := UpsertItem(ctx, client, "item_id_2", "Item 2")
+	fmt.Printf("id: %s\n", itemId2)
+
+	item, err := QueryItem(ctx, client, "Item 1")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,7 +48,9 @@ func main() {
 	}
 
 	// Update with Edge Item-To-Category
-	client.Debug().Item.UpdateOneID("A0001").AddCategory(category).Save(ctx)
+	client.Debug().Item.UpdateOneID("item_id_1").AddCategories(category).Save(ctx)
+	client.Debug().Item.UpdateOneID("item_id_2").AddCategories(category).Save(ctx)
+	client.Debug().Category.UpdateOneID("category_id_1").AddItems(item).Save(ctx)
 
 	QueryCategoryForItem(ctx, category)
 }
@@ -60,7 +62,7 @@ func QueryCategoryForItem(ctx context.Context, category *ent.Category) error {
 	}
 	// Query the inverse edge.
 	for _, i := range items {
-		category, err := i.QueryCategory().Only(ctx)
+		category, err := i.QueryCategories().Only(ctx)
 		if err != nil {
 			return fmt.Errorf("failed querying item %q category: %w", i.Name, err)
 		}
@@ -69,27 +71,27 @@ func QueryCategoryForItem(ctx context.Context, category *ent.Category) error {
 	return nil
 }
 
-func UpsertItem(ctx context.Context, client *ent.Client) (string, error) {
+func UpsertItem(ctx context.Context, client *ent.Client, itemId, itemName string) (string, error) {
 	id, err := client.Debug().Item.
 		Create().
-		SetID("item_id_1").
-		SetName("Item 1").
+		SetID(itemId).
+		SetName(itemName).
 		SetStatus(1).
 		OnConflict(
 			sql.ConflictColumns(item.FieldID),
 		).
 		Update(func(u *ent.ItemUpsert) {
-			u.SetName("Item 1")
+			u.SetName(itemName)
 			u.SetStatus(1)
 		}).
 		ID(ctx)
 	return id, err
 }
 
-func QueryItem(ctx context.Context, client *ent.Client) (*ent.Item, error) {
+func QueryItem(ctx context.Context, client *ent.Client, name string) (*ent.Item, error) {
 	i, err := client.Debug().Item.
 		Query().
-		Where(item.Name("Item 1")).
+		Where(item.Name(name)).
 		Only(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed querying item: %w", err)

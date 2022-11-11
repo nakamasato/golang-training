@@ -192,7 +192,7 @@ func HasItems() predicate.Category {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ItemsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ItemsTable, ItemsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, ItemsTable, ItemsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -204,7 +204,7 @@ func HasItemsWith(preds ...predicate.Item) predicate.Category {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ItemsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ItemsTable, ItemsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, ItemsTable, ItemsPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

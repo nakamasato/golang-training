@@ -27,7 +27,6 @@ func (Category) Edges() []ent.Edge {
 		// and reference it to the "categories" edge (in Item schema)
 		// explicitly using the `Ref` method.
 		edge.From("items", Item.Type).
-			Ref("category").
-			Unique(),
+			Ref("categories"),
 	}
 }

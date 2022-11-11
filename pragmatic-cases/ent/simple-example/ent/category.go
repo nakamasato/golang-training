@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 	"tmp/pragmatic-cases/ent/simple-example/ent/category"
-	"tmp/pragmatic-cases/ent/simple-example/ent/item"
 
 	"entgo.io/ent/dialect/sql"
 )
@@ -20,27 +19,22 @@ type Category struct {
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CategoryQuery when eager-loading is set.
-	Edges         CategoryEdges `json:"edges"`
-	item_category *string
+	Edges CategoryEdges `json:"edges"`
 }
 
 // CategoryEdges holds the relations/edges for other nodes in the graph.
 type CategoryEdges struct {
 	// Items holds the value of the items edge.
-	Items *Item `json:"items,omitempty"`
+	Items []*Item `json:"items,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
 // ItemsOrErr returns the Items value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e CategoryEdges) ItemsOrErr() (*Item, error) {
+// was not loaded in eager-loading.
+func (e CategoryEdges) ItemsOrErr() ([]*Item, error) {
 	if e.loadedTypes[0] {
-		if e.Items == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: item.Label}
-		}
 		return e.Items, nil
 	}
 	return nil, &NotLoadedError{edge: "items"}
@@ -52,8 +46,6 @@ func (*Category) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case category.FieldID, category.FieldName:
-			values[i] = new(sql.NullString)
-		case category.ForeignKeys[0]: // item_category
 			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Category", columns[i])
@@ -81,13 +73,6 @@ func (c *Category) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				c.Name = value.String
-			}
-		case category.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field item_category", values[i])
-			} else if value.Valid {
-				c.item_category = new(string)
-				*c.item_category = value.String
 			}
 		}
 	}

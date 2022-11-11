@@ -56,14 +56,14 @@ func (ic *ItemCreate) SetID(s string) *ItemCreate {
 	return ic
 }
 
-// AddCategoryIDs adds the "category" edge to the Category entity by IDs.
+// AddCategoryIDs adds the "categories" edge to the Category entity by IDs.
 func (ic *ItemCreate) AddCategoryIDs(ids ...string) *ItemCreate {
 	ic.mutation.AddCategoryIDs(ids...)
 	return ic
 }
 
-// AddCategory adds the "category" edges to the Category entity.
-func (ic *ItemCreate) AddCategory(c ...*Category) *ItemCreate {
+// AddCategories adds the "categories" edges to the Category entity.
+func (ic *ItemCreate) AddCategories(c ...*Category) *ItemCreate {
 	ids := make([]string, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
@@ -214,12 +214,12 @@ func (ic *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 		_spec.SetField(item.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if nodes := ic.mutation.CategoryIDs(); len(nodes) > 0 {
+	if nodes := ic.mutation.CategoriesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   item.CategoryTable,
-			Columns: []string{item.CategoryColumn},
+			Table:   item.CategoriesTable,
+			Columns: item.CategoriesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

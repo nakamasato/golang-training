@@ -13,13 +13,11 @@ const (
 	EdgeItems = "items"
 	// Table holds the table name of the category in the database.
 	Table = "categories"
-	// ItemsTable is the table that holds the items relation/edge.
-	ItemsTable = "categories"
+	// ItemsTable is the table that holds the items relation/edge. The primary key declared below.
+	ItemsTable = "item_categories"
 	// ItemsInverseTable is the table name for the Item entity.
 	// It exists in this package in order to avoid circular dependency with the "item" package.
 	ItemsInverseTable = "items"
-	// ItemsColumn is the table column denoting the items relation/edge.
-	ItemsColumn = "item_category"
 )
 
 // Columns holds all SQL columns for category fields.
@@ -28,21 +26,16 @@ var Columns = []string{
 	FieldName,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "categories"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"item_category",
-}
+var (
+	// ItemsPrimaryKey and ItemsColumn2 are the table columns denoting the
+	// primary key for the items relation (M2M).
+	ItemsPrimaryKey = []string{"item_id", "category_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}

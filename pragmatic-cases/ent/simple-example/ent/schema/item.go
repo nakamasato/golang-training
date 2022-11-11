@@ -32,6 +32,6 @@ func (Item) Fields() []ent.Field {
 // Edges of the Item.
 func (Item) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("category", Category.Type),
+		edge.To("categories", Category.Type),
 	}
 }

@@ -29,20 +29,20 @@ type Item struct {
 
 // ItemEdges holds the relations/edges for other nodes in the graph.
 type ItemEdges struct {
-	// Category holds the value of the category edge.
-	Category []*Category `json:"category,omitempty"`
+	// Categories holds the value of the categories edge.
+	Categories []*Category `json:"categories,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// CategoryOrErr returns the Category value or an error if the edge
+// CategoriesOrErr returns the Categories value or an error if the edge
 // was not loaded in eager-loading.
-func (e ItemEdges) CategoryOrErr() ([]*Category, error) {
+func (e ItemEdges) CategoriesOrErr() ([]*Category, error) {
 	if e.loadedTypes[0] {
-		return e.Category, nil
+		return e.Categories, nil
 	}
-	return nil, &NotLoadedError{edge: "category"}
+	return nil, &NotLoadedError{edge: "categories"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -100,9 +100,9 @@ func (i *Item) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// QueryCategory queries the "category" edge of the Item entity.
-func (i *Item) QueryCategory() *CategoryQuery {
-	return (&ItemClient{config: i.config}).QueryCategory(i)
+// QueryCategories queries the "categories" edge of the Item entity.
+func (i *Item) QueryCategories() *CategoryQuery {
+	return (&ItemClient{config: i.config}).QueryCategories(i)
 }
 
 // Update returns a builder for updating this Item.
