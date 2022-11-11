@@ -22,6 +22,27 @@ type Item struct {
 	Status int `json:"status,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the ItemQuery when eager-loading is set.
+	Edges ItemEdges `json:"edges"`
+}
+
+// ItemEdges holds the relations/edges for other nodes in the graph.
+type ItemEdges struct {
+	// Categories holds the value of the categories edge.
+	Categories []*Category `json:"categories,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// CategoriesOrErr returns the Categories value or an error if the edge
+// was not loaded in eager-loading.
+func (e ItemEdges) CategoriesOrErr() ([]*Category, error) {
+	if e.loadedTypes[0] {
+		return e.Categories, nil
+	}
+	return nil, &NotLoadedError{edge: "categories"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -77,6 +98,11 @@ func (i *Item) assignValues(columns []string, values []any) error {
 		}
 	}
 	return nil
+}
+
+// QueryCategories queries the "categories" edge of the Item entity.
+func (i *Item) QueryCategories() *CategoryQuery {
+	return (&ItemClient{config: i.config}).QueryCategories(i)
 }
 
 // Update returns a builder for updating this Item.

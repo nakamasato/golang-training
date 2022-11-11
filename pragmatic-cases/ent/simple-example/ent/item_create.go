@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"tmp/pragmatic-cases/ent/simple-example/ent/category"
 	"tmp/pragmatic-cases/ent/simple-example/ent/item"
 
 	"entgo.io/ent/dialect"
@@ -53,6 +54,21 @@ func (ic *ItemCreate) SetNillableCreatedAt(t *time.Time) *ItemCreate {
 func (ic *ItemCreate) SetID(s string) *ItemCreate {
 	ic.mutation.SetID(s)
 	return ic
+}
+
+// AddCategoryIDs adds the "categories" edge to the Category entity by IDs.
+func (ic *ItemCreate) AddCategoryIDs(ids ...string) *ItemCreate {
+	ic.mutation.AddCategoryIDs(ids...)
+	return ic
+}
+
+// AddCategories adds the "categories" edges to the Category entity.
+func (ic *ItemCreate) AddCategories(c ...*Category) *ItemCreate {
+	ids := make([]string, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return ic.AddCategoryIDs(ids...)
 }
 
 // Mutation returns the ItemMutation object of the builder.
@@ -197,6 +213,25 @@ func (ic *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 	if value, ok := ic.mutation.CreatedAt(); ok {
 		_spec.SetField(item.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
+	}
+	if nodes := ic.mutation.CategoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.CategoriesTable,
+			Columns: []string{item.CategoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: category.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"tmp/pragmatic-cases/ent/simple-example/ent"
+	"tmp/pragmatic-cases/ent/simple-example/ent/category"
 	"tmp/pragmatic-cases/ent/simple-example/ent/item"
 
 	"entgo.io/ent/dialect/sql"
@@ -37,6 +38,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Create Category
+	UpsertCategory(ctx, client)
+
+	// Get Category
+	category, err := QueryCategory(ctx, client)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	client.Debug().Item.UpdateOneID("item_id_1").AddCategories(category).Save(ctx)
+	client.Debug().Item.UpdateOneID("item_id_2").AddCategories(category).Save(ctx)
 }
 
 func UpsertItem(ctx context.Context, client *ent.Client, itemId, itemName string) (string, error) {
@@ -66,4 +79,31 @@ func QueryItem(ctx context.Context, client *ent.Client, name string) (*ent.Item,
 	}
 	log.Println("item returned: ", i)
 	return i, nil
+}
+
+func UpsertCategory(ctx context.Context, client *ent.Client) (string, error) {
+	id, err := client.Debug().Category.
+		Create().
+		SetID("category_id_1"). // UserIDがUnique指定されている場合
+		SetName("Category 1").
+		OnConflict(
+			sql.ConflictColumns(item.FieldID),
+		).
+		Update(func(u *ent.CategoryUpsert) {
+			u.SetName("Category 1")
+		}).
+		ID(ctx)
+	return id, err
+}
+
+func QueryCategory(ctx context.Context, client *ent.Client) (*ent.Category, error) {
+	c, err := client.Debug().Category.
+		Query().
+		Where(category.Name("Category 1")).
+		Only(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed querying item: %w", err)
+	}
+	log.Println("category returned: ", c)
+	return c, nil
 }

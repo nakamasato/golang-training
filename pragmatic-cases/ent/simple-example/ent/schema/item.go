@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,5 +31,7 @@ func (Item) Fields() []ent.Field {
 
 // Edges of the Item.
 func (Item) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("categories", Category.Type),
+	}
 }
