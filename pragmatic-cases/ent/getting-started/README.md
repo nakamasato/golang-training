@@ -598,3 +598,7 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
             2 |       3
     (3 rows)
     ```
+
+# References
+1. https://zenn.dev/spiegel/books/a-study-in-postgresql
+1. https://zenn.dev/ogataka50/articles/f169e51983df41
