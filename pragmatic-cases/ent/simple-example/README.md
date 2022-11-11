@@ -60,30 +60,37 @@
     go generate ./ent
     ```
 1. Create a script `start/start.go`
-    1. Init Client
+    1. Create `main()`
         ```go
-        client, err := ent.Open("postgres", "host=localhost port=5432 user=postgres dbname=ent_simple_example password=postgres sslmode=disable") // hardcoding
-        if err != nil {
-            log.Fatalf("failed opening connection to postgres: %v", err)
-        }
-        defer client.Close()
-        ```
-    1. Create Schema
-        ```go
-        // Run the auto migration tool.
-        if err := client.Schema.Create(context.Background()); err != nil {
-            log.Fatalf("failed creating schema resources: %v", err)
-        }
-        ```
-    1. Create (Upsert) `Item` (postgres)
+        func main() {
+            // Init Client
+            client, err := ent.Open("postgres", "host=localhost port=5432 user=postgres dbname=ent_simple_example password=postgres sslmode=disable") // hardcoding
+            if err != nil {
+                log.Fatalf("failed opening connection to postgres: %v", err)
+            }
+            defer client.Close()
 
-        ```go
-        // Create Item
-        itemId, _ := UpsertItem(ctx, client, "item_id_1", "Item 1")
-        fmt.Printf("id: %s\n", itemId)
-        itemId2, _ := UpsertItem(ctx, client, "item_id_2", "Item 2")
-        fmt.Printf("id: %s\n", itemId2)
+            // Run the auto migration tool.
+            if err := client.Schema.Create(context.Background()); err != nil {
+                log.Fatalf("failed creating schema resources: %v", err)
+            }
+
+            // Create Item
+            ctx := context.Background()
+            itemId, _ := UpsertItem(ctx, client, "item_id_1", "Item 1")
+            fmt.Printf("id: %s\n", itemId)
+            itemId2, _ := UpsertItem(ctx, client, "item_id_2", "Item 2")
+            fmt.Printf("id: %s\n", itemId2)
+
+            // Get Item
+            _, err = QueryItem(ctx, client, "Item 1")
+            if err != nil {
+                log.Fatal(err)
+            }
+        }
         ```
+
+    1. Create (Upsert) `Item` (postgres)
 
         ```go
         func UpsertItem(ctx context.Context, client *ent.Client, itemId, itemName string) (string, error) {
@@ -107,13 +114,6 @@
     1. Query `Item` (postgres)
 
         ```go
-        item, err := QueryItem(ctx, client, "Item 1")
-        if err != nil {
-            log.Fatal(err)
-        }
-        ```
-
-        ```go
         func QueryItem(ctx context.Context, client *ent.Client, name string) (*ent.Item, error) {
             i, err := client.Debug().Item.
                 Query().
@@ -130,10 +130,33 @@
     ```
     go run start/start.go
     ```
+
+    <details>
+
+    ```
+    2022/11/11 15:56:09 driver.Query: query=INSERT INTO "items" ("name", "status", "created_at", "id") VALUES ($1, $2, $3, $4) ON CONFLICT ("id") DO UPDATE SET "name" = $5, "status" = $6 RETURNING "id" args=[Item 1 1 2022-11-11 15:56:09.261309 +0900 JST m=+0.098678418 item_id_1 Item 1 1]
+    id: item_id_1
+    2022/11/11 15:56:09 driver.Query: query=INSERT INTO "items" ("name", "status", "created_at", "id") VALUES ($1, $2, $3, $4) ON CONFLICT ("id") DO UPDATE SET "name" = $5, "status" = $6 RETURNING "id" args=[Item 2 1 2022-11-11 15:56:09.264366 +0900 JST m=+0.101735001 item_id_2 Item 2 1]
+    id: item_id_2
+    2022/11/11 15:56:09 driver.Query: query=SELECT DISTINCT "items"."id", "items"."name", "items"."status", "items"."created_at" FROM "items" WHERE "items"."name" = $1 LIMIT 2 args=[Item 1]
+    2022/11/11 15:56:09 item returned:  Item(id=item_id_1, name=Item 1, status=1, created_at=Fri Nov 11 06:56:09 2022)
+    ```
+
+    </details>
 1. Check db
 
     ```
     docker exec -it postgres psql -U postgres -d ent_simple_example -c 'select * from items;'
+    ```
+
+    <details>
+
+    ```
+        id     |  name  | status |          created_at
+    -----------+--------+--------+-------------------------------
+     item_id_1 | Item 1 |      1 | 2022-11-11 06:56:09.261309+00
+     item_id_2 | Item 2 |      1 | 2022-11-11 06:56:09.264366+00
+    (2 rows)
     ```
 
 ## 2. Create Edge (`Item` -> `Categories`) [O2M]

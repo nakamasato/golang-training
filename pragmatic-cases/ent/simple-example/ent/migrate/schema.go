@@ -8,17 +8,6 @@ import (
 )
 
 var (
-	// CategoriesColumns holds the columns for the "categories" table.
-	CategoriesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString},
-		{Name: "name", Type: field.TypeString},
-	}
-	// CategoriesTable holds the schema information for the "categories" table.
-	CategoriesTable = &schema.Table{
-		Name:       "categories",
-		Columns:    CategoriesColumns,
-		PrimaryKey: []*schema.Column{CategoriesColumns[0]},
-	}
 	// ItemsColumns holds the columns for the "items" table.
 	ItemsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
@@ -32,40 +21,11 @@ var (
 		Columns:    ItemsColumns,
 		PrimaryKey: []*schema.Column{ItemsColumns[0]},
 	}
-	// ItemCategoriesColumns holds the columns for the "item_categories" table.
-	ItemCategoriesColumns = []*schema.Column{
-		{Name: "item_id", Type: field.TypeString},
-		{Name: "category_id", Type: field.TypeString},
-	}
-	// ItemCategoriesTable holds the schema information for the "item_categories" table.
-	ItemCategoriesTable = &schema.Table{
-		Name:       "item_categories",
-		Columns:    ItemCategoriesColumns,
-		PrimaryKey: []*schema.Column{ItemCategoriesColumns[0], ItemCategoriesColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "item_categories_item_id",
-				Columns:    []*schema.Column{ItemCategoriesColumns[0]},
-				RefColumns: []*schema.Column{ItemsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "item_categories_category_id",
-				Columns:    []*schema.Column{ItemCategoriesColumns[1]},
-				RefColumns: []*schema.Column{CategoriesColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		CategoriesTable,
 		ItemsTable,
-		ItemCategoriesTable,
 	}
 )
 
 func init() {
-	ItemCategoriesTable.ForeignKeys[0].RefTable = ItemsTable
-	ItemCategoriesTable.ForeignKeys[1].RefTable = CategoriesTable
 }

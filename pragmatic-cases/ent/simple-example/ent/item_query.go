@@ -4,10 +4,8 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
-	"tmp/pragmatic-cases/ent/simple-example/ent/category"
 	"tmp/pragmatic-cases/ent/simple-example/ent/item"
 	"tmp/pragmatic-cases/ent/simple-example/ent/predicate"
 
@@ -19,13 +17,12 @@ import (
 // ItemQuery is the builder for querying Item entities.
 type ItemQuery struct {
 	config
-	limit          *int
-	offset         *int
-	unique         *bool
-	order          []OrderFunc
-	fields         []string
-	predicates     []predicate.Item
-	withCategories *CategoryQuery
+	limit      *int
+	offset     *int
+	unique     *bool
+	order      []OrderFunc
+	fields     []string
+	predicates []predicate.Item
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -60,28 +57,6 @@ func (iq *ItemQuery) Unique(unique bool) *ItemQuery {
 func (iq *ItemQuery) Order(o ...OrderFunc) *ItemQuery {
 	iq.order = append(iq.order, o...)
 	return iq
-}
-
-// QueryCategories chains the current query on the "categories" edge.
-func (iq *ItemQuery) QueryCategories() *CategoryQuery {
-	query := &CategoryQuery{config: iq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := iq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := iq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(item.Table, item.FieldID, selector),
-			sqlgraph.To(category.Table, category.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, item.CategoriesTable, item.CategoriesPrimaryKey...),
-		)
-		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // First returns the first Item entity from the query.
@@ -260,28 +235,16 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 		return nil
 	}
 	return &ItemQuery{
-		config:         iq.config,
-		limit:          iq.limit,
-		offset:         iq.offset,
-		order:          append([]OrderFunc{}, iq.order...),
-		predicates:     append([]predicate.Item{}, iq.predicates...),
-		withCategories: iq.withCategories.Clone(),
+		config:     iq.config,
+		limit:      iq.limit,
+		offset:     iq.offset,
+		order:      append([]OrderFunc{}, iq.order...),
+		predicates: append([]predicate.Item{}, iq.predicates...),
 		// clone intermediate query.
 		sql:    iq.sql.Clone(),
 		path:   iq.path,
 		unique: iq.unique,
 	}
-}
-
-// WithCategories tells the query-builder to eager-load the nodes that are connected to
-// the "categories" edge. The optional arguments are used to configure the query builder of the edge.
-func (iq *ItemQuery) WithCategories(opts ...func(*CategoryQuery)) *ItemQuery {
-	query := &CategoryQuery{config: iq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	iq.withCategories = query
-	return iq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -355,11 +318,8 @@ func (iq *ItemQuery) prepareQuery(ctx context.Context) error {
 
 func (iq *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, error) {
 	var (
-		nodes       = []*Item{}
-		_spec       = iq.querySpec()
-		loadedTypes = [1]bool{
-			iq.withCategories != nil,
-		}
+		nodes = []*Item{}
+		_spec = iq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Item).scanValues(nil, columns)
@@ -367,7 +327,6 @@ func (iq *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Item{config: iq.config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -379,73 +338,7 @@ func (iq *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := iq.withCategories; query != nil {
-		if err := iq.loadCategories(ctx, query, nodes,
-			func(n *Item) { n.Edges.Categories = []*Category{} },
-			func(n *Item, e *Category) { n.Edges.Categories = append(n.Edges.Categories, e) }); err != nil {
-			return nil, err
-		}
-	}
 	return nodes, nil
-}
-
-func (iq *ItemQuery) loadCategories(ctx context.Context, query *CategoryQuery, nodes []*Item, init func(*Item), assign func(*Item, *Category)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[string]*Item)
-	nids := make(map[string]map[*Item]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
-		}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(item.CategoriesTable)
-		s.Join(joinT).On(s.C(category.FieldID), joinT.C(item.CategoriesPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(item.CategoriesPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(item.CategoriesPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
-	}
-	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-		assign := spec.Assign
-		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]any, error) {
-			values, err := values(columns[1:])
-			if err != nil {
-				return nil, err
-			}
-			return append([]any{new(sql.NullString)}, values...), nil
-		}
-		spec.Assign = func(columns []string, values []any) error {
-			outValue := values[0].(*sql.NullString).String
-			inValue := values[1].(*sql.NullString).String
-			if nids[inValue] == nil {
-				nids[inValue] = map[*Item]struct{}{byID[outValue]: {}}
-				return assign(columns[1:], values[1:])
-			}
-			nids[inValue][byID[outValue]] = struct{}{}
-			return nil
-		}
-	})
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "categories" node returned %v`, n.ID)
-		}
-		for kn := range nodes {
-			assign(kn, n)
-		}
-	}
-	return nil
 }
 
 func (iq *ItemQuery) sqlCount(ctx context.Context) (int, error) {
