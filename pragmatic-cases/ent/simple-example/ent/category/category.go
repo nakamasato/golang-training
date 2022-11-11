@@ -9,8 +9,17 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// EdgeItems holds the string denoting the items edge name in mutations.
+	EdgeItems = "items"
 	// Table holds the table name of the category in the database.
 	Table = "categories"
+	// ItemsTable is the table that holds the items relation/edge.
+	ItemsTable = "categories"
+	// ItemsInverseTable is the table name for the Item entity.
+	// It exists in this package in order to avoid circular dependency with the "item" package.
+	ItemsInverseTable = "items"
+	// ItemsColumn is the table column denoting the items relation/edge.
+	ItemsColumn = "item_category"
 )
 
 // Columns holds all SQL columns for category fields.
@@ -22,7 +31,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "categories"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"item_categories",
+	"item_category",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

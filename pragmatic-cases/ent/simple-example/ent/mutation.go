@@ -36,6 +36,8 @@ type CategoryMutation struct {
 	id            *string
 	name          *string
 	clearedFields map[string]struct{}
+	items         *string
+	cleareditems  bool
 	done          bool
 	oldValue      func(context.Context) (*Category, error)
 	predicates    []predicate.Category
@@ -181,6 +183,45 @@ func (m *CategoryMutation) ResetName() {
 	m.name = nil
 }
 
+// SetItemsID sets the "items" edge to the Item entity by id.
+func (m *CategoryMutation) SetItemsID(id string) {
+	m.items = &id
+}
+
+// ClearItems clears the "items" edge to the Item entity.
+func (m *CategoryMutation) ClearItems() {
+	m.cleareditems = true
+}
+
+// ItemsCleared reports if the "items" edge to the Item entity was cleared.
+func (m *CategoryMutation) ItemsCleared() bool {
+	return m.cleareditems
+}
+
+// ItemsID returns the "items" edge ID in the mutation.
+func (m *CategoryMutation) ItemsID() (id string, exists bool) {
+	if m.items != nil {
+		return *m.items, true
+	}
+	return
+}
+
+// ItemsIDs returns the "items" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ItemsID instead. It exists only for internal usage by the builders.
+func (m *CategoryMutation) ItemsIDs() (ids []string) {
+	if id := m.items; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetItems resets all changes to the "items" edge.
+func (m *CategoryMutation) ResetItems() {
+	m.items = nil
+	m.cleareditems = false
+}
+
 // Where appends a list predicates to the CategoryMutation builder.
 func (m *CategoryMutation) Where(ps ...predicate.Category) {
 	m.predicates = append(m.predicates, ps...)
@@ -299,19 +340,28 @@ func (m *CategoryMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *CategoryMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.items != nil {
+		edges = append(edges, category.EdgeItems)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *CategoryMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case category.EdgeItems:
+		if id := m.items; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *CategoryMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -323,45 +373,62 @@ func (m *CategoryMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *CategoryMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.cleareditems {
+		edges = append(edges, category.EdgeItems)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *CategoryMutation) EdgeCleared(name string) bool {
+	switch name {
+	case category.EdgeItems:
+		return m.cleareditems
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *CategoryMutation) ClearEdge(name string) error {
+	switch name {
+	case category.EdgeItems:
+		m.ClearItems()
+		return nil
+	}
 	return fmt.Errorf("unknown Category unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *CategoryMutation) ResetEdge(name string) error {
+	switch name {
+	case category.EdgeItems:
+		m.ResetItems()
+		return nil
+	}
 	return fmt.Errorf("unknown Category edge %s", name)
 }
 
 // ItemMutation represents an operation that mutates the Item nodes in the graph.
 type ItemMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *string
-	name              *string
-	status            *int
-	addstatus         *int
-	created_at        *time.Time
-	clearedFields     map[string]struct{}
-	categories        map[string]struct{}
-	removedcategories map[string]struct{}
-	clearedcategories bool
-	done              bool
-	oldValue          func(context.Context) (*Item, error)
-	predicates        []predicate.Item
+	op              Op
+	typ             string
+	id              *string
+	name            *string
+	status          *int
+	addstatus       *int
+	created_at      *time.Time
+	clearedFields   map[string]struct{}
+	category        map[string]struct{}
+	removedcategory map[string]struct{}
+	clearedcategory bool
+	done            bool
+	oldValue        func(context.Context) (*Item, error)
+	predicates      []predicate.Item
 }
 
 var _ ent.Mutation = (*ItemMutation)(nil)
@@ -596,58 +663,58 @@ func (m *ItemMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// AddCategoryIDs adds the "categories" edge to the Category entity by ids.
+// AddCategoryIDs adds the "category" edge to the Category entity by ids.
 func (m *ItemMutation) AddCategoryIDs(ids ...string) {
-	if m.categories == nil {
-		m.categories = make(map[string]struct{})
+	if m.category == nil {
+		m.category = make(map[string]struct{})
 	}
 	for i := range ids {
-		m.categories[ids[i]] = struct{}{}
+		m.category[ids[i]] = struct{}{}
 	}
 }
 
-// ClearCategories clears the "categories" edge to the Category entity.
-func (m *ItemMutation) ClearCategories() {
-	m.clearedcategories = true
+// ClearCategory clears the "category" edge to the Category entity.
+func (m *ItemMutation) ClearCategory() {
+	m.clearedcategory = true
 }
 
-// CategoriesCleared reports if the "categories" edge to the Category entity was cleared.
-func (m *ItemMutation) CategoriesCleared() bool {
-	return m.clearedcategories
+// CategoryCleared reports if the "category" edge to the Category entity was cleared.
+func (m *ItemMutation) CategoryCleared() bool {
+	return m.clearedcategory
 }
 
-// RemoveCategoryIDs removes the "categories" edge to the Category entity by IDs.
+// RemoveCategoryIDs removes the "category" edge to the Category entity by IDs.
 func (m *ItemMutation) RemoveCategoryIDs(ids ...string) {
-	if m.removedcategories == nil {
-		m.removedcategories = make(map[string]struct{})
+	if m.removedcategory == nil {
+		m.removedcategory = make(map[string]struct{})
 	}
 	for i := range ids {
-		delete(m.categories, ids[i])
-		m.removedcategories[ids[i]] = struct{}{}
+		delete(m.category, ids[i])
+		m.removedcategory[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedCategories returns the removed IDs of the "categories" edge to the Category entity.
-func (m *ItemMutation) RemovedCategoriesIDs() (ids []string) {
-	for id := range m.removedcategories {
+// RemovedCategory returns the removed IDs of the "category" edge to the Category entity.
+func (m *ItemMutation) RemovedCategoryIDs() (ids []string) {
+	for id := range m.removedcategory {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// CategoriesIDs returns the "categories" edge IDs in the mutation.
-func (m *ItemMutation) CategoriesIDs() (ids []string) {
-	for id := range m.categories {
+// CategoryIDs returns the "category" edge IDs in the mutation.
+func (m *ItemMutation) CategoryIDs() (ids []string) {
+	for id := range m.category {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetCategories resets all changes to the "categories" edge.
-func (m *ItemMutation) ResetCategories() {
-	m.categories = nil
-	m.clearedcategories = false
-	m.removedcategories = nil
+// ResetCategory resets all changes to the "category" edge.
+func (m *ItemMutation) ResetCategory() {
+	m.category = nil
+	m.clearedcategory = false
+	m.removedcategory = nil
 }
 
 // Where appends a list predicates to the ItemMutation builder.
@@ -818,8 +885,8 @@ func (m *ItemMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ItemMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.categories != nil {
-		edges = append(edges, item.EdgeCategories)
+	if m.category != nil {
+		edges = append(edges, item.EdgeCategory)
 	}
 	return edges
 }
@@ -828,9 +895,9 @@ func (m *ItemMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *ItemMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case item.EdgeCategories:
-		ids := make([]ent.Value, 0, len(m.categories))
-		for id := range m.categories {
+	case item.EdgeCategory:
+		ids := make([]ent.Value, 0, len(m.category))
+		for id := range m.category {
 			ids = append(ids, id)
 		}
 		return ids
@@ -841,8 +908,8 @@ func (m *ItemMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ItemMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removedcategories != nil {
-		edges = append(edges, item.EdgeCategories)
+	if m.removedcategory != nil {
+		edges = append(edges, item.EdgeCategory)
 	}
 	return edges
 }
@@ -851,9 +918,9 @@ func (m *ItemMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *ItemMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case item.EdgeCategories:
-		ids := make([]ent.Value, 0, len(m.removedcategories))
-		for id := range m.removedcategories {
+	case item.EdgeCategory:
+		ids := make([]ent.Value, 0, len(m.removedcategory))
+		for id := range m.removedcategory {
 			ids = append(ids, id)
 		}
 		return ids
@@ -864,8 +931,8 @@ func (m *ItemMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ItemMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedcategories {
-		edges = append(edges, item.EdgeCategories)
+	if m.clearedcategory {
+		edges = append(edges, item.EdgeCategory)
 	}
 	return edges
 }
@@ -874,8 +941,8 @@ func (m *ItemMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *ItemMutation) EdgeCleared(name string) bool {
 	switch name {
-	case item.EdgeCategories:
-		return m.clearedcategories
+	case item.EdgeCategory:
+		return m.clearedcategory
 	}
 	return false
 }
@@ -892,8 +959,8 @@ func (m *ItemMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *ItemMutation) ResetEdge(name string) error {
 	switch name {
-	case item.EdgeCategories:
-		m.ResetCategories()
+	case item.EdgeCategory:
+		m.ResetCategory()
 		return nil
 	}
 	return fmt.Errorf("unknown Item edge %s", name)

@@ -62,14 +62,14 @@ func (iu *ItemUpdate) SetNillableCreatedAt(t *time.Time) *ItemUpdate {
 	return iu
 }
 
-// AddCategoryIDs adds the "categories" edge to the Category entity by IDs.
+// AddCategoryIDs adds the "category" edge to the Category entity by IDs.
 func (iu *ItemUpdate) AddCategoryIDs(ids ...string) *ItemUpdate {
 	iu.mutation.AddCategoryIDs(ids...)
 	return iu
 }
 
-// AddCategories adds the "categories" edges to the Category entity.
-func (iu *ItemUpdate) AddCategories(c ...*Category) *ItemUpdate {
+// AddCategory adds the "category" edges to the Category entity.
+func (iu *ItemUpdate) AddCategory(c ...*Category) *ItemUpdate {
 	ids := make([]string, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
@@ -82,20 +82,20 @@ func (iu *ItemUpdate) Mutation() *ItemMutation {
 	return iu.mutation
 }
 
-// ClearCategories clears all "categories" edges to the Category entity.
-func (iu *ItemUpdate) ClearCategories() *ItemUpdate {
-	iu.mutation.ClearCategories()
+// ClearCategory clears all "category" edges to the Category entity.
+func (iu *ItemUpdate) ClearCategory() *ItemUpdate {
+	iu.mutation.ClearCategory()
 	return iu
 }
 
-// RemoveCategoryIDs removes the "categories" edge to Category entities by IDs.
+// RemoveCategoryIDs removes the "category" edge to Category entities by IDs.
 func (iu *ItemUpdate) RemoveCategoryIDs(ids ...string) *ItemUpdate {
 	iu.mutation.RemoveCategoryIDs(ids...)
 	return iu
 }
 
-// RemoveCategories removes "categories" edges to Category entities.
-func (iu *ItemUpdate) RemoveCategories(c ...*Category) *ItemUpdate {
+// RemoveCategory removes "category" edges to Category entities.
+func (iu *ItemUpdate) RemoveCategory(c ...*Category) *ItemUpdate {
 	ids := make([]string, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
@@ -187,12 +187,12 @@ func (iu *ItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := iu.mutation.CreatedAt(); ok {
 		_spec.SetField(item.FieldCreatedAt, field.TypeTime, value)
 	}
-	if iu.mutation.CategoriesCleared() {
+	if iu.mutation.CategoryCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   item.CategoriesTable,
-			Columns: []string{item.CategoriesColumn},
+			Table:   item.CategoryTable,
+			Columns: []string{item.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -203,12 +203,12 @@ func (iu *ItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := iu.mutation.RemovedCategoriesIDs(); len(nodes) > 0 && !iu.mutation.CategoriesCleared() {
+	if nodes := iu.mutation.RemovedCategoryIDs(); len(nodes) > 0 && !iu.mutation.CategoryCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   item.CategoriesTable,
-			Columns: []string{item.CategoriesColumn},
+			Table:   item.CategoryTable,
+			Columns: []string{item.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -222,12 +222,12 @@ func (iu *ItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := iu.mutation.CategoriesIDs(); len(nodes) > 0 {
+	if nodes := iu.mutation.CategoryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   item.CategoriesTable,
-			Columns: []string{item.CategoriesColumn},
+			Table:   item.CategoryTable,
+			Columns: []string{item.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -293,14 +293,14 @@ func (iuo *ItemUpdateOne) SetNillableCreatedAt(t *time.Time) *ItemUpdateOne {
 	return iuo
 }
 
-// AddCategoryIDs adds the "categories" edge to the Category entity by IDs.
+// AddCategoryIDs adds the "category" edge to the Category entity by IDs.
 func (iuo *ItemUpdateOne) AddCategoryIDs(ids ...string) *ItemUpdateOne {
 	iuo.mutation.AddCategoryIDs(ids...)
 	return iuo
 }
 
-// AddCategories adds the "categories" edges to the Category entity.
-func (iuo *ItemUpdateOne) AddCategories(c ...*Category) *ItemUpdateOne {
+// AddCategory adds the "category" edges to the Category entity.
+func (iuo *ItemUpdateOne) AddCategory(c ...*Category) *ItemUpdateOne {
 	ids := make([]string, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
@@ -313,20 +313,20 @@ func (iuo *ItemUpdateOne) Mutation() *ItemMutation {
 	return iuo.mutation
 }
 
-// ClearCategories clears all "categories" edges to the Category entity.
-func (iuo *ItemUpdateOne) ClearCategories() *ItemUpdateOne {
-	iuo.mutation.ClearCategories()
+// ClearCategory clears all "category" edges to the Category entity.
+func (iuo *ItemUpdateOne) ClearCategory() *ItemUpdateOne {
+	iuo.mutation.ClearCategory()
 	return iuo
 }
 
-// RemoveCategoryIDs removes the "categories" edge to Category entities by IDs.
+// RemoveCategoryIDs removes the "category" edge to Category entities by IDs.
 func (iuo *ItemUpdateOne) RemoveCategoryIDs(ids ...string) *ItemUpdateOne {
 	iuo.mutation.RemoveCategoryIDs(ids...)
 	return iuo
 }
 
-// RemoveCategories removes "categories" edges to Category entities.
-func (iuo *ItemUpdateOne) RemoveCategories(c ...*Category) *ItemUpdateOne {
+// RemoveCategory removes "category" edges to Category entities.
+func (iuo *ItemUpdateOne) RemoveCategory(c ...*Category) *ItemUpdateOne {
 	ids := make([]string, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
@@ -448,12 +448,12 @@ func (iuo *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) 
 	if value, ok := iuo.mutation.CreatedAt(); ok {
 		_spec.SetField(item.FieldCreatedAt, field.TypeTime, value)
 	}
-	if iuo.mutation.CategoriesCleared() {
+	if iuo.mutation.CategoryCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   item.CategoriesTable,
-			Columns: []string{item.CategoriesColumn},
+			Table:   item.CategoryTable,
+			Columns: []string{item.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -464,12 +464,12 @@ func (iuo *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := iuo.mutation.RemovedCategoriesIDs(); len(nodes) > 0 && !iuo.mutation.CategoriesCleared() {
+	if nodes := iuo.mutation.RemovedCategoryIDs(); len(nodes) > 0 && !iuo.mutation.CategoryCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   item.CategoriesTable,
-			Columns: []string{item.CategoriesColumn},
+			Table:   item.CategoryTable,
+			Columns: []string{item.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -483,12 +483,12 @@ func (iuo *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := iuo.mutation.CategoriesIDs(); len(nodes) > 0 {
+	if nodes := iuo.mutation.CategoryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   item.CategoriesTable,
-			Columns: []string{item.CategoriesColumn},
+			Table:   item.CategoryTable,
+			Columns: []string{item.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

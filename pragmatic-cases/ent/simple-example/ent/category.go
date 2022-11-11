@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 	"tmp/pragmatic-cases/ent/simple-example/ent/category"
+	"tmp/pragmatic-cases/ent/simple-example/ent/item"
 
 	"entgo.io/ent/dialect/sql"
 )
@@ -16,8 +17,33 @@ type Category struct {
 	// ID of the ent.
 	ID string `json:"oid,omitempty"`
 	// Name holds the value of the "name" field.
-	Name            string `json:"name,omitempty"`
-	item_categories *string
+	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the CategoryQuery when eager-loading is set.
+	Edges         CategoryEdges `json:"edges"`
+	item_category *string
+}
+
+// CategoryEdges holds the relations/edges for other nodes in the graph.
+type CategoryEdges struct {
+	// Items holds the value of the items edge.
+	Items *Item `json:"items,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// ItemsOrErr returns the Items value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e CategoryEdges) ItemsOrErr() (*Item, error) {
+	if e.loadedTypes[0] {
+		if e.Items == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: item.Label}
+		}
+		return e.Items, nil
+	}
+	return nil, &NotLoadedError{edge: "items"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -27,7 +53,7 @@ func (*Category) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case category.FieldID, category.FieldName:
 			values[i] = new(sql.NullString)
-		case category.ForeignKeys[0]: // item_categories
+		case category.ForeignKeys[0]: // item_category
 			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Category", columns[i])
@@ -58,14 +84,19 @@ func (c *Category) assignValues(columns []string, values []any) error {
 			}
 		case category.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field item_categories", values[i])
+				return fmt.Errorf("unexpected type %T for field item_category", values[i])
 			} else if value.Valid {
-				c.item_categories = new(string)
-				*c.item_categories = value.String
+				c.item_category = new(string)
+				*c.item_category = value.String
 			}
 		}
 	}
 	return nil
+}
+
+// QueryItems queries the "items" edge of the Category entity.
+func (c *Category) QueryItems() *ItemQuery {
+	return (&CategoryClient{config: c.config}).QueryItems(c)
 }
 
 // Update returns a builder for updating this Category.

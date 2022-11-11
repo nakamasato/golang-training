@@ -47,21 +47,39 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Update with Edge
-	client.Debug().Item.UpdateOneID("A0001").AddCategories(category).Save(ctx)
+	// Update with Edge Item-To-Category
+	client.Debug().Item.UpdateOneID("A0001").AddCategory(category).Save(ctx)
+
+	QueryCategoryForItem(ctx, category)
+}
+
+func QueryCategoryForItem(ctx context.Context, category *ent.Category) error {
+	items, err := category.QueryItems().All(ctx)
+	if err != nil {
+		return fmt.Errorf("failed querying user categories: %w", err)
+	}
+	// Query the inverse edge.
+	for _, i := range items {
+		category, err := i.QueryCategory().Only(ctx)
+		if err != nil {
+			return fmt.Errorf("failed querying item %q category: %w", i.Name, err)
+		}
+		log.Printf("item %q category: %q\n", i.Name, category.Name)
+	}
+	return nil
 }
 
 func UpsertItem(ctx context.Context, client *ent.Client) (string, error) {
 	id, err := client.Debug().Item.
 		Create().
-		SetID("A0001"). // UserIDがUnique指定されている場合
-		SetName("a8m").
+		SetID("item_id_1").
+		SetName("Item 1").
 		SetStatus(1).
 		OnConflict(
 			sql.ConflictColumns(item.FieldID),
 		).
 		Update(func(u *ent.ItemUpsert) {
-			u.SetName("a8m")
+			u.SetName("Item 1")
 			u.SetStatus(1)
 		}).
 		ID(ctx)
@@ -71,7 +89,7 @@ func UpsertItem(ctx context.Context, client *ent.Client) (string, error) {
 func QueryItem(ctx context.Context, client *ent.Client) (*ent.Item, error) {
 	i, err := client.Debug().Item.
 		Query().
-		Where(item.Name("a8m")).
+		Where(item.Name("Item 1")).
 		Only(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed querying item: %w", err)

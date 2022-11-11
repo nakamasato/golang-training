@@ -329,25 +329,25 @@ func CreatedAtLTE(v time.Time) predicate.Item {
 	})
 }
 
-// HasCategories applies the HasEdge predicate on the "categories" edge.
-func HasCategories() predicate.Item {
+// HasCategory applies the HasEdge predicate on the "category" edge.
+func HasCategory() predicate.Item {
 	return predicate.Item(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CategoriesTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, CategoriesTable, CategoriesColumn),
+			sqlgraph.To(CategoryTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CategoryTable, CategoryColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasCategoriesWith applies the HasEdge predicate on the "categories" edge with a given conditions (other predicates).
-func HasCategoriesWith(preds ...predicate.Category) predicate.Item {
+// HasCategoryWith applies the HasEdge predicate on the "category" edge with a given conditions (other predicates).
+func HasCategoryWith(preds ...predicate.Category) predicate.Item {
 	return predicate.Item(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CategoriesInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, CategoriesTable, CategoriesColumn),
+			sqlgraph.To(CategoryInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CategoryTable, CategoryColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"tmp/pragmatic-cases/ent/simple-example/ent/category"
+	"tmp/pragmatic-cases/ent/simple-example/ent/item"
 	"tmp/pragmatic-cases/ent/simple-example/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
@@ -23,6 +24,7 @@ type CategoryQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Category
+	withItems  *ItemQuery
 	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -58,6 +60,28 @@ func (cq *CategoryQuery) Unique(unique bool) *CategoryQuery {
 func (cq *CategoryQuery) Order(o ...OrderFunc) *CategoryQuery {
 	cq.order = append(cq.order, o...)
 	return cq
+}
+
+// QueryItems chains the current query on the "items" edge.
+func (cq *CategoryQuery) QueryItems() *ItemQuery {
+	query := &ItemQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(category.Table, category.FieldID, selector),
+			sqlgraph.To(item.Table, item.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, category.ItemsTable, category.ItemsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Category entity from the query.
@@ -241,11 +265,23 @@ func (cq *CategoryQuery) Clone() *CategoryQuery {
 		offset:     cq.offset,
 		order:      append([]OrderFunc{}, cq.order...),
 		predicates: append([]predicate.Category{}, cq.predicates...),
+		withItems:  cq.withItems.Clone(),
 		// clone intermediate query.
 		sql:    cq.sql.Clone(),
 		path:   cq.path,
 		unique: cq.unique,
 	}
+}
+
+// WithItems tells the query-builder to eager-load the nodes that are connected to
+// the "items" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CategoryQuery) WithItems(opts ...func(*ItemQuery)) *CategoryQuery {
+	query := &ItemQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withItems = query
+	return cq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -319,10 +355,16 @@ func (cq *CategoryQuery) prepareQuery(ctx context.Context) error {
 
 func (cq *CategoryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Category, error) {
 	var (
-		nodes   = []*Category{}
-		withFKs = cq.withFKs
-		_spec   = cq.querySpec()
+		nodes       = []*Category{}
+		withFKs     = cq.withFKs
+		_spec       = cq.querySpec()
+		loadedTypes = [1]bool{
+			cq.withItems != nil,
+		}
 	)
+	if cq.withItems != nil {
+		withFKs = true
+	}
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, category.ForeignKeys...)
 	}
@@ -332,6 +374,7 @@ func (cq *CategoryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cat
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Category{config: cq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -343,7 +386,43 @@ func (cq *CategoryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cat
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := cq.withItems; query != nil {
+		if err := cq.loadItems(ctx, query, nodes, nil,
+			func(n *Category, e *Item) { n.Edges.Items = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (cq *CategoryQuery) loadItems(ctx context.Context, query *ItemQuery, nodes []*Category, init func(*Category), assign func(*Category, *Item)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Category)
+	for i := range nodes {
+		if nodes[i].item_category == nil {
+			continue
+		}
+		fk := *nodes[i].item_category
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(item.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "item_category" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (cq *CategoryQuery) sqlCount(ctx context.Context) (int, error) {

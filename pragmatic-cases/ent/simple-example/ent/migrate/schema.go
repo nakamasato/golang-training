@@ -12,7 +12,7 @@ var (
 	CategoriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString},
-		{Name: "item_categories", Type: field.TypeString, Nullable: true},
+		{Name: "item_category", Type: field.TypeString, Nullable: true},
 	}
 	// CategoriesTable holds the schema information for the "categories" table.
 	CategoriesTable = &schema.Table{
@@ -21,7 +21,7 @@ var (
 		PrimaryKey: []*schema.Column{CategoriesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "categories_items_categories",
+				Symbol:     "categories_items_category",
 				Columns:    []*schema.Column{CategoriesColumns[2]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.SetNull,

@@ -78,14 +78,14 @@
         func UpsertItem(ctx context.Context, client *ent.Client) (string, error) {
             id, err := client.Debug().Item.
                 Create().
-                SetID("A0001").
-                SetName("a8m").
+                SetID("item_id_1").
+                SetName("Item 1").
                 SetStatus(1).
                 OnConflict(
                     sql.ConflictColumns(item.FieldID),
                 ).
                 Update(func(u *ent.ItemUpsert) {
-                    u.SetName("a8m")
+                    u.SetName("Item 1")
                     u.SetStatus(1)
                 }).
                 ID(ctx)
@@ -99,7 +99,7 @@
         func QueryItem(ctx context.Context, client *ent.Client) (*ent.Item, error) {
             i, err := client.Item.
                 Query().
-                Where(item.Name("a8m")).
+                Where(item.Name("Item 1")).
                 Only(ctx)
             if err != nil {
                 return nil, fmt.Errorf("failed querying item: %w", err)
@@ -152,7 +152,7 @@
     // Edges of the Item.
     func (Item) Edges() []ent.Edge {
         return []ent.Edge{
-            edge.To("categories", Category.Type),
+            edge.To("category", Category.Type),
         }
     }
     ```
@@ -213,7 +213,7 @@
 1. Add `Edge` to the existing `Item`.
 
     ```go
-    client.Debug().Item.UpdateOneID("A0001").AddCategories(category).Save(ctx)
+    client.Debug().Item.UpdateOneID("A0001").AddCategory(category).Save(ctx)
     ```
 
 1. Run `start/start.go`
@@ -287,4 +287,65 @@
 
 ## 3. Add Inverse Edge (`Category` -> `Item`)
 
+![](item-categories-backref.drawio.svg)
 
+1. Add `BackRef`
+
+    ```go
+    // Edges of the Category.
+    func (Category) Edges() []ent.Edge {
+        return []ent.Edge{
+            // Create an inverse-edge called "items" of type `Items`
+            // and reference it to the "categories" edge (in Item schema)
+            // explicitly using the `Ref` method.
+            edge.From("items", Item.Type).
+                Ref("categories").
+                Unique(),
+        }
+    }
+    ```
+1. Go generate
+    ```
+    go generate ./ent
+    ```
+1. Add `QueryCategoryForItem`
+
+    ```go
+    func QueryCategoryForItem(ctx context.Context, category *ent.Category) error {
+        items, err := category.QueryItems().All(ctx)
+        if err != nil {
+            return fmt.Errorf("failed querying user categories: %w", err)
+        }
+        // Query the inverse edge.
+        for _, i := range items {
+            category, err := i.QueryCategory().Only(ctx)
+            if err != nil {
+                return fmt.Errorf("failed querying item %q category: %w", i.Name, err)
+            }
+            log.Printf("item %q category: %q\n", i.Name, category.Name)
+        }
+        return nil
+    }
+    ```
+
+1. Run
+    ```
+    go run start/start.go
+    ```
+
+    ```
+    2022/11/11 14:20:52 driver.Query: query=INSERT INTO "items" ("name", "status", "created_at", "id") VALUES ($1, $2, $3, $4) ON CONFLICT ("id") DO UPDATE SET "name" = $5, "status" = $6 RETURNING "id" args=[Item 1 1 2022-11-11 14:20:52.592921 +0900 JST m=+0.118637209 item_id_1 Item 1 1]
+    id: item_id_1
+    2022/11/11 14:20:52 driver.Query: query=SELECT DISTINCT "items"."id", "items"."name", "items"."status", "items"."created_at" FROM "items" WHERE "items"."name" = $1 LIMIT 2 args=[Item 1]
+    2022/11/11 14:20:52 item returned:  Item(id=item_id_1, name=Item 1, status=1, created_at=Fri Nov 11 05:16:09 2022)
+    2022/11/11 14:20:52 driver.Query: query=INSERT INTO "categories" ("name", "id") VALUES ($1, $2) ON CONFLICT ("id") DO UPDATE SET "name" = $3 RETURNING "id" args=[Category 1 category_id_1 Category 1]
+    id: category_id_1
+    2022/11/11 14:20:52 driver.Query: query=SELECT DISTINCT "categories"."id", "categories"."name" FROM "categories" WHERE "categories"."name" = $1 LIMIT 2 args=[Category 1]
+    2022/11/11 14:20:52 category returned:  Category(id=category_id_1, name=Category 1)
+    2022/11/11 14:20:52 driver.Tx(12204e0b-c154-432b-a6ac-5a5098e01cc9): started
+    2022/11/11 14:20:52 Tx(12204e0b-c154-432b-a6ac-5a5098e01cc9).Exec: query=UPDATE "categories" SET "item_category" = $1 WHERE "id" = $2 AND "item_category" IS NULL args=[A0001 category_id_1]
+    2022/11/11 14:20:52 Tx(12204e0b-c154-432b-a6ac-5a5098e01cc9): rollbacked
+    2022/11/11 14:20:52 driver.Query: query=SELECT DISTINCT "items"."id", "items"."name", "items"."status", "items"."created_at" FROM "items" JOIN (SELECT "item_category" FROM "categories" WHERE "id" = $1) AS "t1" ON "items"."id" = "t1"."item_category" args=[category_id_1]
+    2022/11/11 14:20:52 driver.Query: query=SELECT DISTINCT "categories"."id", "categories"."name" FROM "categories" WHERE "item_category" = $1 LIMIT 2 args=[A0001]
+    2022/11/11 14:20:52 item "a8m" category: "Category 1"
+    ```

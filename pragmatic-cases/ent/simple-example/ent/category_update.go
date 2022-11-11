@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"tmp/pragmatic-cases/ent/simple-example/ent/category"
+	"tmp/pragmatic-cases/ent/simple-example/ent/item"
 	"tmp/pragmatic-cases/ent/simple-example/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
@@ -33,9 +34,34 @@ func (cu *CategoryUpdate) SetName(s string) *CategoryUpdate {
 	return cu
 }
 
+// SetItemsID sets the "items" edge to the Item entity by ID.
+func (cu *CategoryUpdate) SetItemsID(id string) *CategoryUpdate {
+	cu.mutation.SetItemsID(id)
+	return cu
+}
+
+// SetNillableItemsID sets the "items" edge to the Item entity by ID if the given value is not nil.
+func (cu *CategoryUpdate) SetNillableItemsID(id *string) *CategoryUpdate {
+	if id != nil {
+		cu = cu.SetItemsID(*id)
+	}
+	return cu
+}
+
+// SetItems sets the "items" edge to the Item entity.
+func (cu *CategoryUpdate) SetItems(i *Item) *CategoryUpdate {
+	return cu.SetItemsID(i.ID)
+}
+
 // Mutation returns the CategoryMutation object of the builder.
 func (cu *CategoryUpdate) Mutation() *CategoryMutation {
 	return cu.mutation
+}
+
+// ClearItems clears the "items" edge to the Item entity.
+func (cu *CategoryUpdate) ClearItems() *CategoryUpdate {
+	cu.mutation.ClearItems()
+	return cu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -113,6 +139,41 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := cu.mutation.Name(); ok {
 		_spec.SetField(category.FieldName, field.TypeString, value)
 	}
+	if cu.mutation.ItemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   category.ItemsTable,
+			Columns: []string{category.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: item.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.ItemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   category.ItemsTable,
+			Columns: []string{category.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: item.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{category.Label}
@@ -138,9 +199,34 @@ func (cuo *CategoryUpdateOne) SetName(s string) *CategoryUpdateOne {
 	return cuo
 }
 
+// SetItemsID sets the "items" edge to the Item entity by ID.
+func (cuo *CategoryUpdateOne) SetItemsID(id string) *CategoryUpdateOne {
+	cuo.mutation.SetItemsID(id)
+	return cuo
+}
+
+// SetNillableItemsID sets the "items" edge to the Item entity by ID if the given value is not nil.
+func (cuo *CategoryUpdateOne) SetNillableItemsID(id *string) *CategoryUpdateOne {
+	if id != nil {
+		cuo = cuo.SetItemsID(*id)
+	}
+	return cuo
+}
+
+// SetItems sets the "items" edge to the Item entity.
+func (cuo *CategoryUpdateOne) SetItems(i *Item) *CategoryUpdateOne {
+	return cuo.SetItemsID(i.ID)
+}
+
 // Mutation returns the CategoryMutation object of the builder.
 func (cuo *CategoryUpdateOne) Mutation() *CategoryMutation {
 	return cuo.mutation
+}
+
+// ClearItems clears the "items" edge to the Item entity.
+func (cuo *CategoryUpdateOne) ClearItems() *CategoryUpdateOne {
+	cuo.mutation.ClearItems()
+	return cuo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -247,6 +333,41 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 	}
 	if value, ok := cuo.mutation.Name(); ok {
 		_spec.SetField(category.FieldName, field.TypeString, value)
+	}
+	if cuo.mutation.ItemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   category.ItemsTable,
+			Columns: []string{category.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: item.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.ItemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   category.ItemsTable,
+			Columns: []string{category.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: item.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Category{config: cuo.config}
 	_spec.Assign = _node.assignValues

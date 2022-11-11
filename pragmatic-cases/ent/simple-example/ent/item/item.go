@@ -17,17 +17,17 @@ const (
 	FieldStatus = "status"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
-	// EdgeCategories holds the string denoting the categories edge name in mutations.
-	EdgeCategories = "categories"
+	// EdgeCategory holds the string denoting the category edge name in mutations.
+	EdgeCategory = "category"
 	// Table holds the table name of the item in the database.
 	Table = "items"
-	// CategoriesTable is the table that holds the categories relation/edge.
-	CategoriesTable = "categories"
-	// CategoriesInverseTable is the table name for the Category entity.
+	// CategoryTable is the table that holds the category relation/edge.
+	CategoryTable = "categories"
+	// CategoryInverseTable is the table name for the Category entity.
 	// It exists in this package in order to avoid circular dependency with the "category" package.
-	CategoriesInverseTable = "categories"
-	// CategoriesColumn is the table column denoting the categories relation/edge.
-	CategoriesColumn = "item_categories"
+	CategoryInverseTable = "categories"
+	// CategoryColumn is the table column denoting the category relation/edge.
+	CategoryColumn = "item_category"
 )
 
 // Columns holds all SQL columns for item fields.
