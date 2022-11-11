@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"tmp/pragmatic-cases/ent/simple-example/ent/category"
+	"tmp/pragmatic-cases/ent/simple-example/ent/item"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -32,6 +33,21 @@ func (cc *CategoryCreate) SetName(s string) *CategoryCreate {
 func (cc *CategoryCreate) SetID(s string) *CategoryCreate {
 	cc.mutation.SetID(s)
 	return cc
+}
+
+// AddItemIDs adds the "items" edge to the Item entity by IDs.
+func (cc *CategoryCreate) AddItemIDs(ids ...string) *CategoryCreate {
+	cc.mutation.AddItemIDs(ids...)
+	return cc
+}
+
+// AddItems adds the "items" edges to the Item entity.
+func (cc *CategoryCreate) AddItems(i ...*Item) *CategoryCreate {
+	ids := make([]string, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return cc.AddItemIDs(ids...)
 }
 
 // Mutation returns the CategoryMutation object of the builder.
@@ -153,6 +169,25 @@ func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 	if value, ok := cc.mutation.Name(); ok {
 		_spec.SetField(category.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if nodes := cc.mutation.ItemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   category.ItemsTable,
+			Columns: category.ItemsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: item.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

@@ -215,6 +215,22 @@ func (c *CategoryClient) GetX(ctx context.Context, id string) *Category {
 	return obj
 }
 
+// QueryItems queries the items edge of a Category.
+func (c *CategoryClient) QueryItems(ca *Category) *ItemQuery {
+	query := &ItemQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ca.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(category.Table, category.FieldID, id),
+			sqlgraph.To(item.Table, item.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, category.ItemsTable, category.ItemsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(ca.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *CategoryClient) Hooks() []Hook {
 	return c.hooks.Category
@@ -313,7 +329,7 @@ func (c *ItemClient) QueryCategories(i *Item) *CategoryQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(item.Table, item.FieldID, id),
 			sqlgraph.To(category.Table, category.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, item.CategoriesTable, item.CategoriesColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, item.CategoriesTable, item.CategoriesPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
 		return fromV, nil

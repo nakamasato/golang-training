@@ -50,6 +50,8 @@ func main() {
 
 	client.Debug().Item.UpdateOneID("item_id_1").AddCategories(category).Save(ctx)
 	client.Debug().Item.UpdateOneID("item_id_2").AddCategories(category).Save(ctx)
+
+	QueryCategoryForItem(ctx, category)
 }
 
 func UpsertItem(ctx context.Context, client *ent.Client, itemId, itemName string) (string, error) {
@@ -106,4 +108,20 @@ func QueryCategory(ctx context.Context, client *ent.Client) (*ent.Category, erro
 	}
 	log.Println("category returned: ", c)
 	return c, nil
+}
+
+func QueryCategoryForItem(ctx context.Context, category *ent.Category) error {
+	items, err := category.QueryItems().All(ctx)
+	if err != nil {
+		return fmt.Errorf("failed querying user categories: %w", err)
+	}
+	// Query the inverse edge.
+	for _, i := range items {
+		category, err := i.QueryCategories().Only(ctx)
+		if err != nil {
+			return fmt.Errorf("failed querying item %q category: %w", i.Name, err)
+		}
+		log.Printf("item %q category: %q\n", i.Name, category.Name)
+	}
+	return nil
 }

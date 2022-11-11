@@ -389,7 +389,7 @@
             // and reference it to the "categories" edge (in Item schema)
             // explicitly using the `Ref` method.
             edge.From("items", Item.Type).
-                Ref("categories").
+                Ref("categories"),
             //   Unique(), Not add Unique to make it M2M. Otherwise, O2M
         }
     }
@@ -399,6 +399,10 @@
     go generate ./ent
     ```
 1. Add `QueryCategoryForItem`
+
+    ```go
+    QueryCategoryForItem(ctx, category)
+    ```
 
     ```go
     func QueryCategoryForItem(ctx context.Context, category *ent.Category) error {
