@@ -4,12 +4,11 @@
 
 1. Run postgres
     ```
-    docker compose up
+    docker-compose -f ../docker-compose.yml up -d
     ```
-1. Create database
+1. Drop and create database `ent_simple_example`
     ```
-    docker exec -it postgres psql -U postgres -c 'drop database if exists ent_simple_example'
-    docker exec -it postgres psql -U postgres -c 'create database ent_simple_example'
+    docker exec -it postgres psql -U postgres -c '\set AUTOCOMMIT on\n drop database if exists ent_simple_example; create database ent_simple_example'
     ```
 
 ## 1. Create Item
@@ -533,3 +532,52 @@
     ```
 
     </details>
+
+
+## 4. Play with ent syntax
+
+1. Basic (Select + Where)
+
+    ```go
+	items, _ := client.Debug().Item.Query().Where(item.Or(
+		item.CreatedAt(time.Now()),
+		item.And(item.CreatedAtEQ(time.Now()),
+			item.IDLT("item_id_1")),
+	)).All(ctx)
+    ```
+
+1. `predicates`
+
+    ```go
+    var predicates []predicate.Item
+	predicates = append(predicates,
+		func(s *sql.Selector) {
+			s.Where(sql.CompositeGT([]string{s.C(item.FieldCreatedAt), s.C(item.FieldID)}, time.Now(), "item_ids"))
+		},
+	)
+    client.Debug().Item.
+		Query().
+		Where(predicates...).AllX(ctx)
+    ```
+
+    1. [sql.Selector](https://github.com/ent/ent/blob/v0.11.4/dialect/sql/builder.go#L2121): Selector is a builder for the `SELECT` statement.
+    1. [CompositeGT](https://github.com/ent/ent/blob/c063978d68ca1ca6c6bdd6d1474f267637c67fde/dialect/sql/builder.go#L1793): CompositeGT returns a composite ">" predicate
+    1. [Selector.C](https://github.com/ent/ent/blob/v0.11.4/dialect/sql/builder.go#L2472): C returns a formatted string for a selected column from this statement.
+1. Check query
+
+    ```go
+	t1 := sql.Table("items")
+	dialectBuilder := sql.Dialect(dialect.Postgres).
+		Select().
+		From(t1).
+		Where(sql.CompositeGT(t1.Columns(item.FieldCreatedAt, item.FieldID), time.Now(), "item_id_1"))
+
+	query, _ := dialectBuilder.Query()
+	fmt.Println(query)
+    ```
+1. Debug mode
+
+    ```go
+    client.Debug()
+    ```
+    With debug mode, you can check the generated SQL.

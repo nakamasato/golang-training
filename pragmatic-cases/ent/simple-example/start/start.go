@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"tmp/pragmatic-cases/ent/simple-example/ent"
 	"tmp/pragmatic-cases/ent/simple-example/ent/category"
 	"tmp/pragmatic-cases/ent/simple-example/ent/item"
+	"tmp/pragmatic-cases/ent/simple-example/ent/predicate"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	_ "github.com/lib/pq"
 )
@@ -52,6 +55,44 @@ func main() {
 	client.Debug().Item.UpdateOneID("item_id_2").AddCategories(category).Save(ctx)
 
 	QueryCategoryForItem(ctx, category)
+
+	// Practice
+	fmt.Println("Original Query:")
+	items, _ := client.Debug().Item.Query().Where(item.Or(
+		item.CreatedAt(time.Now()),
+		item.And(item.CreatedAtEQ(time.Now()),
+			item.IDLT("item_id_1")),
+	)).All(ctx)
+	for _, i := range items {
+		fmt.Println(i)
+	}
+
+	fmt.Println("New Query:")
+	var predicates []predicate.Item // type Item func(*sql.Selector)
+
+	predicates = append(predicates,
+		func(s *sql.Selector) {
+			s.Where(sql.CompositeGT([]string{s.C(item.FieldCreatedAt), s.C(item.FieldID)}, time.Now(), "item_ids"))
+		},
+	)
+	client.Debug().Item.
+		Query().
+		Where(predicates...).AllX(ctx)
+
+	t1 := sql.Table("items")
+	dialectBuilder := sql.Dialect(dialect.Postgres).
+		Select().
+		From(t1).
+		Where(sql.CompositeGT(t1.Columns(item.FieldCreatedAt, item.FieldID), time.Now(), "item_id_1"))
+
+	query, _ := dialectBuilder.Query()
+	fmt.Println(query)
+	// client.Debug().Item.Query()
+	// items, _ = client.Debug().Item.Query().Where(
+	// 	sql.CompositeGT(item.CreatedAt(time.Now()), item.IDLT("item_id_1"))).All(ctx)
+	// for _, i := range items {
+	// 	fmt.Println(i)
+	// }
 }
 
 func UpsertItem(ctx context.Context, client *ent.Client, itemId, itemName string) (string, error) {
