@@ -30,20 +30,21 @@ jobs:
           docker-compose up -d
           while ! docker-compose ps | grep healthy; do echo 'postgres not ready. sleeping 3 sec'; sleep 3; done
           echo 'postgres is ready!'
+          docker exec -it postgres psql -U postgres -c 'create database ent_getting_started;'
 
-      - name: run start/start.go
+      - name: test getting-started
         run: go run start/start.go
-        working-directory: pragmatic-cases/ent
+        working-directory: pragmatic-cases/ent/getting-started
 
       - name: check postgres records
         working-directory: pragmatic-cases/ent
         run: |
           # https://github.com/docker/compose/issues/7306
-          docker-compose exec -T postgres psql -U postgres postgres -c 'select * from users'
-          docker-compose exec -T postgres psql -U postgres postgres -c 'select * from users' | grep '4 rows'
-          docker-compose exec -T postgres psql -U postgres postgres -c 'select * from cars'
-          docker-compose exec -T postgres psql -U postgres postgres -c 'select * from cars' | grep '5 rows'
-          docker-compose exec -T postgres psql -U postgres postgres -c 'select * from groups'
-          docker-compose exec -T postgres psql -U postgres postgres -c 'select * from groups' | grep '2 rows'
-          docker-compose exec -T postgres psql -U postgres postgres -c 'select * from group_users'
-          docker-compose exec -T postgres psql -U postgres postgres -c 'select * from group_users' | grep '3 rows'
+          docker-compose exec -T postgres psql -U postgres postgres -d ent_getting_started -c 'select * from users'
+          docker-compose exec -T postgres psql -U postgres postgres -d ent_getting_started -c 'select * from users' | grep '4 rows'
+          docker-compose exec -T postgres psql -U postgres postgres -d ent_getting_started -c 'select * from cars'
+          docker-compose exec -T postgres psql -U postgres postgres -d ent_getting_started -c 'select * from cars' | grep '5 rows'
+          docker-compose exec -T postgres psql -U postgres postgres -d ent_getting_started -c 'select * from groups'
+          docker-compose exec -T postgres psql -U postgres postgres -d ent_getting_started -c 'select * from groups' | grep '2 rows'
+          docker-compose exec -T postgres psql -U postgres postgres -d ent_getting_started -c 'select * from group_users'
+          docker-compose exec -T postgres psql -U postgres postgres -d ent_getting_started -c 'select * from group_users' | grep '3 rows'

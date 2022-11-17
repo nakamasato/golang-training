@@ -21,8 +21,6 @@ go get entgo.io/ent/cmd/ent
     docker exec -it postgres psql -U postgres -c 'drop database if exists ent_getting_started;'
     docker exec -it postgres psql -U postgres -c 'create database ent_getting_started;'
     ```
-
-
 ### Create schema
 
 1. Generate the schema for User

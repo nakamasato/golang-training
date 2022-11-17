@@ -8,7 +8,8 @@
     ```
 1. Drop and create database `ent_simple_example`
     ```
-    docker exec -it postgres psql -U postgres -c '\set AUTOCOMMIT on\n drop database if exists ent_simple_example; create database ent_simple_example'
+    docker exec -it postgres psql -U postgres -c 'drop database if exists ent_simple_example;'
+    docker exec -it postgres psql -U postgres -c 'create database ent_simple_example;'
     ```
 
 ## 1. Create Item
