@@ -7,8 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	"tmp/pragmatic-cases/ent/ent/car"
-	"tmp/pragmatic-cases/ent/ent/user"
+	"tmp/pragmatic-cases/ent/getting-started/ent/car"
+	"tmp/pragmatic-cases/ent/getting-started/ent/user"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -162,19 +162,11 @@ func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := cc.mutation.Model(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: car.FieldModel,
-		})
+		_spec.SetField(car.FieldModel, field.TypeString, value)
 		_node.Model = value
 	}
 	if value, ok := cc.mutation.RegisteredAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: car.FieldRegisteredAt,
-		})
+		_spec.SetField(car.FieldRegisteredAt, field.TypeTime, value)
 		_node.RegisteredAt = value
 	}
 	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {

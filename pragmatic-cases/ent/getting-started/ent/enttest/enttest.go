@@ -4,11 +4,11 @@ package enttest
 
 import (
 	"context"
-	"tmp/pragmatic-cases/ent/ent"
+	"tmp/pragmatic-cases/ent/getting-started/ent"
 	// required by schema hooks.
-	_ "tmp/pragmatic-cases/ent/ent/runtime"
+	_ "tmp/pragmatic-cases/ent/getting-started/ent/runtime"
 
-	"tmp/pragmatic-cases/ent/ent/migrate"
+	"tmp/pragmatic-cases/ent/getting-started/ent/migrate"
 
 	"entgo.io/ent/dialect/sql/schema"
 )
@@ -18,7 +18,7 @@ type (
 	// testing.T and testing.B and used by enttest.
 	TestingT interface {
 		FailNow()
-		Error(...interface{})
+		Error(...any)
 	}
 
 	// Option configures client creation.

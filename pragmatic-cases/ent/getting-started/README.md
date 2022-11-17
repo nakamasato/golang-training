@@ -5,18 +5,23 @@
 
 ### Install
 
-1. Install
+```
+go install entgo.io/ent/cmd/ent@latest
+go get entgo.io/ent/cmd/ent
+```
 
+## Prepare
+
+1. Run postgres
     ```
-    go install entgo.io/ent/cmd/ent@latest
-    go get entgo.io/ent/cmd/ent
+    docker-compose -f ../docker-compose.yml up -d
+    ```
+1. Drop and create database `ent_simple_example`
+    ```
+    docker exec -it postgres psql -U postgres -c 'drop database if exists ent_getting_started;'
+    docker exec -it postgres psql -U postgres -c 'create database ent_getting_started;'
     ```
 
-1. Change dir
-
-    ```
-    cd pragmatic-cases/ent
-    ```
 
 ### Create schema
 
@@ -37,7 +42,7 @@
     2 directories, 3 files
     ```
 
-1. Add two fields `age` and `name` by changing `Field` function.
+1. Add two fields `age` and `name` by changing `Field` function [ent/schema/user.go](ent/schema/user.go).
 
     ```go
     func (User) Fields() []ent.Field {
@@ -55,6 +60,8 @@
     ```
     go generate ./ent
     ```
+
+    <details>
 
     ```
     tree ent
@@ -92,9 +99,11 @@
     7 directories, 22 files
     ```
 
+    </details>
+
 ### Create entity (postgres)
 
-1. Create a `ent.client` in `start/start.go`.
+1. Create a `ent.client` adn create User in `start/start.go`
 
     ```go
     package main
@@ -104,20 +113,26 @@
         "fmt"
         "log"
 
-        "tmp/pragmatic-cases/ent/ent"
+        "tmp/pragmatic-cases/ent/getting-started/ent"
 
         _ "github.com/lib/pq"
     )
 
     func main() {
-        client, err := ent.Open("postgres", "host=localhost port=5432 user=postgres dbname=postgres password=postgres") // hardcoding
+        client, err := ent.Open("postgres", "host=localhost port=5432 user=postgres dbname=ent_getting_started password=postgres sslmode=disable") // hardcoding
         if err != nil {
             log.Fatalf("failed opening connection to postgres: %v", err)
         }
         defer client.Close()
         // Run the auto migration tool.
-        if err := client.Schema.Create(context.Background()); err != nil {
+        ctx := context.Background()
+        if err := client.Schema.Create(ctx); err != nil {
             log.Fatalf("failed creating schema resources: %v", err)
+        }
+
+        _, err = CreateUser(ctx, client)
+        if err != nil {
+            log.Fatalln(err)
         }
     }
 
@@ -135,25 +150,43 @@
     }
     ```
 
+1. Run
+
+    ```
+    go run start/start.go
+    2022/11/17 11:37:38 user was created:  User(id=1, age=30, name=a8m)
+    ```
+
 ### Query entity
 
-Add the following code to `start/start.go`
+1. Add the following code to `start/start.go`
 
-```go
-func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
-	u, err := client.User.
-		Query().
-		Where(user.Name("a8m")).
-		// `Only` fails if no user found,
-		// or more than 1 user returned.
-		Only(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed querying user: %w", err)
-	}
-	log.Println("user returned: ", u)
-	return u, nil
-}
-```
+    ```go
+    func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
+        u, err := client.User.
+            Query().
+            Where(user.Name("a8m")).
+            // `Only` fails if no user found,
+            // or more than 1 user returned.
+            Only(ctx)
+        if err != nil {
+            return nil, fmt.Errorf("failed querying user: %w", err)
+        }
+        log.Println("user returned: ", u)
+        return u, nil
+    }
+    ```
+
+    Use it in `main()`
+    ```go
+	QueryUser(ctx, client)
+    ```
+
+1. Run
+
+    ```
+    go run start/start.go
+    ```
 
 ### Add first Edge (Relation) User -> Cars
 
@@ -165,7 +198,7 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 
     You might need to install printer `go get entgo.io/ent/cmd/internal/printer@v0.11.1`
 
-1. Add fields to `Car` and `Group`.
+1. Add fields to `Car` in `ent/schema/car.go` and `Group` in `ent/schema/group.go`.
 
     ```go
     func (Car) Fields() []ent.Field {
@@ -186,7 +219,7 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
     }
     ```
 
-1. Add the "cars" edge to the User schema.
+1. Add the "cars" edge to the User schema in `ent/schema/user.go`.
 
     ```go
     // Edges of the User.
@@ -196,10 +229,29 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
         }
     }
     ```
-
+1. Go generate
+    ```
+    go generate ./ent
+    ```
 1. Add `CreateCars` and `QueryCars` to `start/start.go`.
 
     ```go
+    import (
+        "context"
+        "fmt"
+        "log"
+        "time"
+
+        "tmp/pragmatic-cases/ent/getting-started/ent"
+        "tmp/pragmatic-cases/ent/getting-started/ent/user"
+        "tmp/pragmatic-cases/ent/getting-started/ent/car"
+
+        _ "github.com/lib/pq"
+    )
+
+    ...
+
+
     func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
         // Create a new car with model "Tesla".
         tesla, err := client.Car.
@@ -255,6 +307,21 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
         return nil
     }
     ```
+1. Use it in main
+    ```go
+	// Create user with cars
+	u, _ :=CreateCars(ctx, client)
+	QueryCars(ctx, u)
+    ```
+1. Run
+    ```
+    go run start/start.go
+    2022/11/17 12:00:06 car was created:  Car(id=3, model=Tesla, registered_at=Thu Nov 17 12:00:06 2022)
+    2022/11/17 12:00:06 car was created:  Car(id=4, model=Ford, registered_at=Thu Nov 17 12:00:06 2022)
+    2022/11/17 12:00:06 user was created:  User(id=21, age=30, name=a8m)
+    2022/11/17 12:00:06 returned cars: [Car(id=3, model=Tesla, registered_at=Thu Nov 17 12:00:06 2022) Car(id=4, model=Ford, registered_at=Thu Nov 17 12:00:06 2022)]
+    2022/11/17 12:00:06 Car(id=4, model=Ford, registered_at=Thu Nov 17 12:00:06 2022)
+    ```
 
 ### Add Inverse Edge (BackRef) Car -> User
 
@@ -295,16 +362,31 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
         return nil
     }
     ```
-
+1. Use it in main
+    ```go
+	// inverse edge
+	QueryCarUsers(ctx, u)
+    ```
+1. Go generate
+    ```
+    go generate ./ent
+    ```
+1. Run
+    ```
+    go run start/start.go
+    2022/11/17 12:04:00 Car(id=6, model=Ford, registered_at=Thu Nov 17 12:04:00 2022)
+    2022/11/17 12:04:00 car "Tesla" owner: "a8m"
+    2022/11/17 12:04:00 car "Ford" owner: "a8m"
+    ```
 ### Create another Edge Group -> User
 
 1. Add Edge to Group.
     ```go
     // Edges of the Group.
     func (Group) Edges() []ent.Edge {
-    return []ent.Edge{
+      return []ent.Edge{
         edge.To("users", User.Type),
-    }
+      }
     }
     ```
 
@@ -478,7 +560,8 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 
     ```go
     func main() {
-        client, err := ent.Open("postgres", "host=localhost port=5432 user=postgres dbname=postgres password=password sslmode=disable") // hardcoding
+    	client, err := ent.Open("postgres", "host=localhost port=5432 user=postgres dbname=ent_getting_started password=postgres sslmode=disable") // hardcoding
+
         if err != nil {
             log.Fatalf("failed opening connection to postgres: %v", err)
         }
@@ -519,7 +602,15 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
         }
     }
     ```
-
+1. Run
+    ```
+    docker exec -it postgres psql -U postgres -d ent_getting_started -c 'truncate users cascade;'
+    go start/start.go
+    2022/11/17 12:10:25 The graph was created successfully
+    2022/11/17 12:10:25 cars returned: [Car(id=9, model=Tesla, registered_at=Thu Nov 17 12:10:25 2022) Car(id=10, model=Mazda, registered_at=Thu Nov 17 12:10:25 2022)]
+    2022/11/17 12:10:25 cars returned: [Car(id=9, model=Tesla, registered_at=Thu Nov 17 12:10:25 2022) Car(id=11, model=Ford, registered_at=Thu Nov 17 12:10:25 2022)]
+    2022/11/17 12:10:25 groups returned: [Group(id=2, name=GitHub) Group(id=1, name=GitLab)]
+    ```
 ### Run
 
 1. Run postgres with docker.
@@ -550,7 +641,7 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 1. Check the schema.
 
     ```
-    docker exec -it postgres psql -U postgres -c '\dt'
+    docker exec -it postgres psql -U postgres -d ent_getting_started -c '\dt'
                 List of relations
      Schema |    Name     | Type  |  Owner
     --------+-------------+-------+----------
@@ -564,7 +655,7 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 1. Check records.
 
     ```
-    docker exec -it postgres psql -U postgres -c 'select * from users'
+    docker exec -it postgres psql -U postgres -d ent_getting_started -c 'select * from users'
      id | age | name
     ----+-----+-------
       1 |  30 | a8m
@@ -573,7 +664,7 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
       4 |  28 | Neta
     (4 rows)
 
-    docker exec -it postgres psql -U postgres -c 'select * from cars'
+    docker exec -it postgres psql -U postgres -d ent_getting_started -c 'select * from cars'
      id | model |         registered_at         | user_cars
     ----+-------+-------------------------------+-----------
       1 | Tesla | 2022-07-15 14:40:26.003466+09 |         2
@@ -583,14 +674,14 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
       5 | Ford  | 2022-07-15 14:40:26.081656+09 |         4
     (5 rows)
 
-    docker exec -it postgres psql -U postgres -c 'select * from groups'
+    docker exec -it postgres psql -U postgres -d ent_getting_started -c 'select * from groups'
      id |  name
     ----+--------
       1 | GitLab
       2 | GitHub
     (2 rows)
 
-    docker exec -it postgres psql -U postgres -c 'select * from group_users'
+    docker exec -it postgres psql -U postgres -d ent_getting_started -c 'select * from group_users'
      group_id | user_id
     ----------+---------
             1 |       4

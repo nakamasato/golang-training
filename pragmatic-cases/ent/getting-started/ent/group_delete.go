@@ -5,8 +5,8 @@ package ent
 import (
 	"context"
 	"fmt"
-	"tmp/pragmatic-cases/ent/ent/group"
-	"tmp/pragmatic-cases/ent/ent/predicate"
+	"tmp/pragmatic-cases/ent/getting-started/ent/group"
+	"tmp/pragmatic-cases/ent/getting-started/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

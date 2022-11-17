@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"sync"
 	"time"
-	"tmp/pragmatic-cases/ent/ent/car"
-	"tmp/pragmatic-cases/ent/ent/group"
-	"tmp/pragmatic-cases/ent/ent/predicate"
-	"tmp/pragmatic-cases/ent/ent/user"
+	"tmp/pragmatic-cases/ent/getting-started/ent/car"
+	"tmp/pragmatic-cases/ent/getting-started/ent/group"
+	"tmp/pragmatic-cases/ent/getting-started/ent/predicate"
+	"tmp/pragmatic-cases/ent/getting-started/ent/user"
 
 	"entgo.io/ent"
 )
@@ -418,8 +418,6 @@ func (m *CarMutation) RemovedEdges() []string {
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *CarMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 

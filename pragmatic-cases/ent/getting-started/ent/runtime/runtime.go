@@ -2,9 +2,9 @@
 
 package runtime
 
-// The schema-stitching logic is generated in tmp/pragmatic-cases/ent/ent/runtime.go
+// The schema-stitching logic is generated in tmp/pragmatic-cases/ent/getting-started/ent/runtime.go
 
 const (
-	Version = "v0.11.1"                                         // Version of ent codegen.
-	Sum     = "h1:im67R+2W3Nee2bNS2YnoYz8oAF0Qz4AOlIvKRIAEISY=" // Sum of ent codegen.
+	Version = "v0.11.4"                                         // Version of ent codegen.
+	Sum     = "h1:grwVY0fp31BZ6oEo3YrXenAuv8VJmEw7F/Bi6WqeH3Q=" // Sum of ent codegen.
 )

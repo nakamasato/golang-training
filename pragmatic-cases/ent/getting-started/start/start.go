@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	client, err := ent.Open("postgres", "host=localhost port=5432 user=postgres dbname=postgres password=postgres sslmode=disable") // hardcoding
+	client, err := ent.Open("postgres", "host=localhost port=5432 user=postgres dbname=ent_getting_started password=postgres sslmode=disable") // hardcoding
 	if err != nil {
 		log.Fatalf("failed opening connection to postgres: %v", err)
 	}
@@ -85,7 +85,7 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 
 func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	// Create a new car with model "Tesla".
-	tesla, err := client.Debug().Car.
+	tesla, err := client.Car.
 		Create().
 		SetModel("Tesla").
 		SetRegisteredAt(time.Now()).
@@ -96,7 +96,7 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	log.Println("car was created: ", tesla)
 
 	// Create a new car with model "Ford".
-	ford, err := client.Debug().Car.
+	ford, err := client.Car.
 		Create().
 		SetModel("Ford").
 		SetRegisteredAt(time.Now()).
@@ -107,7 +107,7 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	log.Println("car was created: ", ford)
 
 	// Create a new user, and add it the 2 cars.
-	a8m, err := client.Debug().User.
+	a8m, err := client.User.
 		Create().
 		SetAge(30).
 		SetName("a8m").
