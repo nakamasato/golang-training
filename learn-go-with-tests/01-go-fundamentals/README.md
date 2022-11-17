@@ -261,7 +261,7 @@ go func(u string) {
 }(url)
 ```
 
-**Channel**: a Go data structure that can both receive and send values. help organize and control the communication between thedifferent processes, allowing us to avoid a ***race condition*** bug.
+**Channel**: a Go data structure that can both receive and send values. help organize and control the communication between the different processes, allowing us to avoid a ***race condition*** bug.
 
 ```go
 resultChannel <- result{u, wc(u)}

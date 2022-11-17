@@ -1,0 +1,27 @@
+<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="162px" height="122px" viewBox="-0.5 -0.5 162 122" content="&lt;mxfile&gt;&lt;diagram id=&quot;MT5mVwAt--UxpPc7I1Ha&quot; name=&quot;Page-1&quot;&gt;lZRNb9swDIZ/je/+aJvs2DjdViAbBuSwM2sxtlDZNGR6ifvrR9mSEzctkF4C8SEpUnzpRFlen35YaKtfpNBEaaxOUbaN0nSVxPLrwDCB+9V6AqXVakLJGez1G3ro88peK+wWgUxkWLdLWFDTYMELBtbScRl2ILOs2kKJV2BfgLmmf7XiaqLr+/jMf6Iuq1A5ib3nBYrX0lLf+HoNNTh5agjX+NCuAkXHC5Q9RVluiXg61accjZtqmNiU9/0T79yyxYZvSVhNCf/A9P7Vz4y1742HMIruqGsD8opsU1TaqB0M1LsCHctbg7WpyOo3ahiMuBIB4rbslc3iRcTeZQp2dJwVKp90EL/PSe6C7XuJx0stvc6SpC4fO4n/E14dz2gHHYdWwqSdV0FXjfWcAUaXjZwLyUYrwM8ELePp07kms1qy/0g1sh0kxCdkYRf87guY7ON5k5IHz6rLLQqbAX57y/nus4xy8Ep+rOr6StUo3TyrKH2I0iyJxydufkONSyKScN8tWW4RGB/5aiXC1AweeBYlJ0Mywe248aKcNuYd6loodFPuxqzt3Tu5nZhu7lq+wkdfgKkNesLLvASWpNkLW6QJSt8k3+pj+YYg321qffu6WGKeP+/Rd/HvmT39Bw==&lt;/diagram&gt;&lt;/mxfile&gt;">
+    <defs/>
+    <g>
+        <path d="M 161 31 L 161 14.5 Q 161 1 147.5 1 L 14.5 1 Q 1 1 1 14.5 L 1 31" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-width="2" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 1 31 L 1 107.5 Q 1 121 14.5 121 L 147.5 121 Q 161 121 161 107.5 L 161 31" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1 31 L 161 31" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2" stroke-miterlimit="10" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="14px">
+            <text x="80.5" y="21.5">
+                Item
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" font-size="12px">
+            <text x="6.5" y="48.5">
+                +Id
+            </text>
+            <text x="6.5" y="62.5">
+                +Name
+            </text>
+            <text x="6.5" y="76.5">
+                +Status
+            </text>
+            <text x="6.5" y="90.5">
+                +CreateAt
+            </text>
+        </g>
+    </g>
+</svg>
