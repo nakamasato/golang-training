@@ -31,12 +31,13 @@ jobs:
           while ! docker-compose ps | grep healthy; do echo 'postgres not ready. sleeping 3 sec'; sleep 3; done
           echo 'postgres is ready!'
           docker-compose exec -T postgres psql -U postgres postgres -c 'create database ent_getting_started;'
+          docker-compose exec -T postgres psql -U postgres postgres -c 'create database ent_simple_example;'
 
-      - name: test getting-started
+      - name: run getting_started
         run: go run start/start.go
         working-directory: pragmatic-cases/ent/getting-started
 
-      - name: check postgres records
+      - name: check postgres records for getting_started
         working-directory: pragmatic-cases/ent
         run: |
           # https://github.com/docker/compose/issues/7306
@@ -48,3 +49,7 @@ jobs:
           docker-compose exec -T postgres psql -U postgres postgres -d ent_getting_started -c 'select * from groups' | grep '2 rows'
           docker-compose exec -T postgres psql -U postgres postgres -d ent_getting_started -c 'select * from group_users'
           docker-compose exec -T postgres psql -U postgres postgres -d ent_getting_started -c 'select * from group_users' | grep '3 rows'
+
+      - name: run simple_example
+        run: go run start/start.go
+        working-directory: pragmatic-cases/ent/simple-example
