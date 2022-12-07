@@ -205,7 +205,90 @@ https://github.com/open-telemetry/opentelemetry-go/tree/main/exporters/jaeger
     1. Jaegar UI: http://localhost:16686/search
 
 
-1.
+1. Create `TracerProvider` with Jaegar exporter
+
+    ```go
+    // tracerProvider returns an OpenTelemetry TracerProvider configured to use
+    // the Jaeger exporter that will send spans to the provided url. The returned
+    // TracerProvider will also use a Resource configured with all the information
+    // about the application.
+    func tracerProvider(url string) (*tracesdk.TracerProvider, error) {
+    	// Create the Jaeger exporter
+    	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
+    	if err != nil {
+    		return nil, err
+    	}
+    	tp := tracesdk.NewTracerProvider(
+    		// Always be sure to batch in production.
+    		tracesdk.WithBatcher(exp),
+    		// Record information about this application in a Resource.
+    		tracesdk.WithResource(resource.NewWithAttributes(
+    			semconv.SchemaURL,
+    			semconv.ServiceNameKey.String(service),
+    			attribute.String("environment", environment),
+    			attribute.Int64("ID", id),
+    		)),
+    	)
+    	return tp, nil
+    }
+    ```
+1. Update `main()`
+
+    ```go
+    func main() {
+    	l := log.New(os.Stdout, "", 0)
+
+    	tp, err := tracerProvider("http://localhost:14269/api/traces")
+    	if err != nil {
+    		log.Fatal(err)
+    	}
+    	defer func() {
+    		if err := tp.Shutdown(context.Background()); err != nil {
+    			l.Fatal(err)
+    		}
+    	}()
+    	otel.SetTracerProvider(tp)
+
+    	sigCh := make(chan os.Signal, 1)
+    	signal.Notify(sigCh, os.Interrupt)
+
+    	errCh := make(chan error)
+    	app := NewApp(os.Stdin, l)
+    	go func() {
+    		errCh <- app.Run(context.Background())
+    	}()
+
+    	select {
+    	case <-sigCh:
+    		l.Println("\ngoodbye")
+    		return
+    	case err := <-errCh:
+    		if err != nil {
+    			l.Fatal(err)
+    		}
+    	}
+    }
+    ```
+
+1. Run
+
+    ```
+    go run .
+    What Fibonacci number would you like to know:
+    10
+    Fibonacci(10) = 55
+    What Fibonacci number would you like to know:
+    20
+    Fibonacci(20) = 6765
+    What Fibonacci number would you like to know:
+    10
+    Fibonacci(10) = 55
+    What Fibonacci number would you like to know:
+    ```
+
+1. Check Jaegar UI on http://localhost:16686/search
+
+    ![](docs/jaegar-trace.png)
 
 ## 3. [Zipkin](https://github.com/openzipkin/zipkin)
 
