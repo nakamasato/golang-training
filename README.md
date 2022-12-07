@@ -44,7 +44,7 @@ go1.19
     1. [Ginkgo](pragmatic-cases/ginkgo)
     1. [MySQL](pragmatic-cases/mysql)
     1. [String to Object](pragmatic-cases/string-to-object)
-
+    1. [Opentelemetry](pragmatic-cases/opentelemetry)
 ## References & readings
 1. [Learn Go with Tests](https://quii.gitbook.io/)
 1. [Advanced Testing with Go](https://speakerdeck.com/mitchellh/advanced-testing-with-go)
