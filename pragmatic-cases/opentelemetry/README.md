@@ -352,4 +352,3 @@ Send the telemetry data (traces) to stdout (console exporter) to make the traces
 1. What's **TraceProvider**?: TracerProvider constructs Tracer with specified configuration and register it to use in the target app.
 1. Trace vs. Span: a **Trace** can be thought of as a directed acyclic graph (DAG) of Spans, where the edges between Spans are defined as parent/child relationship. A **Span** is a single operation within a Trace
 1. OtelCollector Gateway？:
-
