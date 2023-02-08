@@ -4,7 +4,7 @@
 
 ## Version
 
-go1.20
+[go1.20](https://tip.golang.org/doc/go1.20)
 
 ## Basics
 
