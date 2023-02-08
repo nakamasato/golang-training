@@ -18,7 +18,7 @@ require (
 )
 
 require (
-	entgo.io/ent v0.11.6
+	entgo.io/ent v0.11.7
 	github.com/gorilla/websocket v1.5.0
 	github.com/lib/pq v1.10.7
 	github.com/onsi/ginkgo v1.16.5
@@ -31,7 +31,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.9.1-0.20230119123307-a3ab6808892b // indirect
+	ariga.io/atlas v0.9.1-0.20230119145809-92243f7c55cb // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
