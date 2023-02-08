@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/go-sql-driver/mysql v1.7.0
-	github.com/onsi/ginkgo/v2 v2.7.0
+	github.com/onsi/ginkgo/v2 v2.8.0
 	github.com/onsi/gomega v1.26.0
 	github.com/prometheus/client_golang v1.14.0
 	golang.org/x/net v0.5.0 // indirect
