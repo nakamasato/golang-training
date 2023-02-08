@@ -1,16 +1,26 @@
 # Open Telemetry
 
+OTel’s goal is to provide a set of **standardized vendor-agnostic SDKs, APIs, and tools for ingesting, transforming, and sending data to an Observability back-end**
+
+## Overview (WIP)
+
+![](docs/overview.drawio.svg)
+
+
 ## 1. [Getting Started](https://opentelemetry.io/docs/instrumentation/go/getting-started/)
 
-1. Have your application instrumented to produce telemetry data
-1. have an exporter to send that data to the console
-1. `TraceProvider` connects them. It is a centralized point where instrumentation will get a Tracer from and funnels the telemetry data from these Tracers to export pipelines.
-    `SpanProcessor`: receive and transmit data to exporters
+1. Instrument your application to produce telemetry data with `Tracer`.
+1. Create an **exporter** to send that data to the console.
+1. `TraceProvider` connects them. It is a centralized point where instrumentation will get a Tracer from and funnels the telemetry data from these Tracers to export pipelines. (config: SpanProcessors, IdGenerator, SpanLimits and Sampler)
+    1. `SpanProcessor`: receive and transmit data to exporters
 
 ### 1.1. Make Fibonacci app
 
-1. `fib.go`
-1. `app.go`
+Fibonacci app: return the Fibonacci number for the number provided by the input.
+
+1. [fib/fib.go](fib/fib.go)
+
+1. [fib/app.go](fib/app.go)
     ```go
     // Run starts polling users for Fibonacci number requests and writes results.
     func (a *App) Run(ctx context.Context) error {
@@ -24,17 +34,27 @@
         }
     }
     ```
-1. `main.go`
+1. [base/main.go](base/main.go)
+1. Run
 
-### 1.2. Run the app
+    ```
+    go run base/main.go
+    What Fibonacci number would you like to know:
+    10
+    Fibonacci(10) = 55
+    What Fibonacci number would you like to know:
+    20
+    Fibonacci(20) = 6765
+    What Fibonacci number would you like to know:
+    ^C
+    goodbye
+    ```
 
-```
-go run .
-```
+### 1.2. Trace Instrumentation
 
-### 1.3. Trace Instrumentation
+Instrumentation: Generate trace in the target app with `Tracer`.
 
-1. Add the imports to app.go
+1. Add the imports to [fib/app.go](fib/app.go)
 
     ```go
     import (
@@ -49,7 +69,8 @@ go run .
         "go.opentelemetry.io/otel/trace"
     )
     ```
-1. Add trace
+
+1. Add trace in [fib/app.go](fib/app.go)
     > The OpenTelemetry Tracing API provides a Tracer to create traces.
 
     > A **trace** is a record of the connection(s) between participants processing a transaction.
@@ -59,6 +80,7 @@ go run .
     newCtx, span := otel.Tracer(name).Start(ctx, "Run") // trace for Run
 
     // a target work
+
     span.End()
     ```
 
@@ -79,7 +101,13 @@ go run .
     └── Write
         └── Fibonacci
     ```
-### 1.4. Exporter
+
+At this point, you can't see the generated traces.
+
+### 1.3. Exporter
+
+Send the telemetry data (traces) to stdout (console exporter) to make the traces visible.
+
 1. Add Console Exporter to `main.go`
 
     ```go
@@ -95,7 +123,10 @@ go run .
     }
     ```
 
-### 1.5. Resource
+### 1.4. Resource
+
+`Resource`: represent the entity producing telemetry.
+
 1. Add a Resource to `main.go`
 
     ```go
@@ -113,8 +144,11 @@ go run .
         return r
     }
     ```
-### 1.6. TracerProvider
-1. Add TracerProvider to main.
+### 1.5. TracerProvider
+
+`TracerProvider` connects instrumentation and exporter by creating and registering Tracer with the exporter.
+
+1. Add `TracerProvider` to main ([console-exporter/main.go](console-exporter/main.go)).
 
     ```go
 	// Write telemetry data to a file.
@@ -145,34 +179,44 @@ go run .
 1. Run
 
     ```
-    go run .
+    go run console-exporter/main.go
+    What Fibonacci number would you like to know:
+    10
+    Fibonacci(10) = 55
+    What Fibonacci number would you like to know:
+    20
+    Fibonacci(20) = 6765
+    What Fibonacci number would you like to know:
+    ^C
+    goodbye
     ```
 
     There's `traces.txt`
 
     ```json
     {
-        "Name": "Run",
+        "Name": "Poll",
         "SpanContext": {
-                "TraceID": "b8c0291b6e5c0de0822cd8a4e98eca18",
-                "SpanID": "cae41bc2b5d984a8",
+                "TraceID": "3794e28f6e88a5736da81c5a2dda262a",
+                "SpanID": "d3704194fdaa8354",
                 "TraceFlags": "01",
                 "TraceState": "",
                 "Remote": false
         },
         "Parent": {
-                "TraceID": "00000000000000000000000000000000",
-                "SpanID": "0000000000000000",
-                "TraceFlags": "00",
+                "TraceID": "3794e28f6e88a5736da81c5a2dda262a",
+                "SpanID": "4c3c9a26044348f1",
+                "TraceFlags": "01",
                 "TraceState": "",
                 "Remote": false
         },
-        ...
+        "SpanKind": 1,
+        "StartTime": "0001-01-01T00:00:00Z",
+        "EndTime": "0001-01-01T00:00:00Z",
+        "Attributes": null,
     ```
 
-## 2. Jaegar Exporter
-
-https://github.com/open-telemetry/opentelemetry-go/tree/main/exporters/jaeger
+## 2. [Jaegar Exporter](https://github.com/open-telemetry/opentelemetry-go/tree/main/exporters/jaeger)
 
 1. Run Jaegar
 
@@ -205,7 +249,7 @@ https://github.com/open-telemetry/opentelemetry-go/tree/main/exporters/jaeger
     1. Jaegar UI: http://localhost:16686/search
 
 
-1. Create `TracerProvider` with Jaegar exporter
+1. Create `TracerProvider` with `Jaegar` exporter in [jaegar-exporter/main.go](jaegar-exporter/main.go)
 
     ```go
     // tracerProvider returns an OpenTelemetry TracerProvider configured to use
@@ -232,13 +276,13 @@ https://github.com/open-telemetry/opentelemetry-go/tree/main/exporters/jaeger
     	return tp, nil
     }
     ```
-1. Update `main()`
+1. Update `main()` in [jaegar-exporter/main.go](jaegar-exporter/main.go)
 
     ```go
     func main() {
     	l := log.New(os.Stdout, "", 0)
 
-    	tp, err := tracerProvider("http://localhost:14269/api/traces")
+    	tp, err := tracerProvider("http://localhost:14268/api/traces")
     	if err != nil {
     		log.Fatal(err)
     	}
@@ -273,7 +317,7 @@ https://github.com/open-telemetry/opentelemetry-go/tree/main/exporters/jaeger
 1. Run
 
     ```
-    go run .
+    go run jaegar-exporter/main.go
     What Fibonacci number would you like to know:
     10
     Fibonacci(10) = 55
@@ -281,18 +325,31 @@ https://github.com/open-telemetry/opentelemetry-go/tree/main/exporters/jaeger
     20
     Fibonacci(20) = 6765
     What Fibonacci number would you like to know:
-    10
-    Fibonacci(10) = 55
-    What Fibonacci number would you like to know:
+    ^C
+    goodbye
     ```
 
 1. Check Jaegar UI on http://localhost:16686/search
 
-    ![](docs/jaegar-trace.png)
+    1. There are two traces (as we executed Run twice):
+        ![](docs/jaegar-trace.png)
+    1. Click on the first trace and you'll see 4 spans in it:
+        ![](docs/jaegar-trace-1.png)
+    1. You can also check flamegraph:
+        ![](docs/jaegar-trace-flamegraph.png)
 
-## 3. [Zipkin](https://github.com/openzipkin/zipkin)
+## 3. [Zipkin](https://github.com/openzipkin/zipkin) (ToDo)
 
 1. Run [zipkin](https://zipkin.io/)
     ```
     docker run -d -p 9411:9411 openzipkin/zipkin
     ```
+
+### FAQ
+
+1. What's **Resource**?: The entity that the traces are generated from. (Service, service instance, etc.)
+1. API vs. SDK:
+1. What's **TraceProvider**?: TracerProvider constructs Tracer with specified configuration and register it to use in the target app.
+1. Trace vs. Span: a **Trace** can be thought of as a directed acyclic graph (DAG) of Spans, where the edges between Spans are defined as parent/child relationship. A **Span** is a single operation within a Trace
+1. OtelCollector Gateway？:
+

@@ -14,6 +14,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
+	"tmp/pragmatic-cases/opentelemetry/fib"
 )
 
 const (
@@ -49,22 +50,34 @@ func tracerProvider(url string) (*trace.TracerProvider, error) {
 func main() {
 	l := log.New(os.Stdout, "", 0)
 
-	tp, err := tracerProvider("http://localhost:14269/api/traces")
+	// Write telemetry data to a file.
+	f, err := os.Create("traces.txt")
 	if err != nil {
-		log.Fatal(err)
+		l.Fatal(err)
 	}
+	defer f.Close()
+
+	exp, err := newExporter(f)
+	if err != nil {
+		l.Fatal(err)
+	}
+
+	tp := trace.NewTracerProvider(
+		trace.WithBatcher(exp),
+		trace.WithResource(newResource()),
+	)
 	defer func() {
 		if err := tp.Shutdown(context.Background()); err != nil {
 			l.Fatal(err)
 		}
 	}()
-	otel.SetTracerProvider(tp)
+	otel.SetTracerProvider(tp) // register tp as the global trace provider
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt)
 
 	errCh := make(chan error)
-	app := NewApp(os.Stdin, l)
+	app := fib.NewApp(os.Stdin, l)
 	go func() {
 		errCh <- app.Run(context.Background())
 	}()
