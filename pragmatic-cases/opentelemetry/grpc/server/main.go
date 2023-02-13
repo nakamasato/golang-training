@@ -27,7 +27,7 @@ import (
 	"net"
 
 	"google.golang.org/grpc"
-	pb "google.golang.org/grpc/examples/helloworld/helloworld"
+	pb "tmp/pragmatic-cases/opentelemetry/grpc/helloworld"
 )
 
 var (

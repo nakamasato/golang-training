@@ -375,11 +375,18 @@ Send the telemetry data (traces) to stdout (console exporter) to make the traces
 
 [helloworld.proto](https://github.com/grpc/grpc-go/blob/master/examples/helloworld/helloworld/helloworld.proto)
 
+```
+protoc --go_out=. --go_opt=paths=source_relative \--go-grpc_out=. --go-grpc_opt=paths=source_relative \grpc/helloworld/helloworld.proto
+```
+
 
 ```protobuf
 syntax = "proto3";
 
 option go_package = "google.golang.org/grpc/examples/helloworld/helloworld";
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.helloworld";
+option java_outer_classname = "HelloWorldProto";
 
 package helloworld;
 
@@ -415,22 +422,20 @@ Generate code
 ```
 protoc --go_out=. --go_opt=paths=source_relative \
 --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-grpc/api/helloworld.proto
+grpc/helloworld/helloworld.proto
 ```
 
-This will generate `hello-service_grpc.pb.go` and `hello-service.pb.go` under `grpc/api`
+This will generate `hello-service_grpc.pb.go` and `hello-service.pb.go` under `grpc/helloworld`
 
 ```
-tree grpc/api
-grpc/api
+tree grpc/helloworld
+grpc/helloworld
 ├── helloworld.pb.go
 ├── helloworld.proto
 └── helloworld_grpc.pb.go
 
 0 directories, 3 files
 ```
-
-</details>
 
 ## 3.3. Prepare server and client code
 
@@ -442,11 +447,31 @@ server:
 curl -o grpc/server/main.go  https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/greeter_server/main.go
 ```
 
+<details>
+
+If you want to use the generated code:
+
+```
+gsed -i 's#google.golang.org/grpc/examples/helloworld/helloworld#tmp/pragmatic-cases/opentelemetry/grpc/helloworld#g' grpc/server/main.go
+```
+
+</details>
+
 client:
 
 ```
 curl -o grpc/client/main.go  https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/greeter_client/main.g
 ```
+
+<details>
+
+If you want to use the generated code:
+
+```
+gsed -i 's#google.golang.org/grpc/examples/helloworld/helloworld#tmp/pragmatic-cases/opentelemetry/grpc/helloworld#g' grpc/client/main.go
+```
+
+</details>
 
 ### 3.4. Run (no trace)
 
@@ -460,7 +485,6 @@ curl -o grpc/client/main.go  https://raw.githubusercontent.com/grpc/grpc-go/mast
     go run grpc/client/main.go
     2023/02/13 10:01:11 Greeting: Hello world
     ```
-
 
 
 ## FAQ
