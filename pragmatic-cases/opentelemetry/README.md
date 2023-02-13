@@ -6,6 +6,10 @@ OTel’s goal is to provide a set of **standardized vendor-agnostic SDKs, APIs, 
 
 ![](docs/overview.drawio.svg)
 
+## Tracing Model
+
+![](docs/tracing-model.drawio.svg)
+
 
 ## 1. [Getting Started](https://opentelemetry.io/docs/instrumentation/go/getting-started/)
 
@@ -51,6 +55,8 @@ Fibonacci app: return the Fibonacci number for the number provided by the input.
     ```
 
 ### 1.2. Trace Instrumentation
+
+#### 1.2.1. Trace Instrumentation - Basic
 
 Instrumentation: Generate trace in the target app with `Tracer`.
 
@@ -103,6 +109,19 @@ Instrumentation: Generate trace in the target app with `Tracer`.
     ```
 
 At this point, you can't see the generated traces.
+
+### 1.2.2. Trace Instrumentation - Error
+
+1. You can also record errors by updating `Write` function:
+
+    ```go
+    f, err := Fibonacci(n)
+    if err != nil {
+        span.RecordError(err)
+        span.SetStatus(codes.Error, err.Error())
+    }
+    return f, err
+    ```
 
 ### 1.3. Exporter
 
@@ -337,18 +356,122 @@ Send the telemetry data (traces) to stdout (console exporter) to make the traces
         ![](docs/jaegar-trace-1.png)
     1. You can also check flamegraph:
         ![](docs/jaegar-trace-flamegraph.png)
-
-## 3. [Zipkin](https://github.com/openzipkin/zipkin) (ToDo)
-
-1. Run [zipkin](https://zipkin.io/)
+1. Run and send a request that would cause an error.
     ```
-    docker run -d -p 9411:9411 openzipkin/zipkin
+    go run jaegar-exporter/main.go
+    What Fibonacci number would you like to know:
+    100
+    Fibonacci(100): unsupported fibonacci number 100: too large
+    What Fibonacci number would you like to know:
+    ^C
+    goodbye
     ```
 
-### FAQ
+## 3. [gRPC Tracing Example](https://github.com/open-telemetry/opentelemetry-go-contrib/tree/instrumentation/google.golang.org/grpc/otelgrpc/example/v0.39.0/instrumentation/google.golang.org/grpc/otelgrpc/example)
+
+
+<details>
+### 3.1. Create proto file
+
+[helloworld.proto](https://github.com/grpc/grpc-go/blob/master/examples/helloworld/helloworld/helloworld.proto)
+
+
+```protobuf
+syntax = "proto3";
+
+option go_package = "google.golang.org/grpc/examples/helloworld/helloworld";
+
+package helloworld;
+
+// The greeting service definition.
+service Greeter {
+  // Sends a greeting
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings
+message HelloReply {
+  string message = 1;
+}
+
+```
+
+
+### 3.2. Generate gRPC code (no need)
+
+Install Go protocol buffers plugin (if you don't have)
+
+```
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+```
+
+Generate code
+
+```
+protoc --go_out=. --go_opt=paths=source_relative \
+--go-grpc_out=. --go-grpc_opt=paths=source_relative \
+grpc/api/helloworld.proto
+```
+
+This will generate `hello-service_grpc.pb.go` and `hello-service.pb.go` under `grpc/api`
+
+```
+tree grpc/api
+grpc/api
+├── helloworld.pb.go
+├── helloworld.proto
+└── helloworld_grpc.pb.go
+
+0 directories, 3 files
+```
+
+</details>
+
+## 3.3. Prepare server and client code
+
+Download from https://github.com/grpc/grpc-go/tree/master/examples/helloworld
+
+server:
+
+```
+curl -o grpc/server/main.go  https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/greeter_server/main.go
+```
+
+client:
+
+```
+curl -o grpc/client/main.go  https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/greeter_client/main.g
+```
+
+### 3.4. Run (no trace)
+
+1. Run gRPC server.
+
+    ```
+    go run grpc/server/main.go
+    ```
+1. Execute client code. (from another terminal)
+    ```
+    go run grpc/client/main.go
+    2023/02/13 10:01:11 Greeting: Hello world
+    ```
+
+
+
+## FAQ
 
 1. What's **Resource**?: The entity that the traces are generated from. (Service, service instance, etc.)
-1. API vs. SDK:
+1. [API](https://opentelemetry.io/docs/reference/specification/overview/#api) vs. [SDK](https://opentelemetry.io/docs/reference/specification/overview/#sdk):
 1. What's **TraceProvider**?: TracerProvider constructs Tracer with specified configuration and register it to use in the target app.
 1. Trace vs. Span: a **Trace** can be thought of as a directed acyclic graph (DAG) of Spans, where the edges between Spans are defined as parent/child relationship. A **Span** is a single operation within a Trace
 1. OtelCollector Gateway？:
+
+
+## Links
+
+1. https://grafana.com/blog/2021/09/23/intro-to-distributed-tracing-with-tempo-opentelemetry-and-grafana-cloud/
