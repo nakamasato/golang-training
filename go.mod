@@ -18,7 +18,7 @@ require (
 )
 
 require (
-	entgo.io/ent v0.11.7
+	entgo.io/ent v0.11.8
 	github.com/gorilla/websocket v1.5.0
 	github.com/lib/pq v1.10.7
 	github.com/onsi/ginkgo v1.16.5
