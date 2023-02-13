@@ -235,9 +235,9 @@ Send the telemetry data (traces) to stdout (console exporter) to make the traces
         "Attributes": null,
     ```
 
-## 2. [Jaegar Exporter](https://github.com/open-telemetry/opentelemetry-go/tree/main/exporters/jaeger)
+## 2. [Jaeger Exporter](https://github.com/open-telemetry/opentelemetry-go/tree/main/exporters/jaeger)
 
-1. Run Jaegar
+1. Run Jaeger
 
     ```
     docker run -d --name jaeger \
@@ -265,10 +265,10 @@ Send the telemetry data (traces) to stdout (console exporter) to make the traces
     {"status":"Server available","upSince":"2022-12-07T11:31:52.359472384Z","uptime":"36.4175651s"}%
     ```
 
-    1. Jaegar UI: http://localhost:16686/search
+    1. Jaeger UI: http://localhost:16686/search
 
 
-1. Create `TracerProvider` with `Jaegar` exporter in [jaegar-exporter/main.go](jaegar-exporter/main.go)
+1. Create `TracerProvider` with `Jaeger` exporter in [jaeger-exporter/main.go](jaeger-exporter/main.go)
 
     ```go
     // tracerProvider returns an OpenTelemetry TracerProvider configured to use
@@ -295,7 +295,7 @@ Send the telemetry data (traces) to stdout (console exporter) to make the traces
     	return tp, nil
     }
     ```
-1. Update `main()` in [jaegar-exporter/main.go](jaegar-exporter/main.go)
+1. Update `main()` in [jaeger-exporter/main.go](jaeger-exporter/main.go)
 
     ```go
     func main() {
@@ -336,7 +336,7 @@ Send the telemetry data (traces) to stdout (console exporter) to make the traces
 1. Run
 
     ```
-    go run jaegar-exporter/main.go
+    go run jaeger-exporter/main.go
     What Fibonacci number would you like to know:
     10
     Fibonacci(10) = 55
@@ -348,17 +348,17 @@ Send the telemetry data (traces) to stdout (console exporter) to make the traces
     goodbye
     ```
 
-1. Check Jaegar UI on http://localhost:16686/search
+1. Check Jaeger UI on http://localhost:16686/search
 
     1. There are two traces (as we executed Run twice):
-        ![](docs/jaegar-trace.png)
+        ![](docs/jaeger-trace.png)
     1. Click on the first trace and you'll see 4 spans in it:
-        ![](docs/jaegar-trace-1.png)
+        ![](docs/jaeger-trace-1.png)
     1. You can also check flamegraph:
-        ![](docs/jaegar-trace-flamegraph.png)
+        ![](docs/jaeger-trace-flamegraph.png)
 1. Run and send a request that would cause an error.
     ```
-    go run jaegar-exporter/main.go
+    go run jaeger-exporter/main.go
     What Fibonacci number would you like to know:
     100
     Fibonacci(100): unsupported fibonacci number 100: too large
@@ -369,8 +369,9 @@ Send the telemetry data (traces) to stdout (console exporter) to make the traces
 
 ## 3. [gRPC Tracing Example](https://github.com/open-telemetry/opentelemetry-go-contrib/tree/instrumentation/google.golang.org/grpc/otelgrpc/example/v0.39.0/instrumentation/google.golang.org/grpc/otelgrpc/example)
 
+- [gRPC Quick start](https://grpc.io/docs/languages/go/quickstart/)
+- [gRPC Tracing Example](https://github.com/open-telemetry/opentelemetry-go-contrib/tree/instrumentation/google.golang.org/grpc/otelgrpc/example/v0.39.0/instrumentation/google.golang.org/grpc/otelgrpc/example)
 
-<details>
 ### 3.1. Create proto file
 
 [helloworld.proto](https://github.com/grpc/grpc-go/blob/master/examples/helloworld/helloworld/helloworld.proto)
@@ -486,7 +487,107 @@ gsed -i 's#google.golang.org/grpc/examples/helloworld/helloworld#tmp/pragmatic-c
     2023/02/13 10:01:11 Greeting: Hello world
     ```
 
+### 3.5. Trace Instrumentation
+1. Set const.
+    ```go
+    const (
+        service     = "grpc-example"
+        environment = "production"
+        tracerName  = "helloworld"
+    )
+    ```
+1. Add interceptor to server/main.go
 
+    ```go
+	s := grpc.NewServer(
+		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
+		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
+	)
+    ```
+1. Add span in `SayHello`
+    ```go
+    func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
+        _, span := otel.Tracer(tracerName).Start(ctx, "SayHello",
+            trace.WithAttributes(attribute.String("extra.key", "extra.value")))
+        log.Printf("Received: %v", in.GetName())
+        defer span.End()
+        return &pb.HelloReply{Message: "Hello " + in.GetName()}, nil
+    }
+    ```
+
+### 3.6. Set up TraceProvider (with Jaeger)
+
+```go
+package main
+
+import (
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/sdk/resource"
+	tracesdk "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+)
+
+func NewJaegerTracerProvider(service, environment, url string) (*tracesdk.TracerProvider, error) {
+	// Create the Jaeger exporter
+	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
+	if err != nil {
+		return nil, err
+	}
+	tp := tracesdk.NewTracerProvider(
+		// Always be sure to batch in production.
+		tracesdk.WithBatcher(exp),
+		// Record information about this application in a Resource.
+		tracesdk.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceName(service),
+			attribute.String("environment", environment),
+		)),
+	)
+	return tp, nil
+}
+```
+main:
+```go
+	tp, err := NewJaegerTracerProvider(service, environment, "http://localhost:14268/api/traces")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err := tp.Shutdown(context.Background()); err != nil {
+			log.Fatal(err)
+		}
+	}()
+	otel.SetTracerProvider(tp) // register tp as the global trace provider
+```
+
+### 3.7. Run
+
+1. Run gaeger
+
+    ```
+    docker run -d --name jaeger \
+      -e COLLECTOR_ZIPKIN_HOST_PORT=:9411 \
+      -e COLLECTOR_OTLP_ENABLED=true \
+      -p 6831:6831/udp \
+      -p 6832:6832/udp \
+      -p 5778:5778 \
+      -p 16686:16686 \
+      -p 4317:4317 \
+      -p 4318:4318 \
+      -p 14250:14250 \
+      -p 14268:14268 \
+      -p 14269:14269 \
+      -p 9411:9411 \
+      jaegertracing/all-in-one:latest
+    ```
+1. Run server & cient
+
+1. Check
+
+    ![](docs/jaeger-grpc-server-trace.png)
+
+### 3.8. Add client side trace
 ## FAQ
 
 1. What's **Resource**?: The entity that the traces are generated from. (Service, service instance, etc.)
