@@ -438,7 +438,7 @@ grpc/helloworld
 0 directories, 3 files
 ```
 
-## 3.3. Prepare server and client code
+### 3.3. Prepare server and client code
 
 Download from https://github.com/grpc/grpc-go/tree/master/examples/helloworld
 
@@ -588,6 +588,79 @@ main:
     ![](docs/jaeger-grpc-server-trace.png)
 
 ### 3.8. Add client side trace
+
+1. Add Jaeger Tracer Provider (same as server)
+
+    ```go
+    func NewJaegerTracerProvider(service, environment, url string) (*tracesdk.TracerProvider, error) {
+        // Create the Jaeger exporter
+        exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
+        if err != nil {
+            return nil, err
+        }
+        tp := tracesdk.NewTracerProvider(
+            // Always be sure to batch in production.
+            tracesdk.WithBatcher(exp),
+            // Record information about this application in a Resource.
+            tracesdk.WithResource(resource.NewWithAttributes(
+                semconv.SchemaURL,
+                semconv.ServiceName(service),
+                attribute.String("environment", environment),
+            )),
+        )
+        return tp, nil
+    }
+    ```
+
+
+1. Add the following interceptors
+
+    ```go
+        conn, err := grpc.Dial(*addr, grpc.WithTransportCredentials(insecure.NewCredentials()),
+            grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+            grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()),
+        )
+    ```
+
+1. Run server & client
+    ```
+    go run grpc/server/main.go
+    ```
+
+    ```
+    go run grpc/client/main.go
+    ```
+
+1. Check (Two separate traces)
+
+    ![](docs/jaeger-server-client-separate-trace.png)
+
+### 3.9. Connect separate traces (server & client)
+
+1. Set propagator in both server and client main.
+
+    ```go
+	otel.SetTextMapPropagator(
+		propagation.NewCompositeTextMapPropagator(
+			propagation.TraceContext{},
+			propagation.Baggage{},
+		),
+	)
+    ```
+1. Run server & client
+    ```
+    go run grpc/server/main.go
+    ```
+
+    ```
+    go run grpc/client/main.go
+    ```
+
+1. Check (all three spans are connected)
+
+    ![](docs/jaeger-server-client-connected-trace.png)
+    ![](docs/jaeger-server-client-connected-spans.png)
+
 ## FAQ
 
 1. What's **Resource**?: The entity that the traces are generated from. (Service, service instance, etc.)
