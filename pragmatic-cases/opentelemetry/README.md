@@ -673,3 +673,4 @@ main:
 ## Links
 
 1. https://grafana.com/blog/2021/09/23/intro-to-distributed-tracing-with-tempo-opentelemetry-and-grafana-cloud/
+1. https://opentelemetry.io/docs/demo/architecture/ <- Really great demo
