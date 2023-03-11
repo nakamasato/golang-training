@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -14,18 +15,50 @@ import (
 	"k8s.io/client-go/util/homedir"
 )
 
-type Skaffold struct{}
+type Skaffold struct {
+	cmd *exec.Cmd
+}
 
 func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	fmt.Println("started")
 	skaffold := &Skaffold{}
-	skaffold.run()
-	listPod()
+	skaffold.run(ctx, "--tail")
+	k8sclient := getClientset()
+	waitUntilPodIsReady(ctx, k8sclient, "test")
+	listPod(ctx, k8sclient)
 	skaffold.delete()
 	fmt.Println("done")
 }
 
-func listPod() {
+func listPod(ctx context.Context, clientset *kubernetes.Clientset) {
+	pods, err := clientset.CoreV1().Pods("default").List(ctx, metav1.ListOptions{})
+	if err != nil {
+		log.Fatal("failed to get pods")
+	}
+	for i, pod := range pods.Items {
+		fmt.Printf("Pod: [%d] %s\n", i, pod.GetName())
+	}
+}
+
+func waitUntilPodIsReady(ctx context.Context, clientset *kubernetes.Clientset, name string) {
+	for {
+		pod, err := clientset.CoreV1().Pods("default").Get(ctx, name, metav1.GetOptions{})
+		if err != nil {
+			time.Sleep(time.Second)
+		}
+		if pod.Status.Phase == "Running" {
+			fmt.Println("pod is running")
+			return
+		} else {
+			fmt.Println("waiting for pod to be ready")
+			time.Sleep(time.Second)
+		}
+	}
+}
+
+func getClientset() *kubernetes.Clientset {
 	var kubeconfig string
 	kubeconfig, ok := os.LookupEnv("KUBECONFIG")
 	if !ok {
@@ -40,35 +73,41 @@ func listPod() {
 	if err != nil {
 		panic(err)
 	}
-
-	pods, err := clientset.CoreV1().Pods("default").List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		log.Fatal("failed to get pods")
-	}
-	for i, pod := range pods.Items {
-		fmt.Printf("Pod: [%d] %s\n", i, pod.GetName())
-	}
+	return clientset
 }
 
-func (s *Skaffold) run() {
-	s.execute("run")
-}
-
-func (s *Skaffold) delete() {
-	s.execute("delete")
-}
-
-func (s *Skaffold) execute(args ...string) {
-	cmd := exec.Command(
+func (s *Skaffold) run(ctx context.Context, args ...string) {
+	fmt.Println("run")
+	args = append([]string{"run"}, args...)
+	s.cmd = exec.CommandContext(
+		ctx,
 		"skaffold",
 		args...,
 	)
+	s.cmd.Stdout = os.Stdout
+	s.cmd.Stderr = os.Stderr
+
+	s.cmd.Start() // Run in background
+}
+
+func (s *Skaffold) delete(args ...string) {
+	fmt.Println("delete")
+	s.cmd.Process.Kill()
+	args = append([]string{"delete"}, args...)
+	s.cmd = exec.Command(
+		"skaffold",
+		args...,
+	)
+	s.cmd.Run()
+}
+
+func (s *Skaffold) execute(args ...string) {
 	// cmd.Dir = "."
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
+	s.cmd.Stdout = os.Stdout
+	s.cmd.Stderr = os.Stderr
+	err := s.cmd.Run()
 	if err != nil {
-		log.Fatal("failed to run skaffold dev.", err)
+		log.Fatal("failed to start skaffold.", err)
 	}
 	fmt.Println("skaffold run completed")
 }
