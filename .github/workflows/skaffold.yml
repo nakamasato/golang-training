@@ -11,7 +11,8 @@ on:
       - main
 
 defaults:
-  working-directory: pragmatic-cases/skaffold
+  run:
+    working-directory: pragmatic-cases/skaffold
 
 jobs:
   test:
