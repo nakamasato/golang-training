@@ -91,10 +91,13 @@ func (s *Skaffold) run(ctx context.Context, args ...string) {
 	// 	fmt.Println("cmd.Cancel is called") // not working
 	// 	return nil
 	// }
-	s.cmd.Start() // Run in background
+	err := s.cmd.Start() // Run in background
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-func (s *Skaffold) cleanup() error {
+func (s *Skaffold) cleanup() {
 	fmt.Println("skaffold cleanup")
 	fmt.Println("skaffold kill process")
 	errKill := s.cmd.Process.Kill()
@@ -105,9 +108,9 @@ func (s *Skaffold) cleanup() error {
 	fmt.Println("skaffold delete")
 	errRun := s.cmd.Run()
 	if errKill != nil {
-		return errKill
+		log.Fatal(errKill)
 	} else if errRun != nil {
-		return errRun
+		log.Fatal(errRun)
 	}
-	return nil
+	fmt.Println("skaffold cleanup completed")
 }
