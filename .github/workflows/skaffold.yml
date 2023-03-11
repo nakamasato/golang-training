@@ -1,0 +1,37 @@
+name: skaffold
+
+on:
+  pull_request:
+    paths:
+      - 'pragmatic-cases/skaffold/**.go'
+      - 'go.*'
+      - .github/workflows/skaffold.yml
+  push:
+    branches:
+      - main
+
+defaults:
+  working-directory: pragmatic-cases/skaffold
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: [ 1.18, 1.19 ]
+    name: ${{ matrix.go }}
+    steps:
+      - name: set up
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go }}
+
+      - uses: actions/checkout@v3
+
+      - name: install skaffold
+        run: |
+          curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
+          sudo install skaffold /usr/local/bin/
+
+      - name: run getting_started
+        run: go run main.go

@@ -25,10 +25,10 @@ func main() {
 	fmt.Println("started")
 	skaffold := &Skaffold{}
 	skaffold.run(ctx, "--tail")
+	defer skaffold.cleanup()
 	k8sclient := getClientset()
 	waitUntilPodIsReady(ctx, k8sclient, "test")
 	listPod(ctx, k8sclient)
-	skaffold.delete()
 	fmt.Println("done")
 }
 
@@ -86,28 +86,27 @@ func (s *Skaffold) run(ctx context.Context, args ...string) {
 	)
 	s.cmd.Stdout = os.Stdout
 	s.cmd.Stderr = os.Stderr
-
+	s.cmd.Cancel = func() error {
+		fmt.Println("cmd.Cancel is called") // not working
+		return nil
+	}
 	s.cmd.Start() // Run in background
 }
 
-func (s *Skaffold) delete(args ...string) {
-	fmt.Println("delete")
-	s.cmd.Process.Kill()
-	args = append([]string{"delete"}, args...)
+func (s *Skaffold) cleanup() error {
+	fmt.Println("skaffold cleanup")
+	fmt.Println("skaffold kill process")
+	errKill := s.cmd.Process.Kill()
 	s.cmd = exec.Command(
 		"skaffold",
-		args...,
+		"delete",
 	)
-	s.cmd.Run()
-}
-
-func (s *Skaffold) execute(args ...string) {
-	// cmd.Dir = "."
-	s.cmd.Stdout = os.Stdout
-	s.cmd.Stderr = os.Stderr
-	err := s.cmd.Run()
-	if err != nil {
-		log.Fatal("failed to start skaffold.", err)
+	fmt.Println("skaffold delete")
+	errRun := s.cmd.Run()
+	if errKill != nil {
+		return errKill
+	} else if errRun != nil {
+		return errRun
 	}
-	fmt.Println("skaffold run completed")
+	return nil
 }
