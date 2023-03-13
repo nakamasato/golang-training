@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -12,7 +13,9 @@ import (
 )
 
 func main() {
-	db, err := sql.Open("postgres", "user=postgres password=postgres dbname=postgres sslmode=disable")
+	host := os.Getenv("POSTGRES_HOST")
+	passwd := os.Getenv("POSTGRES_PASSWORD")
+	db, err := sql.Open("postgres", fmt.Sprintf("host=%s user=postgres password=%s dbname=postgres sslmode=disable", host, passwd))
 	if err != nil {
 		log.Fatalf("failed to Open: %v\n", err)
 	}

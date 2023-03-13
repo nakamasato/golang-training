@@ -76,7 +76,7 @@ docker run --name postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_INITDB_ARGS
 ```
 
 ```
-go run main.go
+POSTGRES_HOST=localhost POSTGRES_PASSWORD=postgres go run main.go
 Up
 Up finished
 select roles

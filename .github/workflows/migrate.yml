@@ -39,4 +39,6 @@ jobs:
 
       - name: run
         run: go run main.go
+        env:
+          POSTGRES_HOST: postgres
         working-directory: pragmatic-cases/migrate
