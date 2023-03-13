@@ -1,0 +1,42 @@
+name: migrate
+
+on:
+  pull_request:
+    paths:
+      - 'pragmatic-cases/migrate/**.go'
+      - 'go.*'
+      - .github/workflows/migrate.yml
+  push:
+    branches:
+      - main
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: [ 1.18, 1.19 ]
+    name: ${{ matrix.go }}
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: set up
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go }}
+
+      - uses: actions/checkout@v3
+
+      - name: run
+        run: go run main.go
+        working-directory: pragmatic-cases/migrate
