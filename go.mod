@@ -17,7 +17,7 @@ require (
 )
 
 require (
-	entgo.io/ent v0.11.9
+	entgo.io/ent v0.11.10
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/gorilla/websocket v1.5.0
 	github.com/lib/pq v1.10.7
@@ -39,7 +39,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.9.1 // indirect
+	ariga.io/atlas v0.9.2-0.20230303073438-03a4779a6338 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
