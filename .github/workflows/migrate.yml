@@ -12,6 +12,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    # postgres container https://docs.github.com/en/actions/using-containerized-services/creating-postgresql-service-containers
     container: node:10.18-jessie
     services:
       postgres:
