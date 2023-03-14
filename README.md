@@ -27,6 +27,22 @@ go1.19
     - VSCode extensions:
         - [vscode-ginkgo](https://marketplace.visualstudio.com/items?itemName=onsi.vscode-ginkgo)
 
+## GitHub Actions
+
+<details>
+
+```yaml
+      - uses: actions/checkout@v3
+
+      - name: set up
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: go.mod
+          cache: true
+```
+
+</details>
+
 ## Contents
 
 1. [Learn Go with tests](learn-go-with-tests) (Official: https://quii.gitbook.io/)
