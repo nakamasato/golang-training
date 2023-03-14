@@ -35,10 +35,16 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - run: nc -vz localhost 5432
       - name: run
         run: go run main.go
         env:
           POSTGRES_HOST: localhost
+          POSTGRES_PASSWORD: postgres
+        working-directory: pragmatic-cases/migrate
+
+      - name: run
+        run: go run main.go
+        env:
+          POSTGRES_HOST: postgres
           POSTGRES_PASSWORD: postgres
         working-directory: pragmatic-cases/migrate
