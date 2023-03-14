@@ -40,4 +40,5 @@ jobs:
         run: go run main.go
         env:
           POSTGRES_HOST: localhost
+          POSTGRES_PASSWORD: postgres
         working-directory: pragmatic-cases/migrate
