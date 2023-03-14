@@ -30,7 +30,8 @@ func main() {
 		log.Fatalf("failed to initialize migrate: %v\n", err)
 	}
 	fmt.Println("Up")
-	err = m.Up(); if err != nil {
+	err = m.Up()
+	if err != nil {
 		log.Fatalf("Up failed: %v\n", err)
 	}
 	fmt.Println("Up finished")
@@ -51,7 +52,8 @@ func main() {
 
 	fmt.Println("-------------")
 	fmt.Println("Down")
-	err = m.Down(); if err != nil {
+	err = m.Down()
+	if err != nil {
 		log.Fatalf("Down failed: %v\n", err)
 	}
 	fmt.Println("Down finished")
