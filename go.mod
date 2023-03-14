@@ -24,6 +24,7 @@ require (
 	github.com/lib/pq v1.10.7
 	github.com/onsi/ginkgo v1.16.5
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
+	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.40.0
 	go.opentelemetry.io/otel v1.14.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.14.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.14.0
