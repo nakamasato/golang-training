@@ -13,12 +13,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: set up
         uses: actions/setup-go@v3
         with:
-          go-version-file: ./go.mod
+          go-version-file: go.mod
           cache: true
-      - uses: actions/checkout@v3
       - run: go test -coverprofile="coverage.txt" -covermode=atomic ./...
       - name: codecov
         uses: codecov/codecov-action@v3
