@@ -6,10 +6,6 @@ on:
       - 'go.**'
 jobs:
   golangci-lint:
-    strategy:
-      matrix:
-        go: [ 1.18, 1.19 ]
-    name: ${{ matrix.go }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out code into the Go module directory
@@ -18,4 +14,4 @@ jobs:
       - name: golangci-lint
         uses: reviewdog/action-golangci-lint@v2
         with:
-          go_version: ${{ matrix.go }}
+          go_version_file: go.mod

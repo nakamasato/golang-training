@@ -12,15 +12,12 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go: [ 1.18, 1.19 ]
-    name: ${{ matrix.go }}
     steps:
       - name: set up
         uses: actions/setup-go@v3
         with:
-          go-version: ${{ matrix.go }}
+          go-version-file: go.mod
+          cache: true
 
       - uses: actions/checkout@v3
 
