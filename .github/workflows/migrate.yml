@@ -1,0 +1,43 @@
+name: migrate
+
+on:
+  pull_request:
+    paths:
+      - 'pragmatic-cases/migrate/**.go'
+      - 'go.*'
+      - .github/workflows/migrate.yml
+  push:
+    branches:
+      - main
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # postgres container https://docs.github.com/en/actions/using-containerized-services/creating-postgresql-service-containers
+    container: node:10.18-jessie
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: set up
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: run
+        run: go run main.go
+        env:
+          POSTGRES_HOST: postgres
+          POSTGRES_PASSWORD: postgres
+        working-directory: pragmatic-cases/migrate

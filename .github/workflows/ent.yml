@@ -12,17 +12,14 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go: [ 1.18, 1.19 ]
-    name: ${{ matrix.go }}
     steps:
+      - uses: actions/checkout@v3
+
       - name: set up
         uses: actions/setup-go@v3
         with:
-          go-version: ${{ matrix.go }}
-
-      - uses: actions/checkout@v3
+          go-version-file: go.mod
+          cache: true
 
       - name: start postgres
         working-directory: pragmatic-cases/ent
