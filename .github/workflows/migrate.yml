@@ -35,7 +35,7 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: run
+      - name: run with host port
         run: go run main.go
         env:
           POSTGRES_HOST: localhost
