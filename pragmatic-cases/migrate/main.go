@@ -30,7 +30,9 @@ func main() {
 		log.Fatalf("failed to initialize migrate: %v\n", err)
 	}
 	fmt.Println("Up")
-	m.Up()
+	err = m.Up(); if err != nil {
+		log.Fatalf("Up failed: %v\n", err)
+	}
 	fmt.Println("Up finished")
 
 	fmt.Println("select roles")
@@ -49,7 +51,9 @@ func main() {
 
 	fmt.Println("-------------")
 	fmt.Println("Down")
-	m.Down()
+	err = m.Down(); if err != nil {
+		log.Fatalf("Down failed: %v\n", err)
+	}
 	fmt.Println("Down finished")
 	fmt.Println("select roles")
 	rows, err = db.Query("SELECT rolname FROM pg_roles WHERE rolname = $1", "my_user")
