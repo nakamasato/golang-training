@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptrace"
@@ -39,6 +40,18 @@ func NewJaegerTracerProvider(service, environment, url string) (*tracesdk.Tracer
 	return tp, nil
 }
 
+func httpRequest(ctx context.Context, url string) error {
+	// httptrace settings
+	clientTrace := otelhttptrace.NewClientTrace(ctx)
+	ctx = httptrace.WithClientTrace(ctx, clientTrace)
+	req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
+
+	// send http request
+	resp, err := http.DefaultClient.Do(req)
+	fmt.Println(resp.StatusCode)
+	return err
+}
+
 func main() {
 	ctx := context.Background()
 	tp, err := NewJaegerTracerProvider(service, environment, "http://localhost:14268/api/traces")
@@ -51,13 +64,10 @@ func main() {
 		}
 	}()
 	otel.SetTracerProvider(tp) // register tp as the global trace provider
+	ctx, span := tp.Tracer("main").Start(ctx, "main")
+	defer span.End()
 
-	clientTrace := otelhttptrace.NewClientTrace(ctx)
-	ctx = httptrace.WithClientTrace(ctx, clientTrace)
-	req, _ := http.NewRequestWithContext(ctx, "GET", "https://journal.lampetty.net/", nil)
-
-	_, err = http.DefaultTransport.RoundTrip(req)
-	if err != nil {
+	if err := httpRequest(ctx, "https://example.com/"); err != nil {
 		log.Fatal(err)
 	}
 }
