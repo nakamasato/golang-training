@@ -661,6 +661,132 @@ main:
     ![](docs/jaeger-server-client-connected-trace.png)
     ![](docs/jaeger-server-client-connected-spans.png)
 
+
+
+## 4. [http trace]
+
+1. Run gaeger
+
+    ```
+    docker run -d --name jaeger \
+      -e COLLECTOR_ZIPKIN_HOST_PORT=:9411 \
+      -e COLLECTOR_OTLP_ENABLED=true \
+      -p 6831:6831/udp \
+      -p 6832:6832/udp \
+      -p 5778:5778 \
+      -p 16686:16686 \
+      -p 4317:4317 \
+      -p 4318:4318 \
+      -p 14250:14250 \
+      -p 14268:14268 \
+      -p 14269:14269 \
+      -p 9411:9411 \
+      jaegertracing/all-in-one:latest
+    ```
+1. Prepare `main.go`
+
+    1. Use the same `NewJaegerTracerProvider` as above.
+    1. In `httpRequest` func, Create clientTrace with `otelhttptrace`, update context and create a request with the context.
+
+        ```go
+        // httptrace settings
+        clientTrace := otelhttptrace.NewClientTrace(ctx)
+        ctx = httptrace.WithClientTrace(ctx, clientTrace)
+        req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
+        ```
+    1. In `main`, create a Trace and pass the context to `httpRequest` func
+        ```go
+        ctx, span := tp.Tracer("main").Start(ctx, "main")
+        defer span.End()
+        ```
+
+    <details><summary>full code</summary>
+
+    ```go
+    package main
+
+    import (
+        "context"
+        "fmt"
+        "log"
+        "net/http"
+        "net/http/httptrace"
+
+        "go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace"
+        "go.opentelemetry.io/otel"
+        "go.opentelemetry.io/otel/attribute"
+        "go.opentelemetry.io/otel/exporters/jaeger"
+        "go.opentelemetry.io/otel/sdk/resource"
+        tracesdk "go.opentelemetry.io/otel/sdk/trace"
+        semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+    )
+
+    const (
+        service     = "httptrace-demo"
+        environment = "development"
+    )
+
+    func NewJaegerTracerProvider(service, environment, url string) (*tracesdk.TracerProvider, error) {
+        // Create the Jaeger exporter
+        exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
+        if err != nil {
+            return nil, err
+        }
+        tp := tracesdk.NewTracerProvider(
+            // Always be sure to batch in production.
+            tracesdk.WithBatcher(exp),
+            // Record information about this application in a Resource.
+            tracesdk.WithResource(resource.NewWithAttributes(
+                semconv.SchemaURL,
+                semconv.ServiceName(service),
+                attribute.String("environment", environment),
+            )),
+        )
+        return tp, nil
+    }
+
+    func httpRequest(ctx context.Context, url string) error {
+        // httptrace settings
+        clientTrace := otelhttptrace.NewClientTrace(ctx)
+        ctx = httptrace.WithClientTrace(ctx, clientTrace)
+        req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
+
+        // send http request
+        resp, err := http.DefaultClient.Do(req)
+        fmt.Println(resp.StatusCode)
+        return err
+    }
+
+    func main() {
+        ctx := context.Background()
+        tp, err := NewJaegerTracerProvider(service, environment, "http://localhost:14268/api/traces")
+        if err != nil {
+            log.Fatal(err)
+        }
+        defer func() {
+            if err := tp.Shutdown(context.Background()); err != nil {
+                log.Fatal(err)
+            }
+        }()
+        otel.SetTracerProvider(tp) // register tp as the global trace provider
+        ctx, span := tp.Tracer("main").Start(ctx, "main")
+        defer span.End()
+
+        if err := httpRequest(ctx, "https://example.com/"); err != nil {
+            log.Fatal(err)
+        }
+    }
+    ```
+
+    </details>
+
+1. Run
+
+    ```
+    go run main.go
+    ```
+
+    ![](docs/jaeger-httptrace.png)
 ## FAQ
 
 1. What's **Resource**?: The entity that the traces are generated from. (Service, service instance, etc.)
