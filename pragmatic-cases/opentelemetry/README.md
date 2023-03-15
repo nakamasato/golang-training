@@ -663,7 +663,7 @@ main:
 
 
 
-## 4. [http trace]
+## 4. [otelhttptrace](https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace)
 
 1. Run gaeger
 
@@ -787,6 +787,12 @@ main:
     ```
 
     ![](docs/jaeger-httptrace.png)
+    
+Ref:
+- https://journal.lampetty.net/entry/opentelemetry-httptrace
+- https://pkg.go.dev/net/http/httptrace
+- https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace
+
 ## FAQ
 
 1. What's **Resource**?: The entity that the traces are generated from. (Service, service instance, etc.)
