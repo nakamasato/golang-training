@@ -793,6 +793,10 @@ Ref:
 - https://pkg.go.dev/net/http/httptrace
 - https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace
 
+## [5. otel collector + jaeger](otel-collector)
+
+![](docs/otel-collector.drawio.svg)
+
 ## FAQ
 
 1. What's **Resource**?: The entity that the traces are generated from. (Service, service instance, etc.)
@@ -800,7 +804,6 @@ Ref:
 1. What's **TraceProvider**?: TracerProvider constructs Tracer with specified configuration and register it to use in the target app.
 1. Trace vs. Span: a **Trace** can be thought of as a directed acyclic graph (DAG) of Spans, where the edges between Spans are defined as parent/child relationship. A **Span** is a single operation within a Trace
 1. OtelCollector Gateway？:
-
 
 ## Links
 
