@@ -665,7 +665,7 @@ main:
 
 ## 4. [otelhttptrace](https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace)
 
-1. Run gaeger
+1. Run jaeger
 
     ```
     docker run -d --name jaeger \
