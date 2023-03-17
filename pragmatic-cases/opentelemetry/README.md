@@ -787,7 +787,7 @@ main:
     ```
 
     ![](docs/jaeger-httptrace.png)
-    
+
 Ref:
 - https://journal.lampetty.net/entry/opentelemetry-httptrace
 - https://pkg.go.dev/net/http/httptrace
