@@ -35,10 +35,9 @@ go1.19
       - uses: actions/checkout@v3
 
       - name: set up
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
           go-version-file: go.mod
-          cache: true
 ```
 
 </details>
