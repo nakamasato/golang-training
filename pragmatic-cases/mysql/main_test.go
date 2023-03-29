@@ -7,7 +7,6 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 )
 
-
 func TestCreateMySQLUser(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -19,7 +18,6 @@ func TestCreateMySQLUser(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-
 
 func TestCheckMySQLHasUser(t *testing.T) {
 	db, mock, err := sqlmock.New()
