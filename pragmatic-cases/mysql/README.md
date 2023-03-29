@@ -37,3 +37,11 @@ This command does the following:
     ```
     docker rm -f $container_id
     ```
+
+1. Run test
+    ```
+    go test .
+    ```
+
+## Ref
+1. https://github.com/DATA-DOG/go-sqlmock
