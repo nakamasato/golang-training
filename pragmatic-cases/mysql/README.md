@@ -22,7 +22,7 @@ This command does the following:
 1. Run mysql with Docker.
 
     ```
-    container_id=$(docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=password --rm mysql:5.7)
+    container_id=$(docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=password --rm mysql:8)
     ```
 
 1. Run `main.go`.
