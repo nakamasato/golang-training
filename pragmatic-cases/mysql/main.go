@@ -24,7 +24,7 @@ func main() {
 		log.Fatal(row.Err())
 	}
 
-	res, err := checkMySQLHasUser(db, "root")
+	res, err := CheckMySQLHasUser(db, "root")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,7 +63,7 @@ func Connect(ctx context.Context) (*sql.DB, error) {
 	}
 }
 
-func checkMySQLHasUser(db *sql.DB, mysqluser string) (bool, error) {
+func CheckMySQLHasUser(db *sql.DB, mysqluser string) (bool, error) {
 	row := db.QueryRow("SELECT COUNT(*) FROM mysql.user where User = '" + mysqluser + "'")
 	var count int
 	if err := row.Scan(&count); err != nil {
