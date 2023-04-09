@@ -49,6 +49,8 @@ go1.19
     1. [Build an application](learn-go-with-tests/02-build-an-application)
     1. [Questions and answers](learn-go-with-tests/03-questions-and-answers)
     1. [Meta](learn-go-with-tests/04-meta)
+1. Pattern
+    1. [Golang Functional Options Pattern](https://golang.cafe/blog/golang-functional-options-pattern.html)
 1. [Pragmatic Cases](pragmatic-cases)
     1. [ent](pragmatic-cases/ent) (go1.17 is removed when upgrading to ent@v0.11.3 #85)
     1. [Prometheus](pragmatic-cases/prometheus)
