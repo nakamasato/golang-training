@@ -22,13 +22,15 @@ jobs:
           go-version-file: go.mod
           
       - name: start kind cluster
-        run: kind create cluster
+        run: |
+          echo "- kind version: $(kind version)" >> $GITHUB_STEP_SUMMARY
+          kind create cluster
 
       - name: install skaffold
         run: |
           curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
           sudo install skaffold /usr/local/bin/
-          echo "skaffold version: $(skaffold version)" >> $GITHUB_STEP_SUMMARY
+          echo "- skaffold version: $(skaffold version)" >> $GITHUB_STEP_SUMMARY
 
       - name: run
         working-directory: pragmatic-cases/skaffold
