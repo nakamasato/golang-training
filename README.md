@@ -53,7 +53,7 @@ go1.20
     1. [Golang Functional Options Pattern](https://golang.cafe/blog/golang-functional-options-pattern.html)
 1. [Pragmatic Cases](pragmatic-cases)
     1. Database
-        1. [ent](pragmatic-cases/ent) (go1.17 is removed when upgrading to ent@v0.11.3 #85)
+        1. [ent](pragmatic-cases/ent) (go1.17 is removed when upgrading to ent@v0.11.3 [#85](https://github.com/nakamasato/golang-training/pull/85))
         1. [MySQL](pragmatic-cases/mysql)
         1. [Migrate](pragmatic-cases/migrate)
             1. [Postgres](pragmatic-cases/migrate/postgres)
@@ -61,7 +61,7 @@ go1.20
         1. [atlas](pragmatic-cases/atlas)
     1. Kubernetes
         1. [kind cluster](pragmatic-cases/kind)
-        1. [k8s client](pragmatic-cases/k8sclient) (needs go1.17 or later to use controller-runtime@v0.13.0 #83)
+        1. [k8s client](pragmatic-cases/k8sclient) (needs go1.17 or later to use controller-runtime@v0.13.0 [#83](https://github.com/nakamasato/golang-training/pull/83))
         1. [Skaffold](pragmatic-cases/skaffold)
     1. Others
         1. [Prometheus](pragmatic-cases/prometheus)
