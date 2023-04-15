@@ -4,7 +4,7 @@
 
 ## Version
 
-go1.19
+go1.20
 
 ## Basics
 
