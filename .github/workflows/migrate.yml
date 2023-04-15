@@ -10,7 +10,7 @@ on:
     branches:
       - main
 jobs:
-  test:
+  postgres:
     runs-on: ubuntu-latest
 
     # postgres container https://docs.github.com/en/actions/using-containerized-services/creating-postgresql-service-containers
@@ -40,3 +40,36 @@ jobs:
           POSTGRES_HOST: postgres
           POSTGRES_PASSWORD: postgres
         working-directory: pragmatic-cases/migrate/postgres
+
+  mysql:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: mysql:8.0
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: test_db
+        options: >-
+          --health-cmd "mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: set up
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+
+      - name: run
+        run: go run main.go
+        env:
+          MYSQL_HOST: localhost
+          MYSQL_PASSWORD: password
+          MYSQL_DB_NAME: test_db
+        working-directory: pragmatic-cases/migrate/mysql
