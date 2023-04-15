@@ -58,6 +58,7 @@ go1.20
         1. [Migrate](pragmatic-cases/migrate)
             1. [Postgres](pragmatic-cases/migrate/postgres)
             1. [MySQL](pragmatic-cases/migrate/mysql)
+        1. [atlas](pragmatic-cases/atlas)
     1. Kubernetes
         1. [kind cluster](pragmatic-cases/kind)
         1. [k8s client](pragmatic-cases/k8sclient) (needs go1.17 or later to use controller-runtime@v0.13.0 #83)
