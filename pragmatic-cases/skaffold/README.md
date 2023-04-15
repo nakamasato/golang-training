@@ -6,19 +6,25 @@ Execute `skaffold dev` programmatically.
 
 - [kind](https://kind.sigs.k8s.io/)
 - [skaffold](https://skaffold.dev/)
+    [install](https://skaffold.dev/docs/install/)
+    Mac:
+    ```
+    curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-darwin-amd64 && \
+    sudo install skaffold /usr/local/bin/
+    ```
 
 ## Steps
 
 1. Start kind cluster.
 
     ```
-    kind create cluster --name test --image kindest/node:v1.20.2
+    kind create cluster
     ```
 
     check:
 
     ```
-    kubectl cluster-info --context kind-test
+    kubectl cluster-info --context kind-kind
     ```
 
 1. Run skaffold with the script.
