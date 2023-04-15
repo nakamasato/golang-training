@@ -4,7 +4,7 @@
 
 ## Version
 
-go1.19
+go1.20
 
 ## Basics
 
@@ -27,6 +27,21 @@ go1.19
     - VSCode extensions:
         - [vscode-ginkgo](https://marketplace.visualstudio.com/items?itemName=onsi.vscode-ginkgo)
 
+## GitHub Actions
+
+<details>
+
+```yaml
+      - uses: actions/checkout@v3
+
+      - name: set up
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+```
+
+</details>
+
 ## Contents
 
 1. [Learn Go with tests](learn-go-with-tests) (Official: https://quii.gitbook.io/)
@@ -34,17 +49,26 @@ go1.19
     1. [Build an application](learn-go-with-tests/02-build-an-application)
     1. [Questions and answers](learn-go-with-tests/03-questions-and-answers)
     1. [Meta](learn-go-with-tests/04-meta)
+1. Pattern
+    1. [Golang Functional Options Pattern](https://golang.cafe/blog/golang-functional-options-pattern.html)
 1. [Pragmatic Cases](pragmatic-cases)
-    1. [ent](pragmatic-cases/ent) (go1.17 is removed when upgrading to ent@v0.11.3 #85)
-    1. [Prometheus](pragmatic-cases/prometheus)
-    1. [kind cluster](pragmatic-cases/kind)
-    1. [k8s client](pragmatic-cases/k8sclient) (needs go1.17 or later to use controller-runtime@v0.13.0 #83)
-    1. [Skaffold](pragmatic-cases/skaffold)
-    1. [Cobra](https://github.com/nakamasato/cobra-sample)
-    1. [Ginkgo](pragmatic-cases/ginkgo)
-    1. [MySQL](pragmatic-cases/mysql)
-    1. [String to Object](pragmatic-cases/string-to-object)
-    1. [Opentelemetry](pragmatic-cases/opentelemetry)
+    1. Database
+        1. [ent](pragmatic-cases/ent) (go1.17 is removed when upgrading to ent@v0.11.3 #85)
+        1. [MySQL](pragmatic-cases/mysql)
+        1. [Migrate](pragmatic-cases/migrate)
+            1. [Postgres](pragmatic-cases/migrate/postgres)
+            1. [MySQL](pragmatic-cases/migrate/mysql)
+    1. Kubernetes
+        1. [kind cluster](pragmatic-cases/kind)
+        1. [k8s client](pragmatic-cases/k8sclient) (needs go1.17 or later to use controller-runtime@v0.13.0 #83)
+        1. [Skaffold](pragmatic-cases/skaffold)
+    1. Others
+        1. [Prometheus](pragmatic-cases/prometheus)
+        1. [Cobra](https://github.com/nakamasato/cobra-sample)
+        1. [Ginkgo](pragmatic-cases/ginkgo)
+        1. [String to Object](pragmatic-cases/string-to-object)
+        1. [Opentelemetry](pragmatic-cases/opentelemetry)
+        1. [gojsondiff](pragmatic-cases/gojsondiff)
 ## References & readings
 1. [Learn Go with Tests](https://quii.gitbook.io/)
 1. [Advanced Testing with Go](https://speakerdeck.com/mitchellh/advanced-testing-with-go)

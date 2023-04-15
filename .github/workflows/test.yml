@@ -9,21 +9,20 @@ on:
   push:
     branches:
       - main
+
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go: [ 1.18, 1.19 ]
-    name: ${{ matrix.go }}
     steps:
-      - name: set up
-        uses: actions/setup-go@v3
-        with:
-          go-version: ${{ matrix.go }}
       - uses: actions/checkout@v3
-      - run: go test -coverprofile="coverage.txt" -covermode=atomic ./...
+
+      - name: set up
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+
+      - name: test
+        run: go test -coverprofile="coverage.txt" -covermode=atomic ./...
+
       - name: codecov
         uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}

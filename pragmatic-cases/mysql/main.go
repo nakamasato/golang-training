@@ -24,11 +24,15 @@ func main() {
 		log.Fatal(row.Err())
 	}
 
-	res, err := checkMySQLHasUser(db, "root")
+	if err := CreateMySQLUser(db, "test_user"); err != nil {
+		log.Fatal(err)
+	}
+
+	res, err := CheckMySQLHasUser(db, "test_user")
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("root user exists: %t\n", res)
+	fmt.Printf("test_user exists: %t\n", res)
 }
 
 func Connect(ctx context.Context) (*sql.DB, error) {
@@ -40,9 +44,9 @@ func Connect(ctx context.Context) (*sql.DB, error) {
 			case <-ctx.Done():
 				return
 			default:
-				time.Sleep(10 * time.Second)
 				db, err := sql.Open("mysql", "root:password@tcp(localhost:3306)/")
 				if err != nil {
+					time.Sleep(10 * time.Second)
 					continue
 				}
 				err = db.Ping()
@@ -63,7 +67,7 @@ func Connect(ctx context.Context) (*sql.DB, error) {
 	}
 }
 
-func checkMySQLHasUser(db *sql.DB, mysqluser string) (bool, error) {
+func CheckMySQLHasUser(db *sql.DB, mysqluser string) (bool, error) {
 	row := db.QueryRow("SELECT COUNT(*) FROM mysql.user where User = '" + mysqluser + "'")
 	var count int
 	if err := row.Scan(&count); err != nil {
@@ -71,4 +75,9 @@ func checkMySQLHasUser(db *sql.DB, mysqluser string) (bool, error) {
 	} else {
 		return count > 0, nil
 	}
+}
+
+func CreateMySQLUser(db *sql.DB, mysqluser string) error {
+	_, err := db.Exec("CREATE USER IF NOT EXISTS '" + mysqluser + "'")
+	return err
 }
