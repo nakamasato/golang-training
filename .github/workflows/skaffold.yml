@@ -10,10 +10,6 @@ on:
     branches:
       - main
 
-defaults:
-  run:
-    working-directory: pragmatic-cases/skaffold
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -32,4 +28,5 @@ jobs:
           echo "skaffold version: $(skaffold version)" >> $GITHUB_STEP_SUMMARY
 
       - name: run
+        working-directory: pragmatic-cases/skaffold
         run: go run main.go
