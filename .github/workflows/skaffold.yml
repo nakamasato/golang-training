@@ -16,10 +16,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: set up
+      - name: setup-go
         uses: actions/setup-go@v4
         with:
           go-version-file: go.mod
+          
+      - name: start kind cluster
+        run: kind create cluster
 
       - name: install skaffold
         run: |
