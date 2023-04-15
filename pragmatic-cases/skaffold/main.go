@@ -86,11 +86,10 @@ func (s *Skaffold) run(ctx context.Context, args ...string) {
 	)
 	s.cmd.Stdout = os.Stdout
 	s.cmd.Stderr = os.Stderr
-	// Cmd.Cancel: https://go.dev/doc/go1.20
-	// s.cmd.Cancel = func() error {
-	// 	fmt.Println("cmd.Cancel is called") // not working
-	// 	return nil
-	// }
+	s.cmd.Cancel = func() error {
+		fmt.Println("cmd.Cancel is called")
+		return nil
+	}
 	err := s.cmd.Start() // Run in background
 	if err != nil {
 		log.Fatal(err)
