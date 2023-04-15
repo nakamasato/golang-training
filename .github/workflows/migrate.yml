@@ -39,4 +39,4 @@ jobs:
         env:
           POSTGRES_HOST: postgres
           POSTGRES_PASSWORD: postgres
-        working-directory: pragmatic-cases/migrate
+        working-directory: pragmatic-cases/migrate/postgres
