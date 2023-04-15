@@ -27,13 +27,9 @@ jobs:
           kind create cluster
 
       - name: install skaffold
-        if: steps.cache-skaffold.outputs.cache-hit != 'true'
         run: |
           curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
           sudo install skaffold /usr/local/bin/
-
-      - name: skaffold version
-        run: |
           echo "- skaffold version: $(skaffold version)" >> $GITHUB_STEP_SUMMARY
 
       - name: run
