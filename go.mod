@@ -9,10 +9,10 @@ require (
 	golang.org/x/net v0.9.0
 	golang.org/x/oauth2 v0.7.0
 	golang.org/x/sys v0.7.0 // indirect
-	k8s.io/api v0.27.0
-	k8s.io/apimachinery v0.27.0
-	k8s.io/client-go v0.27.0
-	k8s.io/kubectl v0.27.0
+	k8s.io/api v0.27.1
+	k8s.io/apimachinery v0.27.1
+	k8s.io/client-go v0.27.1
+	k8s.io/kubectl v0.27.1
 	sigs.k8s.io/controller-runtime v0.14.6
 )
 
