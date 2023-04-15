@@ -81,7 +81,7 @@
 1. Inspect
 
     ```
-    MYSQL_DB_NAME=test_db MYSQL_HOST=localhost     MYSQL_PASSWORD=password go run main.go
+    MYSQL_DB_NAME=test_db MYSQL_HOST=localhost MYSQL_PASSWORD=password go run main.go
     test_db
     ----- table users ----
     col 0: id
