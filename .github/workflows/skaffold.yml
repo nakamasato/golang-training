@@ -21,17 +21,10 @@ jobs:
         with:
           go-version-file: go.mod
 
-      # - name: start kind cluster
-      #   run: |
-      #     echo "- kind version: $(kind version)" >> $GITHUB_STEP_SUMMARY
-      #     kind create cluster
-
-      - name: cache skaffold
-        id: cache-skaffold
-        uses: actions/cache@v3
-        with:
-          path: /usr/loca/bin/
-          key: ${{ runner.os }}-skaffold
+      - name: start kind cluster
+        run: |
+          echo "- kind version: $(kind version)" >> $GITHUB_STEP_SUMMARY
+          kind create cluster
 
       - name: install skaffold
         if: steps.cache-skaffold.outputs.cache-hit != 'true'
@@ -43,6 +36,6 @@ jobs:
         run: |
           echo "- skaffold version: $(skaffold version)" >> $GITHUB_STEP_SUMMARY
 
-      # - name: run
-      #   working-directory: pragmatic-cases/skaffold
-      #   run: go run main.go
+      - name: run
+        working-directory: pragmatic-cases/skaffold
+        run: go run main.go
