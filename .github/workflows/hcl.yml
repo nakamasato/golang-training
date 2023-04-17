@@ -1,0 +1,26 @@
+name: hcl
+
+on:
+  pull_request:
+    paths:
+      - 'pragmatic-cases/hcl/**.go'
+      - 'go.*'
+      - .github/workflows/hcl.yml
+  push:
+    branches:
+      - main
+jobs:
+  mysql:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: set up
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+
+      - name: run
+        run: go run main.go
+        working-directory: pragmatic-cases/hcl
