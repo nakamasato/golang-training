@@ -70,6 +70,7 @@ go1.20
         1. [String to Object](pragmatic-cases/string-to-object)
         1. [Opentelemetry](pragmatic-cases/opentelemetry)
         1. [gojsondiff](pragmatic-cases/gojsondiff)
+        1. [hcl](pragmatic-cases/hcl)
 ## References & readings
 1. [Learn Go with Tests](https://quii.gitbook.io/)
 1. [Advanced Testing with Go](https://speakerdeck.com/mitchellh/advanced-testing-with-go)
