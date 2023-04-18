@@ -4,12 +4,29 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 
 	"ariga.io/atlas/sql/mysql"
+	"ariga.io/atlas/sql/schema"
 	. "github.com/go-sql-driver/mysql"
 )
+
+const hcl_str = `
+table "users" {
+	schema = schema.test_db
+	column "id" {
+		type = bigint
+		unsigned = true
+	}
+	column "shouldnt" {
+		type = bigint
+	}
+}
+schema "test_db" {
+}
+`
 
 func main() {
 	ctx := context.Background()
@@ -36,33 +53,40 @@ func main() {
 		log.Fatalf("failed opening atlas driver: %s", err)
 	}
 
+	fmt.Println("InspectSchema: read schema from MySQL")
+
 	// Inspect the schema of the connected database
 	curSch, err := driver.InspectSchema(ctx, "", nil)
 	if err != nil {
 		log.Fatalf("failed inspecting schema: %s", err)
 	}
-	fmt.Println(curSch.Name)
+	fmt.Printf("shema: %s\n", curSch.Name)
 	for _, tbl := range curSch.Tables {
 		fmt.Printf("----- table %s ----\n", tbl.Name)
 		for i, col := range tbl.Columns {
-			fmt.Printf("col %d: %s\n", i, col.Name)
+			fmt.Printf("col %d name: %s, type: %s\n", i, col.Name, col.Type.Raw)
 		}
 	}
 
 	// TODO: https://pkg.go.dev/ariga.io/atlas@v0.10.0/schemahcl#State.EvalFiles
-	// state := schemahcl.State{}
-	// schema := &schema.Schema{}
-	// err = state.EvalFiles([]string{"schema.hcl"}, schema, map[string]cty.Value{})
+	// https://github.com/ariga/atlas/blob/3e658c6bb46607404434135eb3c190fcfc58919b/internal/integration/hclsqlspec/hclsqlspec_test.go
+	fmt.Println("EvalHCLBytes: read from schema.hcl")
+	var s schema.Schema
 
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	schema := curSch
+	bytes, err := ioutil.ReadFile("schema.hcl")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = mysql.EvalHCLBytes(bytes, &s, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Schema diff
-	change, err := driver.SchemaDiff(curSch, schema)
+	fmt.Println("SchemaDiff: compare schema objects")
+	changes, err := driver.SchemaDiff(curSch, &s)
 	if err != nil {
 		log.Fatalf("failed to scheme diff: %s", err)
 	}
-	fmt.Println(change)
+	fmt.Println(len(changes))
 }
