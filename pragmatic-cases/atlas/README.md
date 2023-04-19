@@ -2,6 +2,10 @@
 
 ![](diagram.drawio.svg)
 
+Atlas is a very interesting tool in that the status is obtained by the SQLs which are completely different for databases. e.g. [PostgreSQL](https://github.com/ariga/atlas/blob/2e0886e03c5862c54247f41f906f60d64f9c7eaf/sql/postgres/inspect.go#L728),  [MySQL](https://github.com/ariga/atlas/blob/2e0886e03c5862c54247f41f906f60d64f9c7eaf/sql/mysql/inspect.go#L631), etc.
+
+(ref: [Programmatic inspection of databases in Go using Atlas](https://ariga.io/programmatic-inspection-of-databases-in-go-using-atlas/))
+
 ## [CLI](https://atlasgo.io/getting-started/)
 
 1. Install
@@ -77,13 +81,15 @@
 
 1. Run mysql with docker
 1. Create `test_db`
-1. Apply
-1. Inspect
+1. `InspectSchema`, `SchemaDiff`, and `ApplyChanges`
 
     ```
-    MYSQL_DB_NAME=test_db MYSQL_HOST=localhost MYSQL_PASSWORD=password go run main.go
-    test_db
+    InspectSchema: read schema from MySQL
+    shema: test_db
     ----- table users ----
-    col 0: id
-    col 1: greeting
+    col 0 name: id, type: int
+    col 1 name: greeting, type: text
+    EvalHCLBytes: read from schema.hcl
+    SchemaDiff: compare schema objects
+    no changes
     ```

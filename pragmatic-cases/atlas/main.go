@@ -88,5 +88,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to scheme diff: %s", err)
 	}
-	fmt.Println(len(changes))
+	if len(changes) == 0 {
+		fmt.Println("no changes")
+	} else {
+		fmt.Println("ApplyChanges")
+		err = driver.ApplyChanges(ctx, changes)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }

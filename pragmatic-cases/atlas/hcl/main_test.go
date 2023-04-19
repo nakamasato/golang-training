@@ -1,8 +1,7 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	"testing"
 
 	"ariga.io/atlas/schemahcl"
 )
@@ -23,13 +22,16 @@ family "default" {
 }
 `
 
-func main() {
-	fmt.Println("hello")
+func Test_EvalBytes(t *testing.T) {
 	// read str into golang struct
 	err := schemahcl.New().EvalBytes([]byte(hcl_str), &test, nil)
 	if err != nil {
-		log.Fatalln(err)
+		t.Fatal(err)
 	}
-	fmt.Println(len(test.Families))
-	fmt.Println(test.Families[0].Name)
+	if len(test.Families) != 1 {
+		t.Errorf("Families length want 1, got %d", len(test.Families))
+	}
+	if want, name := "test", test.Families[0].Name; name != want {
+		t.Errorf("Name want %s, got %s", want, name)
+	}
 }
