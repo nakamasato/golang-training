@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -28,7 +29,15 @@ schema "test_db" {
 }
 `
 
+var dryRun bool
+
+func init() {
+	flag.BoolVar(&dryRun, "dry-run", false, "set for dryrun")
+}
+
 func main() {
+	flag.Parse()
+	fmt.Println(dryRun)
 	ctx := context.Background()
 
 	// Prepare mysql.Config
@@ -90,7 +99,15 @@ func main() {
 	}
 	if len(changes) == 0 {
 		fmt.Println("no changes")
-	} else {
+	} else if dryRun { // only plan
+		fmt.Println("PlayChanges")
+		// https://github.com/ariga/atlas/blob/6d8605ca50556d8e6d6b3884f04b07894529f87d/sql/mysql/migrate.go#L31
+		plan, err := driver.PlanChanges(ctx, "test", changes)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(plan)
+	} else { // apply
 		fmt.Println("ApplyChanges")
 		err = driver.ApplyChanges(ctx, changes)
 		if err != nil {
