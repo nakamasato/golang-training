@@ -3,7 +3,7 @@ module tmp
 go 1.20
 
 require (
-	github.com/go-sql-driver/mysql v1.7.0
+	github.com/go-sql-driver/mysql v1.7.1
 	github.com/onsi/gomega v1.27.6
 	github.com/prometheus/client_golang v1.15.0
 	golang.org/x/net v0.9.0
