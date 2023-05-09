@@ -33,7 +33,7 @@ require (
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.15.1
 	go.opentelemetry.io/otel/sdk v1.15.1
 	go.opentelemetry.io/otel/trace v1.15.1
-	google.golang.org/api v0.121.0
+	google.golang.org/api v0.122.0
 )
 
 require (
