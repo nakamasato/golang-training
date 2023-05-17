@@ -1,0 +1,26 @@
+name: errgroup
+
+on:
+  pull_request:
+    paths:
+      - '**.go'
+      - 'go.*'
+      - .github/workflows/errgroup.yml
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: set up
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+
+      - name: run
+        working-directory: pragmatic-cases/errgroup
+        run: go run main.go
