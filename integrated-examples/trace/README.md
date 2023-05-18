@@ -7,7 +7,7 @@
 ```
 export PROJECT_ID=PROJECT_ID
 export LOCATION_ID=asia-northeast1
-export QUEUE_ID=helloworld-2
+export QUEUE_ID=helloworld
 ```
 
 ```
