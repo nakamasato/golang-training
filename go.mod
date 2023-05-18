@@ -17,6 +17,7 @@ require (
 )
 
 require (
+	cloud.google.com/go/pubsub v1.30.0
 	entgo.io/ent v0.12.3
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/golang-migrate/migrate/v4 v4.15.2
@@ -33,13 +34,15 @@ require (
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.15.1
 	go.opentelemetry.io/otel/sdk v1.15.1
 	go.opentelemetry.io/otel/trace v1.15.1
-	google.golang.org/api v0.122.0
 	golang.org/x/sync v0.1.0
+	google.golang.org/api v0.122.0
 )
 
 require (
+	cloud.google.com/go v0.110.0 // indirect
 	cloud.google.com/go/compute v1.19.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
+	cloud.google.com/go/iam v0.13.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/go-github/v39 v39.2.0 // indirect
