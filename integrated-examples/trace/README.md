@@ -5,9 +5,14 @@
 ## Prerequisite
 
 ```
-export PROJECT_ID=PROJECT_ID # The project ID from above
-export LOCATION_ID=LOCATION_ID # The region in which your queue is running
-export QUEUE_ID=helloworld # The queue you created above
+export PROJECT_ID=PROJECT_ID
+export LOCATION_ID=asia-northeast1
+export QUEUE_ID=helloworld-2
+```
+
+```
+gcloud config set project $PROJECT_ID
+gcloud config set compute/region $LOCATION_ID
 ```
 
 ## Components
@@ -34,7 +39,7 @@ Run the following command in `helloworld` directory:
 first time:
 
 ```
-gcloud run deploy --set-env-vars CLOUD_TASK_TARGET_URL=example.com --region $LOCATION_ID
+gcloud run deploy --source ./helloworld --set-env-vars CLOUD_TASK_TARGET_URL=example.com
 ```
 
 ```
@@ -43,37 +48,37 @@ echo $CLOUD_RUN_URL
 ```
 
 ```
-gcloud run deploy --set-env-vars=CLOUD_TASK_TARGET_URL=${CLOUD_RUN_URL}/helloworld,PROJECT_ID=$PROJECT_ID,LOCATION_ID=$LOCATION_ID,QUEUE_ID=$QUEUE_ID --region $LOCATION_ID
+gcloud run deploy --source ./helloworld --set-env-vars=CLOUD_TASK_TARGET_URL=${CLOUD_RUN_URL}/helloworld,PROJECT_ID=$PROJECT_ID,LOCATION_ID=$LOCATION_ID,QUEUE_ID=$QUEUE_ID --region $LOCATION_ID
 ```
 
 Click on the url: https://helloworld-xxxxx-an.a.run.app/helloworld -> You'll `Hello, World`
 
 ### PubSub
 
-Create topic
+1. Create topic
 
-```
-gcloud pubsub topics create helloworld
-```
+    ```
+    gcloud pubsub topics create helloworld
+    ```
 
-Create subscription
+1. Create subscription
 
-```
-gcloud pubsub subscriptions create helloworld --topic helloworld --push-endpoint ${CLOUD_RUN_URL}/cloudtask
-```
+    ```
+    gcloud pubsub subscriptions create helloworld --topic helloworld --push-endpoint ${CLOUD_RUN_URL}/cloudtask
+    ```
 
-Publish message
+1. Publish message
 
-```
-gcloud pubsub topics publish helloworld --message="helloworld"
-```
+    ```
+    gcloud pubsub topics publish helloworld --message="helloworld"
+    ```
 
-or with go (https://pkg.go.dev/cloud.google.com/go/pubsub)
+    or with go (https://pkg.go.dev/cloud.google.com/go/pubsub)
 
-```
-gcloud auth application-default login
-PROJECT_ID=$PROJECT_ID go run main.go
-```
+    ```
+    gcloud auth application-default login
+    PROJECT_ID=$PROJECT_ID go run pubsubpublisher/main.go
+    ```
 
 ### Cloud Task
 
@@ -81,25 +86,23 @@ PROJECT_ID=$PROJECT_ID go run main.go
 gcloud tasks queues create $QUEUE_ID --location $LOCATION_ID
 ```
 
-Cleanup
-
 ## Cleanup
 
 1. Cloud Run
 
-```
-gcloud run services delete helloworld --region $LOCATION_ID
-```
+    ```
+    gcloud run services delete helloworld --region $LOCATION_ID
+    ```
 
 1. Cloud Task (cannot be recreated within 7 days)
 
-```
-gcloud tasks queues delete $QUEUE_ID --location $LOCATION_ID
-```
+    ```
+    gcloud tasks queues delete $QUEUE_ID --location $LOCATION_ID
+    ```
 
 1. PubSub
 
-```
-gcloud pubsub subscriptions delete helloworld
-gcloud pubsub topics delete helloworld
-```
+    ```
+    gcloud pubsub subscriptions delete helloworld
+    gcloud pubsub topics delete helloworld
+    ```
