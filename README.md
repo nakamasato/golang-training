@@ -19,6 +19,11 @@ go1.20
     go mod init <modulepath e.g. "tmp">
     ```
     multiple mod: [go.work](https://github.com/golang/tools/blob/master/gopls/doc/workspace.md#go-workspaces-go-118)
+    ```
+    go work init
+    go work use .
+    ```
+    add `go.work*` to `.gitignore`
 1. Tools:
     - Test:
         - BDD testing framework: [Ginkgo](https://onsi.github.io/ginkgo/)
