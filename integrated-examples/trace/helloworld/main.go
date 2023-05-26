@@ -45,7 +45,10 @@ func (s *server) createCloudTask(w http.ResponseWriter, r *http.Request) {
 				HttpRequest: &cloudtaskspb.HttpRequest{
 					Url:                 s.queue.url,
 					HttpMethod:          0,
-					Headers:             map[string]string{},
+					Headers:             map[string]string{
+						// traceparent header
+						// tracestate header
+					},
 					Body:                []byte{},
 					AuthorizationHeader: nil,
 				},
