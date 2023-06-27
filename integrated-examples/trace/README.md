@@ -106,3 +106,7 @@ gcloud tasks queues create $QUEUE_ID --location $LOCATION_ID
     gcloud pubsub subscriptions delete helloworld
     gcloud pubsub topics delete helloworld
     ```
+
+## References
+
+1. [Cloud Pub/Sub経由でトレースを取得する](https://zenn.dev/google_cloud_jp/articles/20230626-pubsub-trace)
