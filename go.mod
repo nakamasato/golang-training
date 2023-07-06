@@ -7,7 +7,7 @@ require (
 	github.com/onsi/gomega v1.27.8
 	github.com/prometheus/client_golang v1.16.0
 	golang.org/x/net v0.12.0
-	golang.org/x/oauth2 v0.9.0
+	golang.org/x/oauth2 v0.10.0
 	golang.org/x/sys v0.10.0 // indirect
 	k8s.io/api v0.27.3
 	k8s.io/apimachinery v0.27.3
@@ -42,7 +42,7 @@ require (
 
 require (
 	cloud.google.com/go v0.110.2 // indirect
-	cloud.google.com/go/compute v1.19.3 // indirect
+	cloud.google.com/go/compute v1.20.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.1.0 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
