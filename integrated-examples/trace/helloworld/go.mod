@@ -2,7 +2,7 @@ module helloworld
 
 go 1.20
 
-require cloud.google.com/go/cloudtasks v1.11.1
+require cloud.google.com/go/cloudtasks v1.12.0
 
 require (
 	cloud.google.com/go/compute v1.19.3 // indirect

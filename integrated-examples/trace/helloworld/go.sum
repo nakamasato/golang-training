@@ -7,6 +7,8 @@ cloud.google.com/go/cloudtasks v1.11.0 h1:i9rnSfAYtavpNa02QWquJ1bM4LUxJdFAgQnimt
 cloud.google.com/go/cloudtasks v1.11.0/go.mod h1:PcZAM3Dwzq9C5CEIDc3dVdIugmTS3bEGqnzYbYt4oYE=
 cloud.google.com/go/cloudtasks v1.11.1 h1:zyF35LjQyVQQnWbglmVDbsgOHqkbkaxTeRDisEJsXtE=
 cloud.google.com/go/cloudtasks v1.11.1/go.mod h1:a9udmnou9KO2iulGscKR0qBYjreuX8oHwpmFsKspEvM=
+cloud.google.com/go/cloudtasks v1.12.0 h1:W7yHYHTNY1mlzBcGseZAcv5u92FEuo0AWOb7FMhKftU=
+cloud.google.com/go/cloudtasks v1.12.0/go.mod h1:a9udmnou9KO2iulGscKR0qBYjreuX8oHwpmFsKspEvM=
 cloud.google.com/go/compute v1.19.0 h1:+9zda3WGgW1ZSTlVppLCYFIr48Pa35q1uG2N1itbCEQ=
 cloud.google.com/go/compute v1.19.0/go.mod h1:rikpw2y+UMidAe9tISo04EHNOIf42RLYF/q8Bs93scU=
 cloud.google.com/go/compute v1.19.3 h1:DcTwsFgGev/wV5+q8o2fzgcHOaac+DKGC91ZlvpsQds=
