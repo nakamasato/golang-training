@@ -181,7 +181,7 @@ curl localhost:8080
 ## Deploy Cloud Run
 
 
-### Access with IAM database authentication (Not confirmed yet)
+### Access with IAM database authentication
 
 ```
 DB_HOST=$(gcloud sql instances describe ${INSTANCE_NAME} --project ${PROJECT} --format json | jq -r '.ipAddresses[] | select(.type == "PRIMARY").ipAddress')
@@ -201,7 +201,7 @@ curl https://helloworld-xxx-an.a.run.app
 Hello World!
 ```
 
-### Access with built-in auth (OK)
+### Access with built-in auth
 
 1. Create secret `$SECRET_NAME`
 
