@@ -41,14 +41,14 @@ require (
 	go.opentelemetry.io/otel/trace v1.16.0
 	golang.org/x/sync v0.3.0
 	google.golang.org/api v0.134.0
-	google.golang.org/genproto v0.0.0-20230706204954-ccb25ca9f130
+	google.golang.org/genproto v0.0.0-20230731193218-e0aa005b6bdf
 )
 
 require (
-	cloud.google.com/go v0.110.4 // indirect
-	cloud.google.com/go/compute v1.20.1 // indirect
+	cloud.google.com/go v0.110.6 // indirect
+	cloud.google.com/go/compute v1.23.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
-	cloud.google.com/go/iam v1.1.0 // indirect
+	cloud.google.com/go/iam v1.1.1 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
@@ -78,8 +78,8 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/crypto v0.11.0 // indirect
 	golang.org/x/tools v0.9.3 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20230706204954-ccb25ca9f130 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230720185612-659f7aaaa771 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20230726155614-23370e0ffb3e // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230731190214-cbb8c96f2d6d // indirect
 )
 
 require (
