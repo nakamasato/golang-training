@@ -109,4 +109,5 @@ gcloud tasks queues create $QUEUE_ID --location $LOCATION_ID
 
 ## References
 
-1. [Cloud Pub/Sub経由でトレースを取得する](https://zenn.dev/google_cloud_jp/articles/20230626-pubsub-trace)
+1. [Cloud Pub/Sub経由でトレースを取得する](https://zenn.dev/google_cloud_jp/articles/20230626-pubsub-trace) (ToDo)
+1. [opentelemetry-cloud-run](https://github.com/GoogleCloudPlatform/opentelemetry-cloud-run) (ToDo)
