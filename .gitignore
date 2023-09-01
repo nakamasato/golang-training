@@ -2,3 +2,4 @@ kubeconfig
 .DS_Store
 game.db.json
 go.work*
+helloworld-multi-container.yaml
