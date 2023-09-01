@@ -24,6 +24,10 @@ type Account struct {
 	LastLogin time.Time
 }
 
+func (a *Account) String() string {
+	return fmt.Sprintf("uid:%d, username: %s", a.UserID, a.Username)
+}
+
 type server struct {
 	db *sql.DB
 }
@@ -195,30 +199,29 @@ func main() {
 
 func (s *server) getHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Getting!\n")
-	if err := getRows(s.db); err != nil {
+	if accounts, err := getRows(s.db); err != nil {
 		fmt.Printf("getRows failed %v\n", err)
+	} else {
+		fmt.Fprintf(w, "Got accounts: %s\n", accounts)
 	}
 }
 
-func getRows(db *sql.DB) error {
+func getRows(db *sql.DB) ([]*Account, error) {
 	fmt.Println("getRows")
 	rows, err := db.Query("SELECT * FROM accounts")
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer rows.Close()
+
+	var accounts []*Account
 
 	for rows.Next() {
 		u := &Account{}
 		if err := rows.Scan(&u.UserID, &u.Username, &u.Password, &u.Email, &u.CreatedOn, &u.LastLogin); err != nil {
-			return err
+			return nil, err
 		}
-		fmt.Println(u)
+		accounts = append(accounts, u)
 	}
-
-	err = rows.Err()
-	if err != nil {
-		return err
-	}
-	return nil
+	return accounts, nil
 }

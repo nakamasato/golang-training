@@ -5,6 +5,10 @@
 ## Prerequisite
 
 ```
+PROJECT=xxxxx
+```
+
+```
 gcloud auth login --update-adc
 INSTANCE_NAME=naka-test
 ZONE=asia-northeast1-b
@@ -53,17 +57,15 @@ curl localhost:8080
     --project ${PROJECT}
     ```
 
-1. Create database
+1. Create databases for iam user and built-in user
 
     ```
     gcloud sql databases create $DB_NAME_FOR_IAM_AUTH_USER --instance=${INSTANCE_NAME} --project ${PROJECT}
-    ```
-
-    ```
     gcloud sql databases create $DB_NAME_FOR_BUILTIN_USER --instance=${INSTANCE_NAME} --project ${PROJECT}
     ```
 
 1. Create a Service Account for Cloud Run, which is also used for IAM database authentication for Cloud SQL
+
     ```
     gcloud iam service-accounts create ${SA_NAME} \
         --description="hello world cloud run service" \
@@ -108,38 +110,42 @@ curl localhost:8080
 
     ```sql
     CREATE TABLE accounts (
-    user_id serial PRIMARY KEY,
-    username VARCHAR ( 50 ) UNIQUE NOT NULL,
-    password VARCHAR ( 50 ) NOT NULL,
-    email VARCHAR ( 255 ) UNIQUE NOT NULL,
-    created_on TIMESTAMP NOT NULL,
-    last_login TIMESTAMP
+        user_id serial PRIMARY KEY,
+        username VARCHAR ( 50 ) UNIQUE NOT NULL,
+        password VARCHAR ( 50 ) NOT NULL,
+        email VARCHAR ( 255 ) UNIQUE NOT NULL,
+        created_on TIMESTAMP NOT NULL,
+        last_login TIMESTAMP
     );
     ```
 
     ```sql
-    insert into accounts values (1, 'uid', 'password', 'email@gmail.com', '2023-07-12 00:00:00', '2023-07-12 00:01:00');
+    INSERT INTO accounts VALUES (1, 'uid', 'password', 'email@gmail.com', '2023-07-12 00:00:00', '2023-07-12 00:01:00');
     ```
 
     ```
     psql --host=localhost --username=postgres --dbname=$DB_NAME_FOR_IAM_AUTH_USER -c "alter table accounts owner to \"${SA_NAME}@${PROJECT}.iam\";"
     ```
 
-1. Create Cloud SQL User `helloworld`
+1. Create Cloud SQL User `helloworld` (built-in user)
     ```
     CLOUDSQLUSER_PASS=$(openssl rand -base64 32)
     ```
 
-    ```
+    ```bash
     gcloud sql users create $CLOUDSQLUSER \
         --instance=${INSTANCE_NAME} \
         --password=$CLOUDSQLUSER_PASS \
-        --type=cloud_iam_user --project ${PROJECT}
+        --type=BUILT_IN \
+        --project ${PROJECT}
     ```
+
+    `--password` is necessary for built-in user
 
     ```
     gcloud sql users list --instance ${INSTANCE_NAME} --project ${PROJECT}
     ```
+
 1. Create table `$DB_NAME_FOR_BUILTIN_USER.accounts` for `helloworld`
 
     ```
@@ -152,17 +158,17 @@ curl localhost:8080
 
     ```sql
     CREATE TABLE accounts (
-    user_id serial PRIMARY KEY,
-    username VARCHAR ( 50 ) UNIQUE NOT NULL,
-    password VARCHAR ( 50 ) NOT NULL,
-    email VARCHAR ( 255 ) UNIQUE NOT NULL,
-    created_on TIMESTAMP NOT NULL,
-    last_login TIMESTAMP
+        user_id serial PRIMARY KEY,
+        username VARCHAR ( 50 ) UNIQUE NOT NULL,
+        password VARCHAR ( 50 ) NOT NULL,
+        email VARCHAR ( 255 ) UNIQUE NOT NULL,
+        created_on TIMESTAMP NOT NULL,
+        last_login TIMESTAMP
     );
     ```
 
     ```sql
-    insert into accounts values (1, 'uid', 'password', 'email@gmail.com', '2023-07-12 00:00:00', '2023-07-12 00:01:00');
+    INSERT INTO accounts VALUES (1, 'uid', 'password', 'email@gmail.com', '2023-07-12 00:00:00', '2023-07-12 00:01:00');
     ```
 
 1. Grant permission (ToDo)
@@ -174,34 +180,47 @@ curl localhost:8080
     psql --host=localhost --username=postgres --dbname=postgres
     ```
 
-    ```
-    grant cloudsqlsuperuser to "helloworld@<project_id>.iam";
+    ```sql
+    GRANT cloudsqlsuperuser TO "helloworld@<project_id>.iam";
     ```
 
 ## Deploy Cloud Run
 
+### Access with IAM database authentication (Service Account)
 
-### Access with IAM database authentication
+1. Deploy
 
-```
-DB_HOST=$(gcloud sql instances describe ${INSTANCE_NAME} --project ${PROJECT} --format json | jq -r '.ipAddresses[] | select(.type == "PRIMARY").ipAddress')
-gcloud run deploy ${CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_USER} --service-account ${SA_NAME}@${PROJECT}.iam.gserviceaccount.com \
-    --source ./helloworld \
-    --set-env-vars CLOUD_SQL_WITH_IAM_AUTH=true \
-    --set-env-vars INSTANCE_CONNECTION_NAME=${PROJECT}:${REGION}:${INSTANCE_NAME} \
-    --set-env-vars DB_NAME=$DB_NAME_FOR_IAM_AUTH_USER \
-    --set-env-vars DB_IAM_USER=${SA_NAME}@${PROJECT}.iam \
-    --project ${PROJECT} \
-    --region ${REGION} \
-    --async
-```
+    ```
+    gcloud run deploy ${CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_USER} --service-account ${SA_NAME}@${PROJECT}.iam.gserviceaccount.com \
+        --source ./helloworld \
+        --set-env-vars CLOUD_SQL_WITH_IAM_AUTH=true \
+        --set-env-vars INSTANCE_CONNECTION_NAME=${PROJECT}:${REGION}:${INSTANCE_NAME} \
+        --set-env-vars DB_NAME=$DB_NAME_FOR_IAM_AUTH_USER \
+        --set-env-vars DB_IAM_USER=${SA_NAME}@${PROJECT}.iam \
+        --project ${PROJECT} \
+        --region ${REGION} \
+        --async
+    ```
 
-```
-curl https://helloworld-xxx-an.a.run.app
-Hello World!
-```
+1. Get URL
 
-### Access with built-in auth
+    ```
+    URL=$(gcloud run services describe ${CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_USER} --project $PROJECT --region $REGION --format json | jq -r .status.url); echo $URL
+    ```
+
+1. Check
+
+    ```
+    curl -H "authorization: bearer $(gcloud auth print-identity-token --project $PROJECT)" $URL
+    Hello World!
+    ```
+
+    ```
+    curl -H "authorization: bearer $(gcloud auth print-identity-token --project $PROJECT)" $URL/get
+    Getting!
+    Got accounts: [uid:1, username: uid]
+    ```
+### Access with built-in auth (Postgres user)
 
 1. Create secret `$SECRET_NAME`
 
@@ -238,6 +257,24 @@ Hello World!
     ```
 
     - [connect from cloud run](https://cloud.google.com/sql/docs/postgres/connect-run)
+
+1. Get URL
+    ```
+    URL=$(gcloud run services describe ${CLOUDRUN_SERVICE_NAME_FOR_BUILTIN_USER} --project $PROJECT --region $REGION --format json | jq -r .status.url); echo $URL
+    ```
+
+1. Check
+
+    ```
+    curl -H "authorization: bearer $(gcloud auth print-identity-token --project $PROJECT)" $URL
+    Hello World!
+    ```
+
+    ```
+    curl -H "authorization: bearer $(gcloud auth print-identity-token --project $PROJECT)" $URL/get
+    Getting!
+    Got accounts: [uid:1, username: uid]
+    ```
 
 ## Tips
 
