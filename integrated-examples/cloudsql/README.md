@@ -113,23 +113,16 @@ IMAGE_NAME=helloworld # build image for Cloud Run with gcloud builds
     psql --host=localhost --username=postgres --dbname=$DB_NAME_FOR_IAM_AUTH_USER
     ```
 
-    ```sql
-    CREATE TABLE accounts (
-        user_id serial PRIMARY KEY,
-        username VARCHAR ( 50 ) UNIQUE NOT NULL,
-        password VARCHAR ( 50 ) NOT NULL,
-        email VARCHAR ( 255 ) UNIQUE NOT NULL,
-        created_on TIMESTAMP NOT NULL,
-        last_login TIMESTAMP
-    );
+    ```bash
+    PGPASSWORD=test psql --host=localhost --username=postgres --dbname=$DB_NAME_FOR_IAM_AUTH_USER -c "CREATE TABLE accounts (user_id serial PRIMARY KEY, username VARCHAR ( 50 ) UNIQUE NOT NULL, password VARCHAR ( 50 ) NOT NULL, email VARCHAR ( 255 ) UNIQUE NOT NULL, created_on TIMESTAMP NOT NULL, last_login TIMESTAMP);
     ```
 
-    ```sql
-    INSERT INTO accounts VALUES (1, 'uid', 'password', 'email@gmail.com', '2023-07-12 00:00:00', '2023-07-12 00:01:00');
+    ```bash
+    PGPASSWORD=test psql --host=localhost --username=postgres --dbname=$DB_NAME_FOR_IAM_AUTH_USER -c "INSERT INTO accounts VALUES (1, 'john', 'password', 'john@gmail.com', '2023-07-12 00:00:00', '2023-07-12 00:01:00');"
     ```
 
-    ```
-    psql --host=localhost --username=postgres --dbname=$DB_NAME_FOR_IAM_AUTH_USER -c "alter table accounts owner to \"${SA_NAME}@${PROJECT}.iam\";"
+    ```bash
+    PGPASSWORD=test psql --host=localhost --username=postgres --dbname=$DB_NAME_FOR_IAM_AUTH_USER -c "ALTER TABLE accounts OWNER TO \"${SA_NAME}@${PROJECT}.iam\";"
     ```
 
 1. Create Cloud SQL User `helloworld` (built-in user)
@@ -158,8 +151,10 @@ IMAGE_NAME=helloworld # build image for Cloud Run with gcloud builds
     ```
 
     ```
-    PGPASSWORD=$CLOUDSQLUSER_PASS psql --host=localhost --username=$CLOUDSQLUSER --dbname=$DB_NAME_FOR_BUILTIN_USER
+    PGPASSWORD=$CLOUDSQLUSER_PASS psql --host=localhost --username=$CLOUDSQLUSER --dbname=$DB_NAME_FOR_BUILTIN_USER -f init_db.sql
     ```
+
+    <details><summary>init_db.sql</summary>
 
     ```sql
     CREATE TABLE accounts (
@@ -170,11 +165,10 @@ IMAGE_NAME=helloworld # build image for Cloud Run with gcloud builds
         created_on TIMESTAMP NOT NULL,
         last_login TIMESTAMP
     );
+    INSERT INTO accounts VALUES (1, 'john', 'password', 'john@gmail.com', '2023-07-12 00:00:00', '2023-07-12 00:01:00');
     ```
 
-    ```sql
-    INSERT INTO accounts VALUES (1, 'uid', 'password', 'email@gmail.com', '2023-07-12 00:00:00', '2023-07-12 00:01:00');
-    ```
+    </details>
 
 1. Grant permission (ToDo)
     ```
@@ -223,7 +217,7 @@ IMAGE_NAME=helloworld # build image for Cloud Run with gcloud builds
     ```
     curl -H "authorization: bearer $(gcloud auth print-identity-token --project $PROJECT)" $URL/get
     Getting!
-    Got accounts: [uid:1, username: uid]
+    Got accounts: [uid:1, username: john]
     ```
 ### 4.2. Access with built-in auth (Postgres user)
 
@@ -278,7 +272,7 @@ IMAGE_NAME=helloworld # build image for Cloud Run with gcloud builds
     ```
     curl -H "authorization: bearer $(gcloud auth print-identity-token --project $PROJECT)" $URL/get
     Getting!
-    Got accounts: [uid:1, username: uid]
+    Got accounts: [uid:1, username: john]
     ```
 
 ### 4.3. With SQL Auth Proxy [WIP]
