@@ -148,19 +148,27 @@ func connect() (*sql.DB, error) {
 		return v
 	}
 	var dsn string
-	if os.Getenv("CLOUD_SQL_WITH_IAM_AUTH") == "true" {
+	if os.Getenv("WITH_CONNECTOR_IAM_AUTH") == "true" {
 		// https://cloud.google.com/sql/docs/postgres/samples/cloud-sql-postgres-databasesql-auto-iam-authn
 		return connectWithConnectorIAMAuthN()
-	} else if os.Getenv("CLOUD_SQL_WITH_BUILT_IN_USER") == "true" {
+	} else if os.Getenv("WITH_CONNECTOR_FOR_BUILT_IN_USER") == "true" {
 		// https://cloud.google.com/sql/docs/postgres/connect-run#go
 		return connectWithConnector()
 	} else { // local postgres or with SQL Auth Proxy
-		dsn = fmt.Sprintf("host=%s user=%s password=%s database=%s",
-			mustGetenv("DB_HOST"),
-			mustGetenv("DB_USER"),
-			mustGetenv("DB_PASS"),
-			mustGetenv("DB_NAME"),
-		)
+		if os.Getenv("DB_IAM_USER") != "" { // with IAM auth (IAM_SERVICE_ACCOUNT/IAM_USER user)
+			dsn = fmt.Sprintf("host=%s user=%s database=%s",
+				mustGetenv("DB_HOST"),
+				mustGetenv("DB_IAM_USER"),
+				mustGetenv("DB_NAME"),
+			)
+		} else { // BUILT_IN user
+			dsn = fmt.Sprintf("host=%s user=%s password=%s database=%s",
+				mustGetenv("DB_HOST"),
+				mustGetenv("DB_USER"),
+				mustGetenv("DB_PASS"),
+				mustGetenv("DB_NAME"),
+			)
+		}
 
 		pgxCfg, err := pgx.ParseConfig(dsn)
 		if err != nil {

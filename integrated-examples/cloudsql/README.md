@@ -1,4 +1,12 @@
-# Cloud Run with Cloud SQL
+# Cloud Run with Cloud SQL (with Public IP)
+
+There are several ways to connect Cloud SQL from Cloud Run:
+
+1. Directly connect via Public/Private IP
+1. With Go Connector
+1. With SQL Auth Proxy
+
+This document covers Go connector and SQL Auth Proxy for Cloud SQL BUILT_IN and IAM_SERVICE_ACCOUNT users.
 
 ![](diagram.drawio.svg)
 
@@ -20,7 +28,8 @@ DB_NAME_FOR_BUILTIN_USER=helloworld
 SECRET_NAME=cloudsqluser_pass_helloworld
 CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_USER=helloworld-auth
 CLOUDRUN_SERVICE_NAME_FOR_BUILTIN_USER=helloworld
-CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_WITH_PROXY=helloworld-multi-container
+CLOUDRUN_SERVICE_NAME_FOR_BUILTIN_USER_WITH_PROXY=helloworld-with-proxy
+CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_WITH_PROXY=helloworld-auth-with-proxy
 IMAGE_NAME=helloworld # build image for Cloud Run with gcloud builds
 ```
 
@@ -48,37 +57,38 @@ IMAGE_NAME=helloworld # build image for Cloud Run with gcloud builds
 
 ## 3. Set Up Cloud SQL (Instance, Database, User)
 
-1. Create Cloud SQL instance
+### 3.1. Create Cloud SQL instance (With Public IP only)
 
-    ```
-    gcloud sql instances create ${INSTANCE_NAME} \
-    --database-version=POSTGRES_15 \
-    --cpu=1 \
-    --memory=3840MiB \
-    --zone=$ZONE \
-    --root-password=test \
-    --database-flags=cloudsql.iam_authentication=on \
-    --project ${PROJECT}
-    ```
+```
+gcloud sql instances create ${INSTANCE_NAME} \
+--database-version=POSTGRES_15 \
+--cpu=1 \
+--memory=3840MiB \
+--zone=$ZONE \
+--root-password=test \
+--database-flags=cloudsql.iam_authentication=on \
+--project ${PROJECT}
+```
 
-1. Create databases for iam user and built-in user
+### 3.2. Create databases for iam user and built-in user
 
-    ```
-    gcloud sql databases create $DB_NAME_FOR_IAM_AUTH_USER --instance=${INSTANCE_NAME} --project ${PROJECT}
-    gcloud sql databases create $DB_NAME_FOR_BUILTIN_USER --instance=${INSTANCE_NAME} --project ${PROJECT}
-    ```
+```
+gcloud sql databases create $DB_NAME_FOR_IAM_AUTH_USER --instance=${INSTANCE_NAME} --project ${PROJECT}
+gcloud sql databases create $DB_NAME_FOR_BUILTIN_USER --instance=${INSTANCE_NAME} --project ${PROJECT}
+```
 
-1. Create a Service Account for Cloud Run, which is also used for IAM database authentication for Cloud SQL
+### 3.3. Create a Service Account for Cloud Run, which is also used for IAM database authentication for Cloud SQL
 
-    ```
-    gcloud iam service-accounts create ${SA_NAME} \
-        --description="hello world cloud run service" \
-        --display-name="helloworld" \
-        --project=${PROJECT}
-    ```
+```
+gcloud iam service-accounts create ${SA_NAME} \
+    --description="hello world cloud run service" \
+    --display-name="helloworld" \
+    --project=${PROJECT}
+```
 
-1. Create Cloud SQL user for the service account
+### 3.4. Create Cloud SQL IAM_SERVICEACCOUNT user
 
+1. Create SQL user.
     ```
     gcloud sql users create ${SA_NAME}@${PROJECT}.iam \
     --instance=${INSTANCE_NAME} \
@@ -100,32 +110,46 @@ IMAGE_NAME=helloworld # build image for Cloud Run with gcloud builds
     1. [IAM add-iam-policy-binding](https://cloud.google.com/sdk/gcloud/reference/projects/add-iam-policy-binding)
     1. [Cloud SQL IAM Roles](https://cloud.google.com/sql/docs/postgres/iam-roles)
 
-1. Create table `$DB_NAME_FOR_IAM_AUTH_USER.accounts` for `<sa_name>@<project>.iam`
-
+1. Grant permission to IAM_SERVICE_ACCOUNT user (ToDo)
     ```
-    gcloud auth application-default login
     cloud-sql-proxy ${PROJECT}:${REGION}:${INSTANCE_NAME}
     ```
 
-    Log in with root (password is set above)
+    ```
+    psql --host=localhost --username=postgres --dbname=postgres
+    ```
+
+    ```sql
+    GRANT cloudsqlsuperuser TO "helloworld@<project_id>.iam";
+    ```
+### 3.5. Create table `$DB_NAME_FOR_IAM_AUTH_USER.accounts` for `<sa_name>@<project>.iam`
+
+1. Run cloud sql proxy
+    ```
+    cloud-sql-proxy ${PROJECT}:${REGION}:${INSTANCE_NAME}
+    ```
+
+1. Log in with root (password is set above)
 
     ```
     psql --host=localhost --username=postgres --dbname=$DB_NAME_FOR_IAM_AUTH_USER
     ```
 
-    ```bash
-    PGPASSWORD=test psql --host=localhost --username=postgres --dbname=$DB_NAME_FOR_IAM_AUTH_USER -c "CREATE TABLE accounts (user_id serial PRIMARY KEY, username VARCHAR ( 50 ) UNIQUE NOT NULL, password VARCHAR ( 50 ) NOT NULL, email VARCHAR ( 255 ) UNIQUE NOT NULL, created_on TIMESTAMP NOT NULL, last_login TIMESTAMP);
+1. Create table and insert a sample record
+
+    ```
+    PGPASSWORD=$CLOUDSQLUSER_PASS psql --host=localhost --username=$CLOUDSQLUSER --dbname=$DB_NAME_FOR_IAM_AUTH_USER -f init_db.sql
     ```
 
-    ```bash
-    PGPASSWORD=test psql --host=localhost --username=postgres --dbname=$DB_NAME_FOR_IAM_AUTH_USER -c "INSERT INTO accounts VALUES (1, 'john', 'password', 'john@gmail.com', '2023-07-12 00:00:00', '2023-07-12 00:01:00');"
-    ```
+1. Grant owner to the service account user
 
     ```bash
     PGPASSWORD=test psql --host=localhost --username=postgres --dbname=$DB_NAME_FOR_IAM_AUTH_USER -c "ALTER TABLE accounts OWNER TO \"${SA_NAME}@${PROJECT}.iam\";"
     ```
 
-1. Create Cloud SQL User `helloworld` (built-in user)
+### 3.6. Create Cloud SQL BUILT-IN User `helloworld`
+
+1. Create SQL user
     ```
     CLOUDSQLUSER_PASS=$(openssl rand -base64 32)
     ```
@@ -144,11 +168,13 @@ IMAGE_NAME=helloworld # build image for Cloud Run with gcloud builds
     gcloud sql users list --instance ${INSTANCE_NAME} --project ${PROJECT}
     ```
 
-1. Create table `$DB_NAME_FOR_BUILTIN_USER.accounts` for `helloworld`
+### 3.7. Create table `$DB_NAME_FOR_BUILTIN_USER.accounts` for `helloworld`
 
+1. Run Cloud SQL proxy
     ```
     cloud-sql-proxy ${PROJECT}:${REGION}:${INSTANCE_NAME}
     ```
+1. Create a table and insert a sample record
 
     ```
     PGPASSWORD=$CLOUDSQLUSER_PASS psql --host=localhost --username=$CLOUDSQLUSER --dbname=$DB_NAME_FOR_BUILTIN_USER -f init_db.sql
@@ -170,56 +196,32 @@ IMAGE_NAME=helloworld # build image for Cloud Run with gcloud builds
 
     </details>
 
-1. Grant permission (ToDo)
-    ```
-    cloud-sql-proxy ${PROJECT}:${REGION}:${INSTANCE_NAME}
-    ```
+## 4. Build an image
 
-    ```
-    psql --host=localhost --username=postgres --dbname=postgres
-    ```
+(You can skip this step if you deploy via `gcloud run deploy` with `--source`)
 
-    ```sql
-    GRANT cloudsqlsuperuser TO "helloworld@<project_id>.iam";
-    ```
+[Build an image with Google Cloud's buildpacks](https://cloud.google.com/run/docs/building/containers#buildpacks)
 
-## 4. Deploy Cloud Run
+```
+cd helloworld
+gcloud builds submit --pack image=gcr.io/${PROJECT}/${IMAGE_NAME} --project $PROJECT
+```
 
-### 4.1. Access with IAM database authentication (Service Account)
+<details><summary>Build in local and push to repo</summary>
 
-1. Deploy
+You can build an image in your local and push to the gcr.
 
-    ```
-    gcloud run deploy ${CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_USER} --service-account ${SA_NAME}@${PROJECT}.iam.gserviceaccount.com \
-        --source ./helloworld \
-        --set-env-vars CLOUD_SQL_WITH_IAM_AUTH=true \
-        --set-env-vars INSTANCE_CONNECTION_NAME=${PROJECT}:${REGION}:${INSTANCE_NAME} \
-        --set-env-vars DB_NAME=$DB_NAME_FOR_IAM_AUTH_USER \
-        --set-env-vars DB_IAM_USER=${SA_NAME}@${PROJECT}.iam \
-        --project ${PROJECT} \
-        --region ${REGION} \
-        --async
-    ```
+```
+export KO_DOCKER_REPO=gcr.io/${PROJECT}/${IMAGE_NAME}
+ko build ./helloworld
+```
 
-1. Get URL
+</details>
 
-    ```
-    URL=$(gcloud run services describe ${CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_USER} --project $PROJECT --region $REGION --format json | jq -r .status.url); echo $URL
-    ```
 
-1. Check
+## 5. Deploy Cloud Run
 
-    ```
-    curl -H "authorization: bearer $(gcloud auth print-identity-token --project $PROJECT)" $URL
-    Hello World!
-    ```
-
-    ```
-    curl -H "authorization: bearer $(gcloud auth print-identity-token --project $PROJECT)" $URL/get
-    Getting!
-    Got accounts: [uid:1, username: john]
-    ```
-### 4.2. Access with built-in auth (Postgres user)
+### 5.1. Access with Cloud SQL BUILT_IN user (with [Go Connector](https://github.com/GoogleCloudPlatform/cloud-sql-go-connector))
 
 1. Create secret `$SECRET_NAME`
 
@@ -242,10 +244,11 @@ IMAGE_NAME=helloworld # build image for Cloud Run with gcloud builds
     ```
 
 1. Deploy
+
     ```
     gcloud run deploy ${CLOUDRUN_SERVICE_NAME_FOR_BUILTIN_USER} --service-account ${SA_NAME}@${PROJECT}.iam.gserviceaccount.com \
-        --source ./helloworld \
-        --set-env-vars CLOUD_SQL_WITH_BUILT_IN_USER=true \
+        --image gcr.io/${PROJECT}/${IMAGE_NAME} \
+        --set-env-vars WITH_CONNECTOR_FOR_BUILT_IN_USER=true \
         --set-env-vars INSTANCE_CONNECTION_NAME=${PROJECT}:${REGION}:${INSTANCE_NAME} \
         --set-env-vars DB_NAME=$DB_NAME_FOR_BUILTIN_USER \
         --set-env-vars DB_USER=$CLOUDSQLUSER \
@@ -255,7 +258,27 @@ IMAGE_NAME=helloworld # build image for Cloud Run with gcloud builds
         --async
     ```
 
+
+    <details><summary>You can deploy with source code (build and deploy)</summary>
+
+    ```
+    gcloud run deploy ${CLOUDRUN_SERVICE_NAME_FOR_BUILTIN_USER} --service-account ${SA_NAME}@${PROJECT}.iam.gserviceaccount.com \
+        --source ./helloworld \
+        --set-env-vars WITH_CONNECTOR_FOR_BUILT_IN_USER=true \
+        --set-env-vars INSTANCE_CONNECTION_NAME=${PROJECT}:${REGION}:${INSTANCE_NAME} \
+        --set-env-vars DB_NAME=$DB_NAME_FOR_BUILTIN_USER \
+        --set-env-vars DB_USER=$CLOUDSQLUSER \
+        --set-secrets DB_PASS=${SECRET_NAME}:latest \
+        --project ${PROJECT} \
+        --region ${REGION} \
+        --async
+    ```
+
+    </deitals>
+
     - [connect from cloud run](https://cloud.google.com/sql/docs/postgres/connect-run)
+
+    While waiting, you can move on to next step to deploy Cloud Run service for IAM_SERVICE_ACCOUNT user.
 
 1. Get URL
     ```
@@ -275,33 +298,82 @@ IMAGE_NAME=helloworld # build image for Cloud Run with gcloud builds
     Got accounts: [uid:1, username: john]
     ```
 
-### 4.3. With SQL Auth Proxy [WIP]
+### 5.2. Access with Cloud SQL IAM_SERVICE_ACCOUNT user (With [Go Connector](https://github.com/GoogleCloudPlatform/cloud-sql-go-connector))
+
+1. Deploy
+
+    ```
+    gcloud run deploy ${CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_USER} --service-account ${SA_NAME}@${PROJECT}.iam.gserviceaccount.com \
+        --image gcr.io/${PROJECT}/${IMAGE_NAME} \
+        --set-env-vars WITH_CONNECTOR_IAM_AUTH=true \
+        --set-env-vars INSTANCE_CONNECTION_NAME=${PROJECT}:${REGION}:${INSTANCE_NAME} \
+        --set-env-vars DB_NAME=$DB_NAME_FOR_IAM_AUTH_USER \
+        --set-env-vars DB_IAM_USER=${SA_NAME}@${PROJECT}.iam \
+        --project ${PROJECT} \
+        --region ${REGION} \
+        --async
+    ```
+
+
+    <details><summary>You can deploy with source code (build and deploy)</summary>
+
+    ```
+    gcloud run deploy ${CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_USER} --service-account ${SA_NAME}@${PROJECT}.iam.gserviceaccount.com \
+        --source ./helloworld \
+        --set-env-vars WITH_CONNECTOR_IAM_AUTH=true \
+        --set-env-vars INSTANCE_CONNECTION_NAME=${PROJECT}:${REGION}:${INSTANCE_NAME} \
+        --set-env-vars DB_NAME=$DB_NAME_FOR_IAM_AUTH_USER \
+        --set-env-vars DB_IAM_USER=${SA_NAME}@${PROJECT}.iam \
+        --project ${PROJECT} \
+        --region ${REGION} \
+        --async
+    ```
+
+    </details>
+
+1. Get URL
+
+    ```
+    URL=$(gcloud run services describe ${CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_USER} --project $PROJECT --region $REGION --format json | jq -r .status.url); echo $URL
+    ```
+
+1. Check
+
+    ```
+    curl -H "authorization: bearer $(gcloud auth print-identity-token --project $PROJECT)" $URL
+    Hello World!
+    ```
+
+    ```
+    curl -H "authorization: bearer $(gcloud auth print-identity-token --project $PROJECT)" $URL/get
+    Getting!
+    Got accounts: [uid:1, username: john]
+    ```
+
+### 5.3. Access with Cloud SQL BUILT_IN user via SQL Auth Proxy (Multi Container)
+
+https://cloud.google.com/run/docs/reference/yaml/v1
+
+![](https://cloud.google.com/static/sql/images/proxyconnection.svg)
 
 [About the Cloud SQL Auth Proxy](https://cloud.google.com/sql/docs/postgres/sql-proxy)
-
-1. [Build an image with Google Cloud's buildpacks](https://cloud.google.com/run/docs/building/containers#buildpacks)
-
-    ```
-    cd helloworld
-    gcloud builds submit --pack image=gcr.io/${PROJECT}/${IMAGE_NAME} --project $PROJ
-    ECT
-    ```
 
 1. Deploy with yaml
 
     ```
-    cat << EOF > $CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_WITH_PROXY.yaml
+    cat << EOF > $CLOUDRUN_SERVICE_NAME_FOR_BUILTIN_USER_WITH_PROXY.yaml
     apiVersion: serving.knative.dev/v1
     kind: Service
     metadata:
       annotations:
-         run.googleapis.com/launch-stage: ALPHA
-      name: $CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_WITH_PROXY
+        run.googleapis.com/launch-stage: ALPHA
+      name: $CLOUDRUN_SERVICE_NAME_FOR_BUILTIN_USER_WITH_PROXY
     spec:
       template:
         metadata:
           annotations:
             run.googleapis.com/execution-environment: gen2
+            run.googleapis.com/container-dependencies: '{"helloworld":["cloud-sql-proxy"]}'
 
         spec:
           serviceAccountName: ${SA_NAME}@${PROJECT}.iam.gserviceaccount.com
@@ -311,24 +383,96 @@ IMAGE_NAME=helloworld # build image for Cloud Run with gcloud builds
             ports:
               - containerPort: 8080
             env:
-              - name: CLOUD_SQL_WITH_IAM_AUTH
-                value: "true"
+              - name: DB_USER
+                value: ${CLOUDSQLUSER}
+              - name: DB_NAME
+                value: $DB_NAME_FOR_BUILTIN_USER
+              - name: DB_HOST
+                value: 127.0.0.1
+              - name: DB_PASS
+                valueFrom:
+                  secretKeyRef:
+                    key: latest
+                    name: ${SECRET_NAME}
+          - name: cloud-sql-proxy
+            image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:latest
+            args:
+              # Ensure the port number on the --port argument matches the value of
+              # the DB_PORT env var on the my-app container.
+              - "--port=5432"
+              - "${PROJECT}:${REGION}:${INSTANCE_NAME}"
+    EOF
+    ```
+
+    ```
+    gcloud run services replace $CLOUDRUN_SERVICE_NAME_FOR_BUILTIN_USER_WITH_PROXY.yaml --project $PROJECT --region $REGION
+    ```
+
+1. Get URL
+    ```
+    URL=$(gcloud run services describe ${CLOUDRUN_SERVICE_NAME_FOR_BUILTIN_USER_WITH_PROXY} --project $PROJECT --region $REGION --format json | jq -r .status.url); echo $URL
+    ```
+
+1. Check
+
+    ```
+    curl -H "authorization: bearer $(gcloud auth print-identity-token --project $PROJECT)" $URL
+    Hello World!
+    ```
+
+    ```
+    curl -H "authorization: bearer $(gcloud auth print-identity-token --project $PROJECT)" $URL/get
+    Getting!
+    Got accounts: [uid:1, username: john]
+    ```
+
+### 5.4. Access with Cloud SQL IAM_SERVICE_ACCOUNT user via SQL Auth Proxy (Multi Container)
+
+https://cloud.google.com/run/docs/reference/yaml/v1
+
+![](https://cloud.google.com/static/sql/images/proxyconnection.svg)
+
+[About the Cloud SQL Auth Proxy](https://cloud.google.com/sql/docs/postgres/sql-proxy)
+
+1. Deploy with yaml
+
+    ```
+    cat << EOF > $CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_WITH_PROXY.yaml
+    apiVersion: serving.knative.dev/v1
+    kind: Service
+    metadata:
+      annotations:
+        run.googleapis.com/launch-stage: ALPHA
+      name: $CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_WITH_PROXY
+    spec:
+      template:
+        metadata:
+          annotations:
+            run.googleapis.com/execution-environment: gen2
+            run.googleapis.com/container-dependencies: '{"helloworld":["cloud-sql-proxy"]}'
+
+        spec:
+          serviceAccountName: ${SA_NAME}@${PROJECT}.iam.gserviceaccount.com
+          containers:
+          - name: helloworld
+            image: gcr.io/$PROJECT/$IMAGE_NAME
+            ports:
+              - containerPort: 8080
+            env:
               - name: DB_IAM_USER
                 value: ${SA_NAME}@${PROJECT}.iam
               - name: DB_NAME
                 value: $DB_NAME_FOR_IAM_AUTH_USER
-              - name: INSTANCE_CONNECTION_NAME
+              - name: DB_HOST
                 value: 127.0.0.1
-              - name: DB_PORT
-                value: "5432"
           - name: cloud-sql-proxy
             image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:latest
             args:
-                 # Ensure the port number on the --port argument matches the value of
-                 # the DB_PORT env var on the my-app container.
-                 - "--port=5432"
-                 - "--auto-iam-authn"
-                 - "${PROJECT}:${REGION}:${INSTANCE_NAME}"
+              # Ensure the port number on the --port argument matches the value of
+              # the DB_PORT env var on the my-app container.
+              - "--port=5432"
+              - "--auto-iam-authn"
+              - "${PROJECT}:${REGION}:${INSTANCE_NAME}"
     EOF
     ```
 
@@ -351,22 +495,18 @@ IMAGE_NAME=helloworld # build image for Cloud Run with gcloud builds
     ```
     curl -H "authorization: bearer $(gcloud auth print-identity-token --project $PROJECT)" $URL/get
     Getting!
+    Got accounts: [uid:1, username: john]
     ```
 
-    **Error:** -> `main.go` で IAM_AUTHで接続する時にINSTANCE_NAMEで接続する選択肢しかないから、sql auth proxyで接続する方法を探す
-    ```
-    "getRows failed failed to connect to `host=/tmp user=xxx@xxxx.iam database=xxxx`: dial error (Config error: invalid instance connection name, expected PROJECT:REGION:INSTANCE (connection name = "127.0.0.1"))"
-    ```
+## 6. Connect to Cloud Run with `psql` from Local
 
-## 5. Connect to Cloud Run with `psql` from Local
-
-### 5.1. With `cloud-sql-proxy`
+### 6.1. With `cloud-sql-proxy`
 
 ```
 gcloud auth application-default login
 ```
 
-#### 5.1.1. Using IAM authentication (Service Account)
+#### 6.1.1. Using IAM authentication (Service Account)
 
 1. With service account impersonation, you need to have `roles/iam.serviceAccountTokenCreator` ([required roles](https://cloud.google.com/docs/authentication/use-service-account-impersonation#required-roles))
 
@@ -389,7 +529,7 @@ gcloud auth application-default login
     psql "host=localhost user=${SA_NAME}@${PROJECT}.iam dbname=${DB_NAME_FOR_IAM_AUTH_USER}"
     ```
 
-#### 5.1.2. Using built-in user (Username & Password)
+#### 6.1.2. Using built-in user (Username & Password)
 
 1. Run cloud-sql-proxy
     ```
@@ -401,7 +541,7 @@ gcloud auth application-default login
     ```
     PGPASSWORD=$CLOUDSQLUSER_PASS psql --host=localhost --username=$CLOUDSQLUSER --dbname=$DB_NAME_FOR_BUILTIN_USE
     ```
-### 5.2. With public IP
+### 6.2. With public IP
 
 ```
 DB_HOST=$(gcloud sql instances describe ${INSTANCE_NAME} --project ${PROJECT} --format json | jq -r '.ipAddresses[] | select(.type == "PRIMARY").ipAddress')
@@ -413,7 +553,7 @@ PGPASSWORD=$CLOUDSQLUSER_PASS psql --host=$DB_HOST --username=$CLOUDSQLUSER --db
 
 If [Cloud SQL organization policies](https://cloud.google.com/sql/docs/postgres/org-policy/org-policy) is set, you cannot use this way.
 
-### 5.3. With `gcloud sql connect` command (Public IP)
+### 6.3. With `gcloud sql connect` command (Public IP)
 
 ```
 gcloud sql connect ${INSTANCE_NAME} --user=postgres --quiet --project ${PROJECT}
@@ -427,9 +567,8 @@ gcloud sql connect ${INSTANCE_NAME} --user=postgres --quiet --project ${PROJECT}
 
 For more about `gcloud sql connect`, please read [gcloud sql connect](https://cloud.google.com/sdk/gcloud/reference/sql/connect)
 
-You can also use
 
-## Tips
+## 7. Tips
 
 ```
 gcloud sql users set-password postgres \
@@ -442,11 +581,12 @@ gcloud sql users set-password postgres \
 gcloud sql connect ${INSTANCE_NAME} --user=postgres --quiet --project ${PROJECT}
 ```
 
-## Clean up
+## 8. Clean up
 
 ```
 gcloud run services delete ${CLOUDRUN_SERVICE_NAME_FOR_BUILTIN_USER} --project ${PROJECT} --region ${REGION}
 gcloud run services delete ${CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_USER} --project ${PROJECT} --region ${REGION}
+gcloud run services delete ${CLOUDRUN_SERVICE_NAME_FOR_BUILTIN_USER_WITH_PROXY} --project ${PROJECT} --region ${REGION}
 gcloud run services delete ${CLOUDRUN_SERVICE_NAME_FOR_IAM_AUTH_WITH_PROXY} --project ${PROJECT} --region ${REGION}
 gcloud sql instances delete ${INSTANCE_NAME} --project ${PROJECT}
 gcloud iam service-accounts delete ${SA_NAME}@${PROJECT}.iam.gserviceaccount.com --project ${PROJECT}
@@ -465,3 +605,4 @@ gcloud secrets delete $SECRET_NAME --project ${PROJECT}
 1. [Cloud SQL IAM Roles](https://cloud.google.com/sql/docs/postgres/iam-roles)
 1. [Cloud SQL organization policies](https://cloud.google.com/sql/docs/postgres/org-policy/org-policy): `constraints/sql.restrictPublicIp`
 1. [About the Cloud SQL Auth Proxy](https://cloud.google.com/sql/docs/postgres/sql-proxy)
+1. https://cloud.google.com/run/docs/reference/yaml/v1
