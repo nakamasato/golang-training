@@ -29,7 +29,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.10.9
 	github.com/lithammer/shortuuid/v4 v4.0.0
-	github.com/onsi/ginkgo v1.16.5
+	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/ginkgo/v2 v2.12.0
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
 	github.com/vektah/gqlparser/v2 v2.5.8
