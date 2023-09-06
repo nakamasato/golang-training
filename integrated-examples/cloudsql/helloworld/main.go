@@ -24,6 +24,10 @@ type Account struct {
 	LastLogin time.Time
 }
 
+func (a *Account) String() string {
+	return fmt.Sprintf("uid:%d, username: %s", a.UserID, a.Username)
+}
+
 type server struct {
 	db *sql.DB
 }
@@ -144,19 +148,27 @@ func connect() (*sql.DB, error) {
 		return v
 	}
 	var dsn string
-	if os.Getenv("CLOUD_SQL_WITH_IAM_AUTH") == "true" {
+	if os.Getenv("WITH_CONNECTOR_IAM_AUTH") == "true" {
 		// https://cloud.google.com/sql/docs/postgres/samples/cloud-sql-postgres-databasesql-auto-iam-authn
 		return connectWithConnectorIAMAuthN()
-	} else if os.Getenv("CLOUD_SQL_WITH_BUILT_IN_USER") == "true" {
+	} else if os.Getenv("WITH_CONNECTOR_FOR_BUILT_IN_USER") == "true" {
 		// https://cloud.google.com/sql/docs/postgres/connect-run#go
 		return connectWithConnector()
 	} else { // local postgres or with SQL Auth Proxy
-		dsn = fmt.Sprintf("host=%s user=%s password=%s database=%s",
-			mustGetenv("DB_HOST"),
-			mustGetenv("DB_USER"),
-			mustGetenv("DB_PASS"),
-			mustGetenv("DB_NAME"),
-		)
+		if os.Getenv("DB_IAM_USER") != "" { // with IAM auth (IAM_SERVICE_ACCOUNT/IAM_USER user)
+			dsn = fmt.Sprintf("host=%s user=%s database=%s",
+				mustGetenv("DB_HOST"),
+				mustGetenv("DB_IAM_USER"),
+				mustGetenv("DB_NAME"),
+			)
+		} else { // BUILT_IN user
+			dsn = fmt.Sprintf("host=%s user=%s password=%s database=%s",
+				mustGetenv("DB_HOST"),
+				mustGetenv("DB_USER"),
+				mustGetenv("DB_PASS"),
+				mustGetenv("DB_NAME"),
+			)
+		}
 
 		pgxCfg, err := pgx.ParseConfig(dsn)
 		if err != nil {
@@ -195,30 +207,29 @@ func main() {
 
 func (s *server) getHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Getting!\n")
-	if err := getRows(s.db); err != nil {
+	if accounts, err := getRows(s.db); err != nil {
 		fmt.Printf("getRows failed %v\n", err)
+	} else {
+		fmt.Fprintf(w, "Got accounts: %s\n", accounts)
 	}
 }
 
-func getRows(db *sql.DB) error {
+func getRows(db *sql.DB) ([]*Account, error) {
 	fmt.Println("getRows")
 	rows, err := db.Query("SELECT * FROM accounts")
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer rows.Close()
+
+	var accounts []*Account
 
 	for rows.Next() {
 		u := &Account{}
 		if err := rows.Scan(&u.UserID, &u.Username, &u.Password, &u.Email, &u.CreatedOn, &u.LastLogin); err != nil {
-			return err
+			return nil, err
 		}
-		fmt.Println(u)
+		accounts = append(accounts, u)
 	}
-
-	err = rows.Err()
-	if err != nil {
-		return err
-	}
-	return nil
+	return accounts, nil
 }
