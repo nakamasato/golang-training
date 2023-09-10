@@ -28,6 +28,7 @@ jobs:
           echo 'postgres is ready!'
           docker-compose exec -T postgres psql -U postgres postgres -c 'create database ent_getting_started;'
           docker-compose exec -T postgres psql -U postgres postgres -c 'create database ent_simple_example;'
+          docker-compose exec -T postgres psql -U postgres postgres -c 'create database ent_getting_started_with_versioned_migrations;'
 
       - name: run getting_started
         run: go run start/start.go
@@ -49,3 +50,20 @@ jobs:
       - name: run simple_example
         run: go run start/start.go
         working-directory: pragmatic-cases/ent/simple-example
+
+      - name: install atlas cli
+        run: curl -sSf https://atlasgo.sh | sh
+
+      - name: run getting-started-with-versioned-migrations
+        env:
+          DSN: postgres://postgres:postgres@localhost:5432/ent_getting_started_with_versioned_migrations?sslmode=disable
+        run: |
+          go run -mod=mod ent/migrate/main.go init_db
+          atlas migrate diff migration_name \--dir "file://ent/migrate/migrations" \
+              --to "ent://ent/schema" \
+              --dev-url "docker://postgres/15/ent_getting_started_with_versioned_migrations?search_path=public"
+          atlas migrate apply \
+              --dir "file://ent/migrate/migrations" \
+              --url "${DSN}"
+          go run start/start.go
+        working-directory: pragmatic-cases/ent/getting-started-with-versioned-migrations
