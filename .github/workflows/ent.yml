@@ -51,6 +51,9 @@ jobs:
         run: go run start/start.go
         working-directory: pragmatic-cases/ent/simple-example
 
+      - name: install atlas cli
+        run: curl -sSf https://atlasgo.sh | sh
+
       - name: run getting-started-with-versioned-migrations
         env:
           DSN: postgres://postgres:postgres@localhost:5432/ent_getting_started_with_versioned_migrations?sslmode=disable
