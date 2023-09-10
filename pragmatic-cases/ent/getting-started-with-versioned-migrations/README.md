@@ -239,4 +239,3 @@ DSN="postgres://postgres:pass@localhost:5432/test?sslmode=disable" go run start/
 
 1. `atlas migrate validate --dir file://ent/migrate/migrations`:
 1. `atlas migrate hash --dir file://ent/migrate/migrations`
-

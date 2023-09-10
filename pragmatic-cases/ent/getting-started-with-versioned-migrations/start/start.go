@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
 	"log"
+	"os"
 	"time"
 
 	"tmp/pragmatic-cases/ent/getting-started/ent"
