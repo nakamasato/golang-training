@@ -3,9 +3,9 @@
 package ent
 
 import (
-	"tmp/pragmatic-cases/ent/getting-started/ent/group"
-	"tmp/pragmatic-cases/ent/getting-started/ent/schema"
-	"tmp/pragmatic-cases/ent/getting-started/ent/user"
+	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/group"
+	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/schema"
+	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/user"
 )
 
 // The init function reads all schema descriptors with runtime code

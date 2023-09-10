@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"log"
 	"time"
 
@@ -11,20 +12,20 @@ import (
 	"tmp/pragmatic-cases/ent/getting-started/ent/group"
 	"tmp/pragmatic-cases/ent/getting-started/ent/user"
 
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // postgres driver
 )
 
 func main() {
-	client, err := ent.Open("postgres", "host=localhost port=5432 user=postgres dbname=ent_getting_started password=postgres sslmode=disable") // hardcoding
+	client, err := ent.Open("postgres", os.Getenv("DSN")) // hardcoding
 	if err != nil {
 		log.Fatalf("failed opening connection to postgres: %v", err)
 	}
 	defer client.Close()
 	ctx := context.Background()
-	// Run the auto migration tool.
-	if err := client.Schema.Create(ctx); err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
-	}
+	// Run the auto migration tool. -> versioned migrations
+	// if err := client.Schema.Create(ctx); err != nil {
+	// 	log.Fatalf("failed creating schema resources: %v", err)
+	// }
 
 	if _, err = CreateUser(ctx, client); err != nil {
 		log.Fatal(err)

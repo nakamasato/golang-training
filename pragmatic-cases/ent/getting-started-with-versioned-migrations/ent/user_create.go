@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"tmp/pragmatic-cases/ent/getting-started/ent/car"
-	"tmp/pragmatic-cases/ent/getting-started/ent/group"
-	"tmp/pragmatic-cases/ent/getting-started/ent/user"
+	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/car"
+	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/group"
+	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/user"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -78,50 +78,8 @@ func (uc *UserCreate) Mutation() *UserMutation {
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	var (
-		err  error
-		node *User
-	)
 	uc.defaults()
-	if len(uc.hooks) == 0 {
-		if err = uc.check(); err != nil {
-			return nil, err
-		}
-		node, err = uc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*UserMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = uc.check(); err != nil {
-				return nil, err
-			}
-			uc.mutation = mutation
-			if node, err = uc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(uc.hooks) - 1; i >= 0; i-- {
-			if uc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = uc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, uc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*User)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from UserMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks(ctx, uc.sqlSave, uc.mutation, uc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -171,6 +129,9 @@ func (uc *UserCreate) check() error {
 }
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
+	if err := uc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := uc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -180,19 +141,15 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	uc.mutation.id = &_node.ID
+	uc.mutation.done = true
 	return _node, nil
 }
 
 func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	var (
 		_node = &User{config: uc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: user.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: user.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	)
 	if value, ok := uc.mutation.Age(); ok {
 		_spec.SetField(user.FieldAge, field.TypeInt, value)
@@ -210,10 +167,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.CarsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: car.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(car.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -229,10 +183,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: user.GroupsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -267,8 +218,8 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ucb.builders[i+1].mutation)
 				} else {

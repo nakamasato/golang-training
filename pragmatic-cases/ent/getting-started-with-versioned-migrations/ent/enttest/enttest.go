@@ -4,11 +4,11 @@ package enttest
 
 import (
 	"context"
-	"tmp/pragmatic-cases/ent/getting-started/ent"
+	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent"
 	// required by schema hooks.
-	_ "tmp/pragmatic-cases/ent/getting-started/ent/runtime"
+	_ "tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/runtime"
 
-	"tmp/pragmatic-cases/ent/getting-started/ent/migrate"
+	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/migrate"
 
 	"entgo.io/ent/dialect/sql/schema"
 )

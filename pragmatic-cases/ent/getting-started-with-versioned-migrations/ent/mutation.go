@@ -8,12 +8,13 @@ import (
 	"fmt"
 	"sync"
 	"time"
-	"tmp/pragmatic-cases/ent/getting-started/ent/car"
-	"tmp/pragmatic-cases/ent/getting-started/ent/group"
-	"tmp/pragmatic-cases/ent/getting-started/ent/predicate"
-	"tmp/pragmatic-cases/ent/getting-started/ent/user"
+	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/car"
+	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/group"
+	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/predicate"
+	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/user"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
 )
 
 const (
@@ -260,9 +261,24 @@ func (m *CarMutation) Where(ps ...predicate.Car) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the CarMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CarMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Car, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *CarMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CarMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Car).
@@ -671,9 +687,24 @@ func (m *GroupMutation) Where(ps ...predicate.Group) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the GroupMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *GroupMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Group, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *GroupMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *GroupMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Group).
@@ -1190,9 +1221,24 @@ func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the UserMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *UserMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.User, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UserMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (User).
