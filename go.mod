@@ -42,7 +42,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.18.0
 	go.opentelemetry.io/otel/trace v1.18.0
 	golang.org/x/sync v0.3.0
-	google.golang.org/api v0.140.0
+	google.golang.org/api v0.141.0
 	google.golang.org/genproto v0.0.0-20230913181813-007df8e322eb
 )
 
