@@ -17,7 +17,7 @@ jobs:
     container: node:20.6.1-alpine
     services:
       postgres:
-        image: postgres
+        image: postgres:15
         env:
           POSTGRES_PASSWORD: postgres
         options: >-
