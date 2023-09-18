@@ -6,6 +6,7 @@ on:
       - 'pragmatic-cases/ent/**.go'
       - 'go.*'
       - .github/workflows/ent.yml
+      - pragmatic-cases/ent/docker-compose.yml
   push:
     branches:
       - main
