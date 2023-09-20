@@ -19,7 +19,7 @@ require (
 require (
 	cloud.google.com/go/pubsub v1.33.0
 	cloud.google.com/go/secretmanager v1.11.1
-	entgo.io/ent v0.12.3
+	entgo.io/ent v0.12.4
 	github.com/99designs/gqlgen v0.17.31
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/golang-migrate/migrate/v4 v4.16.2
@@ -87,7 +87,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.14.0
+	ariga.io/atlas v0.14.1-0.20230918065911-83ad451a4935
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
