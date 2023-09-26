@@ -49,6 +49,12 @@
     2 directories, 9 files
     ```
 
+    If you want to regenerate with new gqlgen version, you can do it with the following command:
+
+    ```
+    go run github.com/99designs/gqlgen
+    ```
+
 1. Define your schema (update the generated [graph/schema.graphqls](graph/schema.graphqls))
 
     > gqlgen is a schema-first library
