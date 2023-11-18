@@ -14,7 +14,11 @@ const (
 )
 
 func main() {
-	hook, _ := github.New(github.Options.Secret(os.Getenv("GITHUB_WEBHOOK_SECRET")))
+	hook, err := github.New(github.Options.Secret(os.Getenv("GITHUB_WEBHOOK_SECRET")))
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+		os.Exit(1)
+	}
 
 	http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		payload, err := hook.Parse(r, github.ReleaseEvent, github.PullRequestEvent)
