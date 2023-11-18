@@ -27,14 +27,13 @@ func main() {
 				fmt.Printf("ErrEventNotFound: %v\n", err)
 			}
 		}
-		fmt.Printf("received event: %v\n", payload)
 		switch payload := payload.(type) {
 
 		case github.CheckRunPayload:
-			fmt.Printf("CheckRunPayload: %+v\n", payload)
+			fmt.Printf("CheckRunPayload(Action: %s, Name: %s, Status: %s)\n", payload.Action, payload.CheckRun.Name, payload.CheckRun.Status)
 
 		case github.StatusPayload:
-			fmt.Printf("StatusPayload: %+v\n", payload)
+			fmt.Printf("StatusPayload(State: %s, sha: %s)\n", payload.State, payload.Commit.Sha)
 
 		case github.PullRequestPayload:
 			var lables []string
@@ -44,6 +43,8 @@ func main() {
 
 			fmt.Printf("PullRequestPayload(Action: %s, PR: %d, URL: %s, Labels: %q)\n",
 				payload.Action, payload.Number, payload.PullRequest.URL, lables)
+		default:
+			fmt.Printf("no action is defined for event: %v\n", payload)
 		}
 	})
 	http.ListenAndServe(":8080", nil)
