@@ -15,7 +15,12 @@ const (
 
 func main() {
 	logger := zap.NewExample()
-	defer logger.Sync()
+	defer func() {
+		err := logger.Sync()
+		if err != nil {
+			panic(err)
+		}
+	}()
 	sugar := logger.Sugar()
 	hook, err := github.New(github.Options.Secret(os.Getenv("GITHUB_WEBHOOK_SECRET")))
 	if err != nil {
@@ -48,5 +53,9 @@ func main() {
 			sugar.Error("no action is defined for event", zap.Any("payload", payload))
 		}
 	})
-	http.ListenAndServe(":8080", nil)
+	err = http.ListenAndServe(":8080", nil)
+	if err != nil {
+		sugar.Errorw("failed to start server", zap.Error(err))
+		os.Exit(1)
+	}
 }
