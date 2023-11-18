@@ -24,10 +24,10 @@ func main() {
 		payload, err := hook.Parse(r, github.ReleaseEvent, github.PullRequestEvent)
 		if err != nil {
 			if err == github.ErrEventNotFound {
-				fmt.Printf("ErrEventNotFound: %v", err)
+				fmt.Printf("ErrEventNotFound: %v\n", err)
 			}
 		}
-		fmt.Println("received event: %v", payload)
+		fmt.Println("received event: %v\n", payload)
 		switch payload := payload.(type) {
 
 		case github.CheckRunPayload:
