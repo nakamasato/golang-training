@@ -23,16 +23,17 @@ func main() {
 				fmt.Printf("ErrEventNotFound: %v", err)
 			}
 		}
+		fmt.Println("received event: %v", payload)
 		switch payload := payload.(type) {
 
 		case github.CheckRunPayload:
-			fmt.Printf("CheckRunPayload: %+v", payload)
+			fmt.Printf("CheckRunPayload: %+v\n", payload)
 
 		case github.StatusPayload:
-			fmt.Printf("StatusPayload: %+v", payload)
+			fmt.Printf("StatusPayload: %+v\n", payload)
 
 		case github.PullRequestPayload:
-			fmt.Printf("PullRequestPayload: %+v", payload)
+			fmt.Printf("PullRequestPayload: %+v\n", payload)
 		}
 	})
 	http.ListenAndServe(":8080", nil)
