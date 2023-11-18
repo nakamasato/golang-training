@@ -38,17 +38,17 @@ func main() {
 		switch payload := payload.(type) {
 
 		case github.CheckRunPayload:
-			logger.Info("CheckRunPayload", zap.String("Action", payload.Action), zap.String("sha", payload.CheckRun.HeadSHA))
+			logger.Info("CheckRunPayload", zap.String("Action", payload.Action), zap.String("Repo", payload.Repository.Name), zap.String("sha", payload.CheckRun.HeadSHA), zap.String("RequestURI", r.RequestURI))
 
 		case github.StatusPayload:
-			logger.Info("StatusPayload", zap.String("State", payload.State), zap.String("sha", payload.Commit.Sha))
+			logger.Info("StatusPayload", zap.String("Repo", payload.Repository.Name), zap.String("State", payload.State), zap.String("sha", payload.Commit.Sha), zap.String("RequestURI", r.RequestURI))
 
 		case github.PullRequestPayload:
-			var lables []string
+			var labels []string
 			for _, label := range payload.PullRequest.Labels {
-				lables = append(lables, label.Name)
+				labels = append(labels, label.Name)
 			}
-			logger.Info("PullRequestPayload", zap.String("Action", payload.Action), zap.Int64("PR", payload.Number), zap.String("URL", payload.PullRequest.URL), zap.Strings("Labels", lables))
+			logger.Info("PullRequestPayload", zap.String("Action", payload.Action), zap.String("Repo", payload.Repository.Name), zap.Int64("PR", payload.Number), zap.Strings("Labels", labels), zap.String("RequestURI", r.RequestURI))
 		default:
 			logger.Error("no action is defined for event", zap.Any("payload", payload))
 		}
