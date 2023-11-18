@@ -37,7 +37,13 @@ func main() {
 			fmt.Printf("StatusPayload: %+v\n", payload)
 
 		case github.PullRequestPayload:
-			fmt.Printf("PullRequestPayload: %+v\n", payload)
+			var lables []string
+			for _, label := range payload.PullRequest.Labels {
+				lables = append(lables, label.Name)
+			}
+
+			fmt.Printf("PullRequestPayload(Action: %s, PR: %d, URL: %s, Labels: %q)\n",
+				payload.Action, payload.Number, payload.PullRequest.URL, lables)
 		}
 	})
 	http.ListenAndServe(":8080", nil)
