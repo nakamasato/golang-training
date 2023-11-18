@@ -21,13 +21,13 @@ func main() {
 	}
 
 	http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-		payload, err := hook.Parse(r, github.ReleaseEvent, github.PullRequestEvent)
+		payload, err := hook.Parse(r, github.CheckRunEvent, github.StatusEvent, github.PullRequestEvent)
 		if err != nil {
 			if err == github.ErrEventNotFound {
 				fmt.Printf("ErrEventNotFound: %v\n", err)
 			}
 		}
-		fmt.Println("received event: %v\n", payload)
+		fmt.Printf("received event: %v\n", payload)
 		switch payload := payload.(type) {
 
 		case github.CheckRunPayload:

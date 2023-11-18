@@ -1,9 +1,21 @@
 # GitHub Webhook handler on Cloud Run
 
 ## Setup
-```
-go mod init github.com/nakamasato/golang-training/pragmatic-cases/githubwebhook
-```
+
+1. initialize module
+
+    ```
+    go mod init github.com/nakamasato/golang-training/pragmatic-cases/githubwebhook
+    ```
+
+1. use workspace
+
+    ```
+    go work use .
+    ```
+
+1. add main.go
+
 
 ## Deploy
 
@@ -57,6 +69,7 @@ go mod init github.com/nakamasato/golang-training/pragmatic-cases/githubwebhook
         1. `Check runs`
         1. `Pull requests`
         1. `Statuses`
+    1. `Secret`: `$SECRET_KEY` generated above
 
 ## Clean up
 
