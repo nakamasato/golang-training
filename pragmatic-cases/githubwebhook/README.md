@@ -82,4 +82,3 @@ gcloud iam service-accounts delete githubwebhook@${PROJECT}.iam.gserviceaccount.
 ## Ref
 
 1. https://pkg.go.dev/go.uber.org/zap
-1.
