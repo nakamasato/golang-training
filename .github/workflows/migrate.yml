@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
 
     # postgres container https://docs.github.com/en/actions/using-containerized-services/creating-postgresql-service-containers
-    container: node:10.22-jessie
+    container: node:20.6.1-alpine
     services:
       postgres:
-        image: postgres
+        image: postgres:15
         env:
           POSTGRES_PASSWORD: postgres
         options: >-
@@ -27,12 +27,13 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: set up
         uses: actions/setup-go@v4
         with:
           go-version-file: go.mod
+          cache: false
 
       - name: run
         run: go run main.go
@@ -59,7 +60,7 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: set up
         uses: actions/setup-go@v4
