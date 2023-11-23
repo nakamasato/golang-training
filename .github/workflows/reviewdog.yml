@@ -15,3 +15,4 @@ jobs:
         uses: reviewdog/action-golangci-lint@v2
         with:
           go_version_file: go.mod
+          golangci_lint_flags: --timeout 5m
