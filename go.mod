@@ -33,7 +33,7 @@ require (
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
 	github.com/vektah/gqlparser/v2 v2.5.10
 	github.com/yudai/gojsondiff v1.0.0
-	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.45.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.46.1
 	go.opentelemetry.io/otel v1.21.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.17.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.21.0
