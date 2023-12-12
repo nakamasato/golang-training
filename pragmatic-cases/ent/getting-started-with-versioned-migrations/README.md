@@ -184,7 +184,7 @@ func (s *Schema) NamedDiff(ctx context.Context, name string, opts ...schema.Migr
     The migration directory is synced with the desired state, no changes to be made
     ```
 
-## 4. Verify and lint migrations
+### 4. Verify and lint migrations
 
 ```
 atlas migrate lint \
@@ -193,7 +193,7 @@ atlas migrate lint \
   --latest=1
 ```
 
-## 5. Apply migration files
+### 5. Apply migration files
 
 ```
 atlas migrate apply \
@@ -229,11 +229,262 @@ atlas migrate apply \
 No migration files to execute
 ```
 
-## 5. Run app
+### 6. Run app
 
 ```
 DSN="postgres://postgres:pass@localhost:5432/test?sslmode=disable" go run start/start.go
 ```
+
+## From auto migration to versioned migrations
+
+### 0. Prepare
+
+```
+rm -rf ent/migrate/migrations/
+mkdir ent/migrate/migrations/
+```
+
+### 1. Create empty DB
+
+```
+docker run --name migration --rm -p 5532:5432 -e POSTGRES_PASSWORD=pass -e POSTGRES_DB=test -d postgres
+```
+
+### 2. Enable auto migration
+
+```go
+	if err := client.Schema.Create(ctx); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+```
+
+### 3. Run application
+
+```
+DSN="postgres://postgres:pass@localhost:5532/test?sslmode=disable" go run start/start.go
+```
+
+```
+2023/12/11 16:08:56 user was created:  User(id=1, age=30, name=a8m)
+2023/12/11 16:08:56 driver.Query: query=SELECT DISTINCT "users"."id", "users"."age", "users"."name" FROM "users" WHERE "users"."name" = $1 LIMIT 2 args=[a8m]
+2023/12/11 16:08:56 user returned:  User(id=1, age=30, name=a8m)
+2023/12/11 16:08:56 car was created:  Car(id=1, model=Tesla, registered_at=Mon Dec 11 16:08:56 2023)
+2023/12/11 16:08:56 car was created:  Car(id=2, model=Ford, registered_at=Mon Dec 11 16:08:56 2023)
+2023/12/11 16:08:56 user was created:  User(id=2, age=30, name=a8m)
+2023/12/11 16:08:56 returned cars: [Car(id=1, model=Tesla, registered_at=Mon Dec 11 07:08:56 2023) Car(id=2, model=Ford, registered_at=Mon Dec 11 07:08:56 2023)]
+2023/12/11 16:08:56 Car(id=2, model=Ford, registered_at=Mon Dec 11 07:08:56 2023)
+2023/12/11 16:08:56 car "Tesla" owner: "a8m"
+2023/12/11 16:08:56 car "Ford" owner: "a8m"
+2023/12/11 16:08:56 The graph was created successfully
+2023/12/11 16:08:56 cars returned: [Car(id=3, model=Tesla, registered_at=Mon Dec 11 07:08:56 2023) Car(id=4, model=Mazda, registered_at=Mon Dec 11 07:08:56 2023)]
+2023/12/11 16:08:56 cars returned: [Car(id=3, model=Tesla, registered_at=Mon Dec 11 07:08:56 2023) Car(id=5, model=Ford, registered_at=Mon Dec 11 07:08:56 2023)]
+2023/12/11 16:08:56 groups returned: [Group(id=2, name=GitHub) Group(id=1, name=GitLab)]
+```
+
+### 4. Check db
+
+```
+psql --host localhost --port 5532 test -U postgres
+Password for user postgres:
+psql (15.3, server 16.1 (Debian 16.1-1.pgdg120+1))
+WARNING: psql major version 15, server major version 16.
+         Some psql features might not work.
+Type "help" for help.
+
+test=# \dt
+            List of relations
+ Schema |    Name     | Type  |  Owner
+--------+-------------+-------+----------
+ public | cars        | table | postgres
+ public | group_users | table | postgres
+ public | groups      | table | postgres
+ public | users       | table | postgres
+(4 rows)
+
+test=#
+```
+
+### 5. Use versioned migrations
+
+```go
+	// if err := client.Schema.Create(ctx); err != nil {
+	// 	log.Fatalf("failed creating schema resources: %v", err)
+	// }
+```
+
+### 6. Generate migration files
+
+```
+atlas migrate diff init \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://postgres/15/test?search_path=public"
+```
+
+```
+ls ent/migrate/migrations
+20231211071237_init.sql atlas.sum
+```
+
+### 7. Check
+
+```
+atlas schema apply \
+  --url "postgresql://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://postgres/15/test?search_path=public"
+```
+
+```
+Schema is synced, no changes to be made
+```
+
+### 8. Change ent schema
+
+Add `email` field to `User` schema:
+
+```diff
++ 		field.String("email"),
+```
+
+### 9. Generate migration files
+
+```
+atlas migrate diff add_email_to_user \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://postgres/15/test?search_path=public"
+```
+
+`ent/migrate/migrations/20231211071759_add_email_to_user.sql` is generated:
+
+```
+cat ent/migrate/migrations/20231211071759_add_email_to_user.sql
+-- Modify "users" table
+ALTER TABLE "users" ADD COLUMN "email" character varying NOT NULL;
+```
+
+### 10. Apply migration files
+
+```
+atlas schema apply \
+  --url "postgresql://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://postgres/15/test?search_path=public"
+```
+
+Error:
+```
+atlas schema apply \
+  --url "postgresql://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://postgres/15/test?search_path=public"
+-- Planned Changes:
+-- Modify "users" table
+ALTER TABLE "users" ADD COLUMN "email" character varying NOT NULL;
+✔ Apply
+Error: modify "users" table: pq: column "email" of relation "users" contains null values
+```
+
+### 11. Fix the schema and generate the files
+
+```go
+		field.String("email").
+			Default("unknown"),
+```
+
+```
+atlas migrate diff add_email_to_user \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://postgres/15/test?search_path=public"
+```
+
+```
+diff ent/migrate/migrations/20231211071759_add_email_to_user.sql ent/migrate/migrations/20231211072624_add_email_to_user.sql
+2c2
+< ALTER TABLE "users" ADD COLUMN "email" character varying NOT NULL;
+---
+> ALTER TABLE "users" ALTER COLUMN "email" SET DEFAULT 'unknown';
+```
+
+This change is not correct.
+
+### 12. Remove the two migration files manually
+
+```
+rm ent/migrate/migrations/20231211071759_add_email_to_user.sql
+rm ent/migrate/migrations/20231211072624_add_email_to_user.sql
+```
+
+## 13. Try generating again
+
+```
+atlas migrate diff add_email_to_user \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://postgres/15/test?search_path=public"
+```
+
+```
+You have a checksum error in your migration directory.
+This happens if you manually create or edit a migration file.
+Please check your migration files and run
+
+'atlas migrate hash'
+
+to re-hash the contents and resolve the error
+
+Error: checksum mismatch
+```
+
+## 14. Fix the hash
+
+```
+atlas migrate hash --dir file://ent/migrate/migrations
+```
+
+## 15. Regenerate
+
+```
+atlas migrate diff add_email_to_user \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://postgres/15/test?search_path=public"
+```
+
+Now it's successfully generated:
+
+```
+ls ent/migrate/migrations
+20231211071237_init.sql              20231211073102_add_email_to_user.sql atlas.sum
+```
+
+```
+cat ent/migrate/migrations/20231211073102_add_email_to_user.sql
+-- Modify "users" table
+ALTER TABLE "users" ADD COLUMN "email" character varying NOT NULL DEFAULT 'unknown';
+```
+
+## 16. Apply
+
+```
+atlas schema apply \
+  --url "postgresql://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://postgres/15/test?search_path=public"
+```
+
+```
+ALTER TABLE "users" ADD COLUMN "email" character varying NOT NULL DEFAULT 'unknown';
+-- Drop "atlas_schema_revisions" table
+DROP TABLE "atlas_schema_revisions";
+✔ Apply
+```
+
+## FAQ
+
+1. Why is `atlas_schema_revisions` dropped?
 
 ## Tips: commands
 
