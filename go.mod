@@ -42,7 +42,7 @@ require (
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.21.0
 	go.opentelemetry.io/otel/sdk v1.21.0
 	go.opentelemetry.io/otel/trace v1.21.0
-	golang.org/x/sync v0.5.0
+	golang.org/x/sync v0.6.0
 	google.golang.org/api v0.154.0
 	google.golang.org/genproto v0.0.0-20240102182953-50ed04b92917
 )
