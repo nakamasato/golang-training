@@ -23,7 +23,7 @@ require (
 	cloud.google.com/go/secretmanager v1.11.4
 	entgo.io/ent v0.12.5
 	github.com/99designs/gqlgen v0.17.42
-	github.com/DATA-DOG/go-sqlmock v1.5.1
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/hashicorp/go-retryablehttp v0.7.5
