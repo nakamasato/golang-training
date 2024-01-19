@@ -6,7 +6,7 @@ toolchain go1.21.5
 
 require (
 	github.com/go-sql-driver/mysql v1.7.1
-	github.com/onsi/gomega v1.31.0
+	github.com/onsi/gomega v1.31.1
 	github.com/prometheus/client_golang v1.18.0
 	golang.org/x/net v0.20.0
 	golang.org/x/oauth2 v0.16.0
