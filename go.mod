@@ -21,7 +21,7 @@ require (
 require (
 	cloud.google.com/go/pubsub v1.36.1
 	cloud.google.com/go/secretmanager v1.11.5
-	entgo.io/ent v0.12.5
+	entgo.io/ent v0.13.0
 	github.com/99designs/gqlgen v0.17.43
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/golang-migrate/migrate/v4 v4.17.0
@@ -87,13 +87,13 @@ require (
 	go.opentelemetry.io/proto/otlp v1.1.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/crypto v0.19.0 // indirect
-	golang.org/x/tools v0.16.1 // indirect
+	golang.org/x/tools v0.17.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240125205218-1f4bbc51befe // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240125205218-1f4bbc51befe // indirect
 )
 
 require (
-	ariga.io/atlas v0.19.0
+	ariga.io/atlas v0.19.1-0.20240203083654-5948b60a8e43
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
