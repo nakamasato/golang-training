@@ -22,7 +22,7 @@ require (
 	cloud.google.com/go/pubsub v1.36.1
 	cloud.google.com/go/secretmanager v1.11.5
 	entgo.io/ent v0.13.0
-	github.com/99designs/gqlgen v0.17.43
+	github.com/99designs/gqlgen v0.17.44
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/gorilla/websocket v1.5.1
@@ -70,13 +70,13 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/hashicorp/golang-lru/v2 v2.0.3 // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sergi/go-diff v1.3.1 // indirect
-	github.com/sosodev/duration v1.1.0 // indirect
-	github.com/urfave/cli/v2 v2.25.5 // indirect
+	github.com/sosodev/duration v1.2.0 // indirect
+	github.com/urfave/cli/v2 v2.27.1 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yudai/pp v2.0.1+incompatible // indirect
