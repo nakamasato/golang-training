@@ -93,7 +93,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.19.1-0.20240221143834-10d130062de5
+	ariga.io/atlas v0.19.1-0.20240222223548-8d0f628c6d96
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
