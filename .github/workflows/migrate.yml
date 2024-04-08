@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # postgres container https://docs.github.com/en/actions/using-containerized-services/creating-postgresql-service-containers
-    container: node:10.18-jessie
+    container: node:20
 
     # Service containers to run with `container-job`
     services:
