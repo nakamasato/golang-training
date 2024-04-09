@@ -587,6 +587,55 @@ env "local" {
 atlas migrate lint --config 'file://atlas-config.hcl' --env local --latest 1 --var "destructive=true"
 ```
 
+## Example
+
+### Add new Schema
+
+1. Create schema
+    ```
+    GOWORK=off go run -mod=mod entgo.io/ent/cmd/ent new Animal
+    ```
+1. Add fields/edges (manual) `ent/schema/animal.go`
+
+    ```go
+    func (Animal) Fields() []ent.Field {
+      return []ent.Field{
+        field.String("species"),
+        field.Int("age"),
+        field.String("name"),
+      }
+    }
+    ```
+1. Generate ent
+
+    ```
+    GOWORK=off go generate ./ent
+    ```
+
+1. Generate migartiion files
+
+    ```
+    atlas migrate diff add_animal --config 'file://atlas-config.hcl' --env local
+    ```
+
+1. Apply migration files
+
+    ```
+    atlas migrate apply --config 'file://atlas-config.hcl' --env local
+    ```
+
+1. Remove schema
+
+    ```
+    rm ent/schema/animal.go
+    ```
+
+1. Generate ent
+
+    ```
+    GOWORK=off go generate ./ent
+    ```
+
 
 ## FAQ
 

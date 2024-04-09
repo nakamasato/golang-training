@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
-	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/animal"
 	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/car"
 	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/group"
 	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/user"
@@ -76,10 +75,9 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			animal.Table: animal.ValidColumn,
-			car.Table:    car.ValidColumn,
-			group.Table:  group.ValidColumn,
-			user.Table:   user.ValidColumn,
+			car.Table:   car.ValidColumn,
+			group.Table: group.ValidColumn,
+			user.Table:  user.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)
