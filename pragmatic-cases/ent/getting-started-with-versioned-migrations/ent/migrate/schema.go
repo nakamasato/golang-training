@@ -8,6 +8,19 @@ import (
 )
 
 var (
+	// AnimalsColumns holds the columns for the "animals" table.
+	AnimalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "species", Type: field.TypeString},
+		{Name: "age", Type: field.TypeInt},
+		{Name: "name", Type: field.TypeString},
+	}
+	// AnimalsTable holds the schema information for the "animals" table.
+	AnimalsTable = &schema.Table{
+		Name:       "animals",
+		Columns:    AnimalsColumns,
+		PrimaryKey: []*schema.Column{AnimalsColumns[0]},
+	}
 	// CarsColumns holds the columns for the "cars" table.
 	CarsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -79,6 +92,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AnimalsTable,
 		CarsTable,
 		GroupsTable,
 		UsersTable,
