@@ -5,12 +5,12 @@
 
 1. Define Ent schema in `ent/schema/xxx.go`
 1. Generate with `go generate ./ent` -> generate migration files
-1. Apply migration files with `atlas migrate apply` command
+1. Apply migration files with `atlas migrate apply` command (`atlas` cli: `brew install ariga/tap/atlas`)
 
     ```
     atlas migrate apply \
         --dir "file://ent/migrate/migrations" \
-        --url "postgres://postgres:pass@localhost:5432/database?search_path=public&sslmode=disable"
+        --url "postgres://postgres:pass@localhost:5432/test?search_path=public&sslmode=disable"
     ```
 
 ## Prerequisite
@@ -19,6 +19,9 @@
 1. atlas cli: `curl -sSf https://atlasgo.sh | sh`
 
 ## Steps
+
+Under `getting-started-with-versioned-migrations` directory
+
 
 ### 1. Create a migration generation script
 
@@ -79,7 +82,7 @@ func (s *Schema) NamedDiff(ctx context.Context, name string, opts ...schema.Migr
     docker run --name migration --rm -p 5432:5432 -e POSTGRES_PASSWORD=pass -e POSTGRES_DB=test -d postgres
     ```
 
-1. Add `ent/migrate.main.go`
+1. Add `ent/migrate/main.go`
 
     ```go
     //go:build ignore
@@ -124,15 +127,6 @@ func (s *Schema) NamedDiff(ctx context.Context, name string, opts ...schema.Migr
     }
     ```
 
-    There's another option to generate the migration files:
-
-    ```
-    atlas migrate diff migration_name \
-        --dir "file://ent/migrate/migrations" \
-        --to "ent://ent/schema" \
-        --dev-url "docker://postgres/15/test?search_path=public"
-    ```
-
 1. Create a dir `ent/migrate/migrations`
 
     ```
@@ -146,6 +140,16 @@ func (s *Schema) NamedDiff(ctx context.Context, name string, opts ...schema.Migr
     ```
 
     `<name>`: You can use any name. I used `init_db` as this is the initial generation of migration files.
+
+    There's another option to generate the migration files:
+
+    ```
+    atlas migrate diff init_db \
+        --dir "file://ent/migrate/migrations" \
+        --to "ent://ent/schema" \
+        --dev-url "docker://postgres/15/test?search_path=public"
+    ```
+
 
 1. Two files are generated
 
@@ -195,10 +199,12 @@ atlas migrate lint \
 
 ### 5. Apply migration files
 
+Apply the migration files:
+
 ```
 atlas migrate apply \
   --dir "file://ent/migrate/migrations" \
-  --url "postgres://postgres:pass@localhost:5432/database?search_path=public&sslmode=disable"
+  --url "postgres://postgres:pass@localhost:5432/test?search_path=public&sslmode=disable"
 ```
 
 ```
@@ -231,9 +237,6 @@ No migration files to execute
 
 ### 6. Run app
 
-```
-DSN="postgres://postgres:pass@localhost:5432/test?sslmode=disable" go run start/start.go
-```
 
 ## From auto migration to versioned migrations
 
@@ -417,7 +420,7 @@ rm ent/migrate/migrations/20231211071759_add_email_to_user.sql
 rm ent/migrate/migrations/20231211072624_add_email_to_user.sql
 ```
 
-## 13. Try generating again
+### 13. Try generating again
 
 ```
 atlas migrate diff add_email_to_user \
@@ -438,13 +441,13 @@ to re-hash the contents and resolve the error
 Error: checksum mismatch
 ```
 
-## 14. Fix the hash
+### 14. Fix the hash
 
 ```
 atlas migrate hash --dir file://ent/migrate/migrations
 ```
 
-## 15. Regenerate
+### 15. Regenerate
 
 ```
 atlas migrate diff add_email_to_user \
@@ -466,7 +469,7 @@ cat ent/migrate/migrations/20231211073102_add_email_to_user.sql
 ALTER TABLE "users" ADD COLUMN "email" character varying NOT NULL DEFAULT 'unknown';
 ```
 
-## 16. Apply
+### 16. Apply
 
 ```
 atlas schema apply \
@@ -481,6 +484,109 @@ ALTER TABLE "users" ADD COLUMN "email" character varying NOT NULL DEFAULT 'unkno
 DROP TABLE "atlas_schema_revisions";
 ✔ Apply
 ```
+
+## Configuration file `atlas.hcl`
+
+> [!NOTE]
+> The default is `atlas.hcl` but if I use the name, all the commands above references the configuration file, so in this case I use `atlas-config.hcl`.
+
+### 1. Basic configuration
+
+
+The command we used above can be simplified with the configuration file.
+
+```
+atlas migrate diff migration_name \
+    --dir "file://ent/migrate/migrations" \
+    --to "ent://ent/schema" \
+    --dev-url "docker://postgres/15/test?search_path=public"
+```
+
+We can configure a local environment in `atlas-config.hcl`:
+
+```hcl
+env "local" {
+  migration {
+    dir = "file://ent/migrate/migrations"
+    revisions_schema = "public"
+  }
+  src = "ent://ent/schema"
+  url = "postgres://postgres:pass@localhost:5432/test?search_path=public&sslmode=disable"
+  dev = "docker://postgres/15/dev?search_path=public"
+}
+```
+
+We can run the same command with the configuration file:
+
+```
+atlas migrate diff migration_name --config 'file://atlas-config.hcl' --env local
+```
+
+### 2. Destructive skip
+
+https://atlasgo.io/versioned/diff#diff-policy
+
+Let's consider a case to drop a field. (e.g. Remove `field.Time("registered_at"),` from `Car` schema `ent/schema/car.go`)
+
+generate ent
+
+```
+GOWORK=off go generate ./ent
+```
+
+Now generate the migration files:
+
+```
+atlas migrate diff remove_registered_at_from_car --config 'file://atlas-config.hcl' --env local
+```
+
+`ent/migrate/migrations/20240408074945_remove_registered_at_from_car.sql` is generated.
+
+Lint fails with the following error:
+
+```
+atlas migrate lint --config 'file://atlas-config.hcl' --env local --latest 1
+Analyzing changes from version 20230910044615 to 20240408074945 (1 migration in total):
+
+  -- analyzing version 20240408074945
+    -- destructive changes detected:
+      -- L2: Dropping non-virtual column "registered_at"
+         https://atlasgo.io/lint/analyzers#DS103
+    -- suggested fix:
+      -> Add a pre-migration check to ensure column "registered_at" is NULL before
+         dropping it
+  -- ok (254.541µs)
+
+  -------------------------
+  -- 146.386084ms
+  -- 1 version with errors
+  -- 1 schema change
+  -- 1 diagnostic
+```
+
+This is safe to prevent unintended drop. But if you are sure, you can skip this check with the configuration file and `--var "destructive=true"`:
+
+```hcl
+variable "destructive" {
+  type    = bool
+  default = false
+}
+
+env "local" {
+  ...
+  diff {
+    skip {
+      drop_schema = !var.destructive
+      drop_table  = !var.destructive
+    }
+  }
+}
+```
+
+```
+atlas migrate lint --config 'file://atlas-config.hcl' --env local --latest 1 --var "destructive=true"
+```
+
 
 ## FAQ
 
