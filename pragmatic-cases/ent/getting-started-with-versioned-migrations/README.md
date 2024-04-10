@@ -521,7 +521,10 @@ atlas migrate diff migration_name --config 'file://atlas-config.hcl' --env local
 
 ### 2. Destructive skip
 
-https://atlasgo.io/versioned/diff#diff-policy
+- https://atlasgo.io/integrations/kubernetes/operator#diff
+- https://atlasgo.io/versioned/diff#diff-policy
+- https://atlasgo.io/lint/analyzers#destructive-changes
+
 
 Let's consider a case to drop a field. (e.g. Remove `field.Time("registered_at"),` from `Car` schema `ent/schema/car.go`)
 
