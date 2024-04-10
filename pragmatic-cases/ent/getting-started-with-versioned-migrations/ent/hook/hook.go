@@ -8,6 +8,18 @@ import (
 	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent"
 )
 
+// The AnimalFunc type is an adapter to allow the use of ordinary
+// function as Animal mutator.
+type AnimalFunc func(context.Context, *ent.AnimalMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AnimalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AnimalMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AnimalMutation", m)
+}
+
 // The CarFunc type is an adapter to allow the use of ordinary
 // function as Car mutator.
 type CarFunc func(context.Context, *ent.CarMutation) (ent.Value, error)

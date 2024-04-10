@@ -1,8 +1,8 @@
-variable "destructive" {
+variable "skip_drop" {
   type    = bool
-  default = false
+  default = true
+  description = "Skip drop operations (schema, table, column, index, foreign key)"
 }
-
 
 env "local" {
   migration {
@@ -15,11 +15,11 @@ env "local" {
 
   diff {
     skip {
-      drop_schema = !var.destructive
-      drop_table  = !var.destructive
-      drop_column = !var.destructive
-      drop_index  = !var.destructive
-      drop_foreign_key = !var.destructive
+      drop_schema = var.skip_drop
+      drop_table  = var.skip_drop
+      drop_column = var.skip_drop
+      drop_index  = var.skip_drop
+      drop_foreign_key = var.skip_drop
     }
   }
 }
