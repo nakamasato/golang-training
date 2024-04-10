@@ -10,7 +10,7 @@ env "local" {
     revisions_schema = "public"
   }
   src = "ent://ent/schema"
-  url = "postgres://postgres:pass@localhost:5432/test?search_path=public&sslmode=disable"
+  url = "postgres://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable"
   dev = "docker://postgres/15/dev?search_path=public"
 
   diff {

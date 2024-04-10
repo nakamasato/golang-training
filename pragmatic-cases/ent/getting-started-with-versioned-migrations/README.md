@@ -10,13 +10,17 @@
     ```
     atlas migrate apply \
         --dir "file://ent/migrate/migrations" \
-        --url "postgres://postgres:pass@localhost:5432/test?search_path=public&sslmode=disable"
+        --url "postgres://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable"
     ```
 
 ## Prerequisite
 
 1. Code preparation[Getting Started](../getting-started/README.md)
 1. atlas cli: `curl -sSf https://atlasgo.sh | sh`
+1. postgres
+    ```
+    docker run --name migration --rm -p 5532:5432 -e POSTGRES_PASSWORD=pass -e POSTGRES_DB=test -d postgres
+    ```
 
 ## Steps
 
@@ -76,11 +80,6 @@ func (s *Schema) NamedDiff(ctx context.Context, name string, opts ...schema.Migr
 
 ### 3. Generate Versioned Migration Files
 
-1. Start postgres container
-
-    ```
-    docker run --name migration --rm -p 5432:5432 -e POSTGRES_PASSWORD=pass -e POSTGRES_DB=test -d postgres
-    ```
 
 1. Add `ent/migrate/main.go`
 
@@ -120,7 +119,7 @@ func (s *Schema) NamedDiff(ctx context.Context, name string, opts ...schema.Migr
     		log.Fatalln("migration name is required. Use: 'go run -mod=mod ent/migrate/main.go <name>'")
     	}
     	// Generate migrations using Atlas support for Postgres (note the Ent dialect option passed above).
-    	err = migrate.NamedDiff(ctx, os.Getenv("DSN"), os.Args[1], opts...) // "postgres://postgres:pass@localhost:5432/test?sslmode=disable"
+    	err = migrate.NamedDiff(ctx, os.Getenv("DSN"), os.Args[1], opts...) // "postgres://postgres:pass@localhost:5532/test?sslmode=disable"
     	if err != nil {
     		log.Fatalf("failed generating migration file: %v", err)
     	}
@@ -136,7 +135,7 @@ func (s *Schema) NamedDiff(ctx context.Context, name string, opts ...schema.Migr
 1. Trigger migration generation by executing `go run -mod=mod ent/migrate/main.go <name>`
 
     ```
-    DSN="postgres://postgres:pass@localhost:5432/test?sslmode=disable" GOWORK=off go run -mod=mod ent/migrate/main.go init_db
+    DSN="postgres://postgres:pass@localhost:5532/test?sslmode=disable" GOWORK=off go run -mod=mod ent/migrate/main.go init_db
     ```
 
     `<name>`: You can use any name. I used `init_db` as this is the initial generation of migration files.
@@ -204,13 +203,13 @@ Apply the migration files:
 ```
 atlas migrate apply \
   --dir "file://ent/migrate/migrations" \
-  --url "postgres://postgres:pass@localhost:5432/test?search_path=public&sslmode=disable"
+  --url "postgres://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable"
 ```
 
 ```
 atlas migrate apply \
   --dir "file://ent/migrate/migrations" \
-  --url "postgres://postgres:pass@localhost:5432/test?search_path=public&sslmode=disable"
+  --url "postgres://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable"
 Migrating to version 20230910044615 (1 migrations in total):
 
   -- migrating version 20230910044615
@@ -231,26 +230,24 @@ If you rerun, no change will be made.
 ```
 atlas migrate apply \
   --dir "file://ent/migrate/migrations" \
-  --url "postgres://postgres:pass@localhost:5432/test?search_path=public&sslmode=disable"
+  --url "postgres://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable"
 No migration files to execute
 ```
 
 ### 6. Run app
 
+```
+DSN="postgres://postgres:pass@localhost:5532/test?sslmode=disable" go run start/start.go
+```
+
 
 ## From auto migration to versioned migrations
 
-### 0. Prepare
+### 1. Prepare
 
 ```
 rm -rf ent/migrate/migrations/
 mkdir ent/migrate/migrations/
-```
-
-### 1. Create empty DB
-
-```
-docker run --name migration --rm -p 5532:5432 -e POSTGRES_PASSWORD=pass -e POSTGRES_DB=test -d postgres
 ```
 
 ### 2. Enable auto migration
@@ -511,7 +508,7 @@ env "local" {
     revisions_schema = "public"
   }
   src = "ent://ent/schema"
-  url = "postgres://postgres:pass@localhost:5432/test?search_path=public&sslmode=disable"
+  url = "postgres://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable"
   dev = "docker://postgres/15/dev?search_path=public"
 }
 ```
@@ -654,6 +651,9 @@ atlas migrate lint --config 'file://atlas-config.hcl' --env local --latest 1 --v
     The migration directory is synced with the desired state, no changes to be made
     ```
 
+> [!NOTE]
+> In the same way, you can remove fields, edges, etc.
+
 ### Add removed schema
 
 1. Add `animal` again (DB has animal table).
@@ -730,5 +730,5 @@ atlas migrate lint --config 'file://atlas-config.hcl' --env local --latest 1 --v
 1. `atlas migrate validate --dir file://ent/migrate/migrations`:
 1. `atlas migrate hash --dir file://ent/migrate/migrations`
 1. `atlas migrate lint --dir file://ent/migrate/migrations --latest 1`
-1. `atlas migrate apply --dir file://ent/migrate/migrations --url "postgres://postgres:pass@localhost:5432/test?search_path=public&sslmode=disable"`
+1. `atlas migrate apply --dir file://ent/migrate/migrations --url "postgres://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable"`
 1. `atlas migrate diff migration_name --dir file://ent/migrate/migrations --to "ent://ent/schema" --dev-url "docker://postgres/15/test?search_path=public"`
