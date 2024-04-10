@@ -10,13 +10,17 @@
     ```
     atlas migrate apply \
         --dir "file://ent/migrate/migrations" \
-        --url "postgres://postgres:pass@localhost:5432/test?search_path=public&sslmode=disable"
+        --url "postgres://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable"
     ```
 
 ## Prerequisite
 
 1. Code preparation[Getting Started](../getting-started/README.md)
 1. atlas cli: `curl -sSf https://atlasgo.sh | sh`
+1. postgres
+    ```
+    docker run --name migration --rm -p 5532:5432 -e POSTGRES_PASSWORD=pass -e POSTGRES_DB=test -d postgres
+    ```
 
 ## Steps
 
@@ -76,11 +80,6 @@ func (s *Schema) NamedDiff(ctx context.Context, name string, opts ...schema.Migr
 
 ### 3. Generate Versioned Migration Files
 
-1. Start postgres container
-
-    ```
-    docker run --name migration --rm -p 5432:5432 -e POSTGRES_PASSWORD=pass -e POSTGRES_DB=test -d postgres
-    ```
 
 1. Add `ent/migrate/main.go`
 
@@ -120,7 +119,7 @@ func (s *Schema) NamedDiff(ctx context.Context, name string, opts ...schema.Migr
     		log.Fatalln("migration name is required. Use: 'go run -mod=mod ent/migrate/main.go <name>'")
     	}
     	// Generate migrations using Atlas support for Postgres (note the Ent dialect option passed above).
-    	err = migrate.NamedDiff(ctx, os.Getenv("DSN"), os.Args[1], opts...) // "postgres://postgres:pass@localhost:5432/test?sslmode=disable"
+    	err = migrate.NamedDiff(ctx, os.Getenv("DSN"), os.Args[1], opts...) // "postgres://postgres:pass@localhost:5532/test?sslmode=disable"
     	if err != nil {
     		log.Fatalf("failed generating migration file: %v", err)
     	}
@@ -136,7 +135,7 @@ func (s *Schema) NamedDiff(ctx context.Context, name string, opts ...schema.Migr
 1. Trigger migration generation by executing `go run -mod=mod ent/migrate/main.go <name>`
 
     ```
-    DSN="postgres://postgres:pass@localhost:5432/test?sslmode=disable" GOWORK=off go run -mod=mod ent/migrate/main.go init_db
+    DSN="postgres://postgres:pass@localhost:5532/test?sslmode=disable" GOWORK=off go run -mod=mod ent/migrate/main.go init_db
     ```
 
     `<name>`: You can use any name. I used `init_db` as this is the initial generation of migration files.
@@ -204,13 +203,13 @@ Apply the migration files:
 ```
 atlas migrate apply \
   --dir "file://ent/migrate/migrations" \
-  --url "postgres://postgres:pass@localhost:5432/test?search_path=public&sslmode=disable"
+  --url "postgres://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable"
 ```
 
 ```
 atlas migrate apply \
   --dir "file://ent/migrate/migrations" \
-  --url "postgres://postgres:pass@localhost:5432/test?search_path=public&sslmode=disable"
+  --url "postgres://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable"
 Migrating to version 20230910044615 (1 migrations in total):
 
   -- migrating version 20230910044615
@@ -231,26 +230,24 @@ If you rerun, no change will be made.
 ```
 atlas migrate apply \
   --dir "file://ent/migrate/migrations" \
-  --url "postgres://postgres:pass@localhost:5432/test?search_path=public&sslmode=disable"
+  --url "postgres://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable"
 No migration files to execute
 ```
 
 ### 6. Run app
 
+```
+DSN="postgres://postgres:pass@localhost:5532/test?sslmode=disable" go run start/start.go
+```
+
 
 ## From auto migration to versioned migrations
 
-### 0. Prepare
+### 1. Prepare
 
 ```
 rm -rf ent/migrate/migrations/
 mkdir ent/migrate/migrations/
-```
-
-### 1. Create empty DB
-
-```
-docker run --name migration --rm -p 5532:5432 -e POSTGRES_PASSWORD=pass -e POSTGRES_DB=test -d postgres
 ```
 
 ### 2. Enable auto migration
@@ -511,7 +508,7 @@ env "local" {
     revisions_schema = "public"
   }
   src = "ent://ent/schema"
-  url = "postgres://postgres:pass@localhost:5432/test?search_path=public&sslmode=disable"
+  url = "postgres://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable"
   dev = "docker://postgres/15/dev?search_path=public"
 }
 ```
@@ -524,7 +521,10 @@ atlas migrate diff migration_name --config 'file://atlas-config.hcl' --env local
 
 ### 2. Destructive skip
 
-https://atlasgo.io/versioned/diff#diff-policy
+- https://atlasgo.io/integrations/kubernetes/operator#diff
+- https://atlasgo.io/versioned/diff#diff-policy
+- https://atlasgo.io/lint/analyzers#destructive-changes
+
 
 Let's consider a case to drop a field. (e.g. Remove `field.Time("registered_at"),` from `Car` schema `ent/schema/car.go`)
 
@@ -567,17 +567,21 @@ Analyzing changes from version 20230910044615 to 20240408074945 (1 migration in 
 This is safe to prevent unintended drop. But if you are sure, you can skip this check with the configuration file and `--var "destructive=true"`:
 
 ```hcl
-variable "destructive" {
+variable "skip_drop" {
   type    = bool
-  default = false
+  default = true
+  description = "Skip drop operations (schema, table, column, index, foreign key)"
 }
 
 env "local" {
   ...
   diff {
     skip {
-      drop_schema = !var.destructive
-      drop_table  = !var.destructive
+      drop_schema = var.skip_drop
+      drop_table  = var.skip_drop
+      drop_column = var.skip_drop
+      drop_index  = var.skip_drop
+      drop_foreign_key = var.skip_drop
     }
   }
 }
@@ -587,12 +591,147 @@ env "local" {
 atlas migrate lint --config 'file://atlas-config.hcl' --env local --latest 1 --var "destructive=true"
 ```
 
+## Example
+
+### Add new Schema
+
+1. Create schema
+    ```
+    GOWORK=off go run -mod=mod entgo.io/ent/cmd/ent new Animal
+    ```
+1. Add fields/edges (manual) `ent/schema/animal.go`
+
+    ```go
+    func (Animal) Fields() []ent.Field {
+      return []ent.Field{
+        field.String("species"),
+        field.Int("age"),
+        field.String("name"),
+      }
+    }
+    ```
+1. Generate ent
+
+    ```
+    GOWORK=off go generate ./ent
+    ```
+
+1. Generate migartiion files
+
+    ```
+    atlas migrate diff add_animal --config 'file://atlas-config.hcl' --env local
+    ```
+
+1. Apply migration files
+
+    ```
+    atlas migrate apply --config 'file://atlas-config.hcl' --env local
+    ```
+
+### Remove schema
+
+1. Remove animal
+
+    ```
+    rm ent/schema/animal.go
+    ```
+
+1. Generate ent
+
+    ```
+    GOWORK=off go generate ./ent
+    ```
+
+1. Generate migration files
+
+    ```
+    atlas migrate diff drop_animal --config 'file://atlas-config.hcl' --env local
+    ```
+
+    If `skip_drop` is set to true in `atlas-config.hcl`, no migration file is generated.
+
+    ```
+    The migration directory is synced with the desired state, no changes to be made
+    ```
+
+> [!NOTE]
+> In the same way, you can remove fields, edges, etc.
+
+### Add removed schema
+
+1. Add `animal` again (DB has animal table).
+
+    ```
+    GOWORK=off go run -mod=mod entgo.io/ent/cmd/ent new Animal
+    ```
+
+    At this point `animal` table has `species`, `age`, and `name` fields.
+
+    Let's add different fields `color` and `gender`.
+
+    ```go
+    // Fields of the Animal.
+    func (Animal) Fields() []ent.Field {
+      return []ent.Field{
+        field.String("color"),
+        field.String("gender"),
+      }
+    }
+    ```
+
+    ```
+    GOWORK=off go generate ./ent
+    ```
+
+1. Generate migration files
+    ```
+    atlas migrate diff add_animal --config 'file://atlas-config.hcl' --env local
+    ```
+
+    `ent/migrate/migrations/20240410023634_add_animal_again.sql` is generated.
+
+    ```sql
+    ALTER TABLE "animals" ADD COLUMN "color" character varying NOT NULL, ADD COLUMN "gender" character varying NOT NULL;
+    ```
+
+    The change is to add two new columns to the existing table! Cool!
+
+1. Apply the change
+
+    ```
+    atlas migrate apply --config 'file://atlas-config.hcl' --env local
+    ```
+
+1. Check in DB
+
+    ```
+    PGPASSWORD=pass psql --host=localhost postgres --dbname test
+    ```
+
+    ```sql
+    test=# \d animals
+                                    Table "public.animals"
+     Column  |       Type        | Collation | Nullable |             Default
+    ---------+-------------------+-----------+----------+----------------------------------
+     id      | bigint            |           | not null | generated by default as identity
+     species | character varying |           | not null |
+     age     | bigint            |           | not null |
+     name    | character varying |           | not null |
+     color   | character varying |           | not null |
+     gender  | character varying |           | not null |
+    Indexes:
+        "animals_pkey" PRIMARY KEY, btree (id)
+    ```
 
 ## FAQ
 
 1. Why is `atlas_schema_revisions` dropped?
+    1. `atlas_schema_revisions` table is required only for versioned migrations and it's not part of ent schema. To prevent being dropped, you can exclude it in `atlas.hcl`.
 
 ## Tips: commands
 
 1. `atlas migrate validate --dir file://ent/migrate/migrations`:
 1. `atlas migrate hash --dir file://ent/migrate/migrations`
+1. `atlas migrate lint --dir file://ent/migrate/migrations --latest 1`
+1. `atlas migrate apply --dir file://ent/migrate/migrations --url "postgres://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable"`
+1. `atlas migrate diff migration_name --dir file://ent/migrate/migrations --to "ent://ent/schema" --dev-url "docker://postgres/15/test?search_path=public"`

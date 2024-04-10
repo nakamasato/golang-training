@@ -11,6 +11,7 @@ import (
 
 	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/migrate"
 
+	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/animal"
 	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/car"
 	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/group"
 	"tmp/pragmatic-cases/ent/getting-started-with-versioned-migrations/ent/user"
@@ -26,6 +27,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Animal is the client for interacting with the Animal builders.
+	Animal *AnimalClient
 	// Car is the client for interacting with the Car builders.
 	Car *CarClient
 	// Group is the client for interacting with the Group builders.
@@ -43,6 +46,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Animal = NewAnimalClient(c.config)
 	c.Car = NewCarClient(c.config)
 	c.Group = NewGroupClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -138,6 +142,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:    ctx,
 		config: cfg,
+		Animal: NewAnimalClient(cfg),
 		Car:    NewCarClient(cfg),
 		Group:  NewGroupClient(cfg),
 		User:   NewUserClient(cfg),
@@ -160,6 +165,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:    ctx,
 		config: cfg,
+		Animal: NewAnimalClient(cfg),
 		Car:    NewCarClient(cfg),
 		Group:  NewGroupClient(cfg),
 		User:   NewUserClient(cfg),
@@ -169,7 +175,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Car.
+//		Animal.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -191,6 +197,7 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Animal.Use(hooks...)
 	c.Car.Use(hooks...)
 	c.Group.Use(hooks...)
 	c.User.Use(hooks...)
@@ -199,6 +206,7 @@ func (c *Client) Use(hooks ...Hook) {
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Animal.Intercept(interceptors...)
 	c.Car.Intercept(interceptors...)
 	c.Group.Intercept(interceptors...)
 	c.User.Intercept(interceptors...)
@@ -207,6 +215,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *AnimalMutation:
+		return c.Animal.mutate(ctx, m)
 	case *CarMutation:
 		return c.Car.mutate(ctx, m)
 	case *GroupMutation:
@@ -215,6 +225,139 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// AnimalClient is a client for the Animal schema.
+type AnimalClient struct {
+	config
+}
+
+// NewAnimalClient returns a client for the Animal from the given config.
+func NewAnimalClient(c config) *AnimalClient {
+	return &AnimalClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `animal.Hooks(f(g(h())))`.
+func (c *AnimalClient) Use(hooks ...Hook) {
+	c.hooks.Animal = append(c.hooks.Animal, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `animal.Intercept(f(g(h())))`.
+func (c *AnimalClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Animal = append(c.inters.Animal, interceptors...)
+}
+
+// Create returns a builder for creating a Animal entity.
+func (c *AnimalClient) Create() *AnimalCreate {
+	mutation := newAnimalMutation(c.config, OpCreate)
+	return &AnimalCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Animal entities.
+func (c *AnimalClient) CreateBulk(builders ...*AnimalCreate) *AnimalCreateBulk {
+	return &AnimalCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AnimalClient) MapCreateBulk(slice any, setFunc func(*AnimalCreate, int)) *AnimalCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AnimalCreateBulk{err: fmt.Errorf("calling to AnimalClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AnimalCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AnimalCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Animal.
+func (c *AnimalClient) Update() *AnimalUpdate {
+	mutation := newAnimalMutation(c.config, OpUpdate)
+	return &AnimalUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AnimalClient) UpdateOne(a *Animal) *AnimalUpdateOne {
+	mutation := newAnimalMutation(c.config, OpUpdateOne, withAnimal(a))
+	return &AnimalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AnimalClient) UpdateOneID(id int) *AnimalUpdateOne {
+	mutation := newAnimalMutation(c.config, OpUpdateOne, withAnimalID(id))
+	return &AnimalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Animal.
+func (c *AnimalClient) Delete() *AnimalDelete {
+	mutation := newAnimalMutation(c.config, OpDelete)
+	return &AnimalDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AnimalClient) DeleteOne(a *Animal) *AnimalDeleteOne {
+	return c.DeleteOneID(a.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AnimalClient) DeleteOneID(id int) *AnimalDeleteOne {
+	builder := c.Delete().Where(animal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AnimalDeleteOne{builder}
+}
+
+// Query returns a query builder for Animal.
+func (c *AnimalClient) Query() *AnimalQuery {
+	return &AnimalQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAnimal},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Animal entity by its id.
+func (c *AnimalClient) Get(ctx context.Context, id int) (*Animal, error) {
+	return c.Query().Where(animal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AnimalClient) GetX(ctx context.Context, id int) *Animal {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AnimalClient) Hooks() []Hook {
+	return c.hooks.Animal
+}
+
+// Interceptors returns the client interceptors.
+func (c *AnimalClient) Interceptors() []Interceptor {
+	return c.inters.Animal
+}
+
+func (c *AnimalClient) mutate(ctx context.Context, m *AnimalMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AnimalCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AnimalUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AnimalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AnimalDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Animal mutation op: %q", m.Op())
 	}
 }
 
@@ -684,9 +827,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Car, Group, User []ent.Hook
+		Animal, Car, Group, User []ent.Hook
 	}
 	inters struct {
-		Car, Group, User []ent.Interceptor
+		Animal, Car, Group, User []ent.Interceptor
 	}
 )

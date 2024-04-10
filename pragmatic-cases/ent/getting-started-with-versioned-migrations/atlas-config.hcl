@@ -1,8 +1,8 @@
-variable "destructive" {
+variable "skip_drop" {
   type    = bool
-  default = false
+  default = true
+  description = "Skip drop operations (schema, table, column, index, foreign key)"
 }
-
 
 env "local" {
   migration {
@@ -10,16 +10,16 @@ env "local" {
     revisions_schema = "public"
   }
   src = "ent://ent/schema"
-  url = "postgres://postgres:pass@localhost:5432/test?search_path=public&sslmode=disable"
+  url = "postgres://postgres:pass@localhost:5532/test?search_path=public&sslmode=disable"
   dev = "docker://postgres/15/dev?search_path=public"
 
   diff {
     skip {
-      drop_schema = !var.destructive
-      drop_table  = !var.destructive
-      drop_column = !var.destructive
-      drop_index  = !var.destructive
-      drop_foreign_key = !var.destructive
+      drop_schema = var.skip_drop
+      drop_table  = var.skip_drop
+      drop_column = var.skip_drop
+      drop_index  = var.skip_drop
+      drop_foreign_key = var.skip_drop
     }
   }
 }
