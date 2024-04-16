@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	cloud.google.com/go/cloudsqlconn v1.9.0
-	github.com/jackc/pgx/v4 v4.18.3
+	github.com/jackc/pgx/v5 v5.5.5
 	github.com/jackc/pgx/v5 v5.5.5
 )
 
