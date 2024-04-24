@@ -556,6 +556,8 @@ go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.
 go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.49.0/go.mod h1:f/PbKbRd4cdUICWell6DmzvVJ7QrmBgFrRHjXmAXbK4=
 go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.50.0 h1:52SjLe8ZPVMzjDI9aPfbMsQV59duqQTVptm37YltRX8=
 go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.50.0/go.mod h1:NWdRtRLRilOKVheb6B2gwDZgqC1rlgJiGng3lwV9uwI=
+go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.51.0 h1:974XTyIwHI4nHa1+uSLxHtUnlJ2DiVtAJjk7fd07p/8=
+go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.51.0/go.mod h1:ZvX/taFlN6TGaOOM6D42wrNwPKUV1nGO2FuUXkityBU=
 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.44.0 h1:KfYpVmrjI7JuToy5k8XV3nkapjWx48k4E4JOtVstzQI=
 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.46.1 h1:aFJWCqJMNjENlcleuuOkGAPH82y0yULBScfXcIEdS24=
 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.46.1/go.mod h1:sEGXWArGqc3tVa+ekntsN65DmVbVeW+7lTKTjZF3/Fo=
@@ -567,6 +569,8 @@ go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0 h1:jq9TW8u
 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0/go.mod h1:p8pYQP+m5XfbZm9fxtSKAbM6oIllS7s2AfxrChvc7iw=
 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.50.0 h1:cEPbyTSEHlQR89XVlyo78gqluF8Y3oMeBkXGWzQsfXY=
 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.50.0/go.mod h1:DKdbWcT4GH1D0Y3Sqt/PFXt2naRKDWtU+eE6oLdFNA8=
+go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.51.0 h1:Xs2Ncz0gNihqu9iosIZ5SkBbWo5T8JhhLJFMQL1qmLI=
+go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.51.0/go.mod h1:vy+2G/6NvVMpwGX/NyLqcC41fxepnuKHk16E6IZUcJc=
 go.opentelemetry.io/otel v1.18.0 h1:TgVozPGZ01nHyDZxK5WGPFB9QexeTMXEH7+tIClWfzs=
 go.opentelemetry.io/otel v1.18.0/go.mod h1:9lWqYO0Db579XzVuCKFNPDl4s73Voa+zEck3wHaAYQI=
 go.opentelemetry.io/otel v1.19.0 h1:MuS/TNf4/j4IXsZuJegVzI1cwut7Qc00344rgH7p8bs=
