@@ -13,7 +13,7 @@ require (
 	k8s.io/apimachinery v0.30.0
 	k8s.io/client-go v0.30.0
 	k8s.io/kubectl v0.30.0
-	sigs.k8s.io/controller-runtime v0.17.3
+	sigs.k8s.io/controller-runtime v0.18.0
 )
 
 require (
@@ -101,7 +101,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
-	github.com/evanphx/json-patch/v5 v5.8.0 // indirect
+	github.com/evanphx/json-patch/v5 v5.9.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
