@@ -18,7 +18,7 @@ require (
 
 require (
 	cloud.google.com/go/pubsub v1.37.0
-	cloud.google.com/go/secretmanager v1.12.0
+	cloud.google.com/go/secretmanager v1.13.0
 	entgo.io/ent v0.13.1
 	github.com/99designs/gqlgen v0.17.45
 	github.com/DATA-DOG/go-sqlmock v1.5.2
@@ -90,7 +90,7 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/tools v0.20.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240415180920-8c6c420018be // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240429193739-8cf5692501f6 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240429193739-8cf5692501f6 // indirect
 )
 
