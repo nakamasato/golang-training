@@ -31,7 +31,7 @@ require (
 	github.com/lithammer/shortuuid/v4 v4.0.0
 	github.com/onsi/ginkgo/v2 v2.17.3
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
-	github.com/vektah/gqlparser/v2 v2.5.11
+	github.com/vektah/gqlparser/v2 v2.5.12
 	github.com/yudai/gojsondiff v1.0.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.51.0
 	go.opentelemetry.io/otel v1.26.0
