@@ -20,7 +20,7 @@ require (
 	cloud.google.com/go/pubsub v1.38.0
 	cloud.google.com/go/secretmanager v1.13.1
 	entgo.io/ent v0.13.1
-	github.com/99designs/gqlgen v0.17.47
+	github.com/99designs/gqlgen v0.17.48
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/golang-migrate/migrate/v4 v4.17.1
 	github.com/gorilla/websocket v1.5.1
