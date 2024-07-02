@@ -18,7 +18,7 @@ require (
 
 require (
 	cloud.google.com/go/pubsub v1.40.0
-	cloud.google.com/go/secretmanager v1.13.2
+	cloud.google.com/go/secretmanager v1.13.3
 	entgo.io/ent v0.13.1
 	github.com/99designs/gqlgen v0.17.49
 	github.com/DATA-DOG/go-sqlmock v1.5.2
@@ -41,13 +41,13 @@ require (
 	go.opentelemetry.io/otel/sdk v1.27.0
 	go.opentelemetry.io/otel/trace v1.27.0
 	golang.org/x/sync v0.7.0
-	google.golang.org/api v0.186.0
+	google.golang.org/api v0.187.0
 	google.golang.org/genproto v0.0.0-20240701130421-f6361c86f094
 )
 
 require (
 	cloud.google.com/go v0.115.0 // indirect
-	cloud.google.com/go/auth v0.6.0 // indirect
+	cloud.google.com/go/auth v0.6.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.2 // indirect
 	cloud.google.com/go/compute v1.27.1 // indirect
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
