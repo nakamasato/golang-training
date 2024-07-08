@@ -42,16 +42,16 @@ require (
 	go.opentelemetry.io/otel/trace v1.28.0
 	golang.org/x/sync v0.7.0
 	google.golang.org/api v0.187.0
-	google.golang.org/genproto v0.0.0-20240701130421-f6361c86f094
+	google.golang.org/genproto v0.0.0-20240708141625-4ad9e859172b
 )
 
 require (
 	cloud.google.com/go v0.115.0 // indirect
 	cloud.google.com/go/auth v0.6.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.2 // indirect
-	cloud.google.com/go/compute v1.27.1 // indirect
+	cloud.google.com/go/compute v1.27.2 // indirect
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
-	cloud.google.com/go/iam v1.1.9 // indirect
+	cloud.google.com/go/iam v1.1.10 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
