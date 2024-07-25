@@ -178,6 +178,7 @@ cloud.google.com/go/secretmanager v1.13.1/go.mod h1:y9Ioh7EHp1aqEKGYXk3BOC+vkhlH
 cloud.google.com/go/secretmanager v1.13.2/go.mod h1:rB3lORY7QZrjACov35PX0KXMM0bKlbkL0/eFlS312wk=
 cloud.google.com/go/secretmanager v1.13.3/go.mod h1:e45+CxK0w6GaL4hS+KabgQskl4RdSS30b+HRf0TH0kk=
 cloud.google.com/go/secretmanager v1.13.4/go.mod h1:SjKHs6rx0ELUqfbRWrWq4e7SiNKV7QMWZtvZsQm3k5w=
+cloud.google.com/go/secretmanager v1.13.5/go.mod h1:/OeZ88l5Z6nBVilV0SXgv6XJ243KP2aIhSWRMrbvDCQ=
 entgo.io/ent v0.12.4 h1:LddPnAyxls/O7DTXZvUGDj0NZIdGSu317+aoNLJWbD8=
 entgo.io/ent v0.12.4/go.mod h1:Y3JVAjtlIk8xVZYSn3t3mf8xlZIn5SAOXZQxD6kKI+Q=
 entgo.io/ent v0.12.5 h1:KREM5E4CSoej4zeGa88Ou/gfturAnpUv0mzAjch1sj4=
@@ -402,6 +403,8 @@ github.com/googleapis/gax-go/v2 v2.12.4 h1:9gWcmF85Wvq4ryPFvGFaOgPIs1AQX0d0bcbGw
 github.com/googleapis/gax-go/v2 v2.12.4/go.mod h1:KYEYLorsnIGDi/rPC8b5TdlB9kbKoFubselGIoBMCwI=
 github.com/googleapis/gax-go/v2 v2.12.5 h1:8gw9KZK8TiVKB6q3zHY3SBzLnrGp6HQjyfYBYGmXdxA=
 github.com/googleapis/gax-go/v2 v2.12.5/go.mod h1:BUDKcWo+RaKq5SC9vVYL0wLADa3VcfswbOMMRmB9H3E=
+github.com/googleapis/gax-go/v2 v2.13.0 h1:yitjD5f7jQHhyDsnhKEBU52NdvvdSeGzlAnDPT0hH1s=
+github.com/googleapis/gax-go/v2 v2.13.0/go.mod h1:Z/fvTZXF8/uw7Xu5GuslPw+bplx6SS338j1Is2S+B7A=
 github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWmnc=
 github.com/gorilla/websocket v1.5.0/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/gorilla/websocket v1.5.1 h1:gmztn0JnHVt9JZquRuzLw3g4wouNVzKL15iLr/zn/QY=
