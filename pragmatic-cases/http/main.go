@@ -24,12 +24,16 @@ func ModifyPathForServiceA(next http.Handler) http.Handler {
 func main() {
 	// Your final handler
 	finalHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello, world! Path" + r.URL.Path))
+		if _, err := w.Write([]byte("Hello, world! Path" + r.URL.Path)); err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
 	})
 
 	// Wrap the final handler with the ModifyPath adapter
 	http.Handle("/", ModifyPathForServiceA(finalHandler))
 
 	// Start the server
-	http.ListenAndServe(":8080", nil)
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		panic(err)
+	}
 }
