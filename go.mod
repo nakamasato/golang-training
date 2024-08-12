@@ -7,7 +7,7 @@ require (
 	github.com/onsi/gomega v1.34.1
 	github.com/prometheus/client_golang v1.19.1
 	golang.org/x/net v0.27.0
-	golang.org/x/oauth2 v0.21.0
+	golang.org/x/oauth2 v0.22.0
 	golang.org/x/sys v0.22.0 // indirect
 	k8s.io/api v0.30.3
 	k8s.io/apimachinery v0.30.3
@@ -18,7 +18,7 @@ require (
 
 require (
 	cloud.google.com/go/pubsub v1.41.0
-	cloud.google.com/go/secretmanager v1.13.5
+	cloud.google.com/go/secretmanager v1.13.6
 	entgo.io/ent v0.14.0
 	github.com/99designs/gqlgen v0.17.49
 	github.com/DATA-DOG/go-sqlmock v1.5.2
@@ -40,14 +40,14 @@ require (
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.28.0
 	go.opentelemetry.io/otel/sdk v1.28.0
 	go.opentelemetry.io/otel/trace v1.28.0
-	golang.org/x/sync v0.7.0
-	google.golang.org/api v0.190.0
+	golang.org/x/sync v0.8.0
+	google.golang.org/api v0.191.0
 	google.golang.org/genproto v0.0.0-20240808171019-573a1156607a
 )
 
 require (
 	cloud.google.com/go v0.115.0 // indirect
-	cloud.google.com/go/auth v0.7.3 // indirect
+	cloud.google.com/go/auth v0.8.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.3 // indirect
 	cloud.google.com/go/compute v1.27.4 // indirect
 	cloud.google.com/go/compute/metadata v0.5.0 // indirect
@@ -136,7 +136,7 @@ require (
 	golang.org/x/mod v0.19.0 // indirect
 	golang.org/x/term v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
-	golang.org/x/time v0.5.0 // indirect
+	golang.org/x/time v0.6.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
