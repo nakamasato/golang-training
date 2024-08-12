@@ -17,7 +17,7 @@ require (
 )
 
 require (
-	cloud.google.com/go/pubsub v1.40.0
+	cloud.google.com/go/pubsub v1.41.0
 	cloud.google.com/go/secretmanager v1.13.5
 	entgo.io/ent v0.14.0
 	github.com/99designs/gqlgen v0.17.49
@@ -42,7 +42,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.28.0
 	golang.org/x/sync v0.7.0
 	google.golang.org/api v0.190.0
-	google.golang.org/genproto v0.0.0-20240730163845-b1a4ccb954bf
+	google.golang.org/genproto v0.0.0-20240808171019-573a1156607a
 )
 
 require (
@@ -91,7 +91,7 @@ require (
 	golang.org/x/crypto v0.25.0 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/tools v0.23.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240725223205-93522f1f2a9f // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240730163845-b1a4ccb954bf // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240730163845-b1a4ccb954bf // indirect
 )
 
