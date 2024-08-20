@@ -5,7 +5,7 @@ go 1.22.5
 require (
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/onsi/gomega v1.34.1
-	github.com/prometheus/client_golang v1.20.0
+	github.com/prometheus/client_golang v1.20.1
 	golang.org/x/net v0.28.0
 	golang.org/x/oauth2 v0.22.0
 	golang.org/x/sys v0.23.0 // indirect
