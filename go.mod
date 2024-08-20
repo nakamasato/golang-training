@@ -17,7 +17,7 @@ require (
 )
 
 require (
-	cloud.google.com/go/pubsub v1.41.0
+	cloud.google.com/go/pubsub v1.42.0
 	cloud.google.com/go/secretmanager v1.13.6
 	entgo.io/ent v0.14.0
 	github.com/99designs/gqlgen v0.17.49
