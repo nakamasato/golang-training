@@ -8,7 +8,7 @@ require (
 	github.com/prometheus/client_golang v1.20.1
 	golang.org/x/net v0.28.0
 	golang.org/x/oauth2 v0.22.0
-	golang.org/x/sys v0.23.0 // indirect
+	golang.org/x/sys v0.24.0 // indirect
 	k8s.io/api v0.31.0
 	k8s.io/apimachinery v0.31.0
 	k8s.io/client-go v0.31.0
@@ -18,7 +18,7 @@ require (
 
 require (
 	cloud.google.com/go/pubsub v1.42.0
-	cloud.google.com/go/secretmanager v1.13.6
+	cloud.google.com/go/secretmanager v1.14.0
 	entgo.io/ent v0.14.0
 	github.com/99designs/gqlgen v0.17.49
 	github.com/DATA-DOG/go-sqlmock v1.5.2
@@ -41,14 +41,14 @@ require (
 	go.opentelemetry.io/otel/sdk v1.28.0
 	go.opentelemetry.io/otel/trace v1.28.0
 	golang.org/x/sync v0.8.0
-	google.golang.org/api v0.192.0
+	google.golang.org/api v0.193.0
 	google.golang.org/genproto v0.0.0-20240820151423-278611b39280
 )
 
 require (
 	cloud.google.com/go v0.115.1 // indirect
-	cloud.google.com/go/auth v0.8.1 // indirect
-	cloud.google.com/go/auth/oauth2adapt v0.2.3 // indirect
+	cloud.google.com/go/auth v0.9.0 // indirect
+	cloud.google.com/go/auth/oauth2adapt v0.2.4 // indirect
 	cloud.google.com/go/compute v1.27.5 // indirect
 	cloud.google.com/go/compute/metadata v0.5.0 // indirect
 	cloud.google.com/go/iam v1.1.13 // indirect
