@@ -41,13 +41,13 @@ require (
 	go.opentelemetry.io/otel/sdk v1.28.0
 	go.opentelemetry.io/otel/trace v1.28.0
 	golang.org/x/sync v0.8.0
-	google.golang.org/api v0.193.0
+	google.golang.org/api v0.194.0
 	google.golang.org/genproto v0.0.0-20240820151423-278611b39280
 )
 
 require (
 	cloud.google.com/go v0.115.1 // indirect
-	cloud.google.com/go/auth v0.9.0 // indirect
+	cloud.google.com/go/auth v0.9.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.4 // indirect
 	cloud.google.com/go/compute v1.27.5 // indirect
 	cloud.google.com/go/compute/metadata v0.5.0 // indirect
