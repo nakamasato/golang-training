@@ -1,6 +1,6 @@
 module tmp
 
-go 1.22.5
+go 1.23.0
 
 require (
 	github.com/go-sql-driver/mysql v1.8.1
@@ -19,7 +19,7 @@ require (
 require (
 	cloud.google.com/go/pubsub v1.42.0
 	cloud.google.com/go/secretmanager v1.14.0
-	entgo.io/ent v0.14.0
+	entgo.io/ent v0.14.1
 	github.com/99designs/gqlgen v0.17.49
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/golang-migrate/migrate/v4 v4.17.1
