@@ -7,7 +7,7 @@ require (
 	github.com/onsi/gomega v1.34.2
 	github.com/prometheus/client_golang v1.20.2
 	golang.org/x/net v0.28.0
-	golang.org/x/oauth2 v0.22.0
+	golang.org/x/oauth2 v0.23.0
 	golang.org/x/sys v0.24.0 // indirect
 	k8s.io/api v0.31.0
 	k8s.io/apimachinery v0.31.0
