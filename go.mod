@@ -20,7 +20,7 @@ require (
 	cloud.google.com/go/pubsub v1.43.0
 	cloud.google.com/go/secretmanager v1.14.1
 	entgo.io/ent v0.14.1
-	github.com/99designs/gqlgen v0.17.49
+	github.com/99designs/gqlgen v0.17.50
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/golang-migrate/migrate/v4 v4.18.1
 	github.com/gorilla/websocket v1.5.3
@@ -80,9 +80,9 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/sosodev/duration v1.3.1 // indirect
-	github.com/urfave/cli/v2 v2.27.2 // indirect
+	github.com/urfave/cli/v2 v2.27.4 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
-	github.com/xrash/smetrics v0.0.0-20240312152122-5f08fbb34913 // indirect
+	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yudai/pp v2.0.1+incompatible // indirect
 	go.opencensus.io v0.24.0 // indirect
