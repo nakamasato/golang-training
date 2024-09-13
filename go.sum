@@ -221,6 +221,7 @@ cloud.google.com/go/secretmanager v1.13.4/go.mod h1:SjKHs6rx0ELUqfbRWrWq4e7SiNKV
 cloud.google.com/go/secretmanager v1.13.5/go.mod h1:/OeZ88l5Z6nBVilV0SXgv6XJ243KP2aIhSWRMrbvDCQ=
 cloud.google.com/go/secretmanager v1.13.6/go.mod h1:x2ySyOrqv3WGFRFn2Xk10iHmNmvmcEVSSqc30eb1bhw=
 cloud.google.com/go/secretmanager v1.14.0/go.mod h1:q0hSFHzoW7eRgyYFH8trqEFavgrMeiJI4FETNN78vhM=
+cloud.google.com/go/secretmanager v1.14.1/go.mod h1:L+gO+u2JA9CCyXpSR8gDH0o8EV7i/f0jdBOrUXcIV0U=
 entgo.io/ent v0.12.4 h1:LddPnAyxls/O7DTXZvUGDj0NZIdGSu317+aoNLJWbD8=
 entgo.io/ent v0.12.4/go.mod h1:Y3JVAjtlIk8xVZYSn3t3mf8xlZIn5SAOXZQxD6kKI+Q=
 entgo.io/ent v0.12.5 h1:KREM5E4CSoej4zeGa88Ou/gfturAnpUv0mzAjch1sj4=
