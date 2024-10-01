@@ -2,7 +2,7 @@ module helloworld
 
 go 1.21
 
-toolchain go1.23.1
+toolchain go1.23.2
 
 require cloud.google.com/go/cloudtasks v1.13.1
 
