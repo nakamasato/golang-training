@@ -34,12 +34,12 @@ require (
 	github.com/vektah/gqlparser/v2 v2.5.17
 	github.com/yudai/gojsondiff v1.0.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.55.0
-	go.opentelemetry.io/otel v1.30.0
+	go.opentelemetry.io/otel v1.31.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.17.0
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.30.0
-	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.30.0
-	go.opentelemetry.io/otel/sdk v1.30.0
-	go.opentelemetry.io/otel/trace v1.30.0
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.31.0
+	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.31.0
+	go.opentelemetry.io/otel/sdk v1.31.0
+	go.opentelemetry.io/otel/trace v1.31.0
 	golang.org/x/sync v0.8.0
 	google.golang.org/api v0.200.0
 	google.golang.org/genproto v0.0.0-20241007155032-5fefd90f89a9
@@ -88,14 +88,14 @@ require (
 	github.com/yudai/pp v2.0.1+incompatible // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.55.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.30.0 // indirect
-	go.opentelemetry.io/otel/metric v1.30.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.31.0 // indirect
+	go.opentelemetry.io/otel/metric v1.31.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.3.1 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/crypto v0.28.0 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/tools v0.24.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240930140551-af27646dc61f // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20241007155032-5fefd90f89a9 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241007155032-5fefd90f89a9 // indirect
 )
 
