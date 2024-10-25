@@ -8,7 +8,7 @@ https://cloud.google.com/dataflow/docs/quickstarts/create-pipeline-go
 ### Run on Local
 
 ```
-go run pragmatic-cases/gcp/dataflow/wordcount/main.go --output output.txt
+go run integrated-examples/dataflow/wordcount/main.go --output output.txt
 ```
 
 ### Run on Dataflow
@@ -24,7 +24,7 @@ gcloud auth application-default login
 ```
 
 ```
-go run pragmatic-cases/gcp/dataflow/wordcount/main.go --input gs://dataflow-samples/shakespeare/kinglear.txt \
+go run integrated-examples/dataflow/wordcount/main.go --input gs://dataflow-samples/shakespeare/kinglear.txt \
     --output gs://$BUCKET_NAME/results/outputs \
     --runner dataflow \
     --project $PROJECT \
