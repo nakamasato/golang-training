@@ -1,5 +1,9 @@
 # Cloud Run
 
+## PubSub Subscriber
+
+[pubsubsubscriber](pubsubsubscriber/main.go)
+
 ## Connect Cloud SQL
 
 Please check [Cloud SQL](../cloudsql/README.md), which covers:

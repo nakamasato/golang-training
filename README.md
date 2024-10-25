@@ -77,6 +77,12 @@ go1.22
         1. [Opentelemetry](pragmatic-cases/opentelemetry)
         1. [gojsondiff](pragmatic-cases/gojsondiff)
         1. [hcl](pragmatic-cases/hcl)
+1. [Integrated Examples](integrated-examples/)
+    1. [CloudRun](integrated-examples/cloudrun/)
+    1. [Dataflow](integrated-examples/dataflow/)
+    1. [trace](integrated-examples/trace/)
+    1. [gdrive](integrated-examples/gdrive/)
+
 ## References & readings
 1. [Learn Go with Tests](https://quii.gitbook.io/)
 1. [Advanced Testing with Go](https://speakerdeck.com/mitchellh/advanced-testing-with-go)
