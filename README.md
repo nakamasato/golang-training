@@ -69,10 +69,6 @@ go1.22
         1. [kind cluster](pragmatic-cases/kind)
         1. [k8s client](pragmatic-cases/k8sclient) (needs go1.17 or later to use controller-runtime@v0.13.0 [#83](https://github.com/nakamasato/golang-training/pull/83))
         1. [Skaffold](pragmatic-cases/skaffold)
-    1. GCP
-        1. [Dataflow](pragmatic-cases/gcp/dataflow)
-        1. [CloudRun](pragmatic-cases/gcp/cloudrun/)
-            1. [pubsubsubscriber](pragmatic-cases/gcp/cloudrun/pubsubsubscriber/)
     1. Others
         1. [Prometheus](pragmatic-cases/prometheus)
         1. [Cobra](https://github.com/nakamasato/cobra-sample)
@@ -81,6 +77,11 @@ go1.22
         1. [Opentelemetry](pragmatic-cases/opentelemetry)
         1. [gojsondiff](pragmatic-cases/gojsondiff)
         1. [hcl](pragmatic-cases/hcl)
+1. [Integrated Examples](integrated-examples/)
+    1. [CloudRun](integrated-examples/cloudrun/)
+    1. [Dataflow](integrated-examples/dataflow/)
+    1. [trace](integrated-examples/trace/)
+    1. [gdrive](integrated-examples/gdrive/)
 
 ## References & readings
 1. [Learn Go with Tests](https://quii.gitbook.io/)
