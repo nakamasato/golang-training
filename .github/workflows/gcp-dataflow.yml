@@ -1,0 +1,27 @@
+name: gcp-dataflow
+
+on:
+  pull_request:
+    paths:
+      - 'pragmatic-cases/gcp/dataflow/**.go'
+      - 'go.*'
+      - .github/workflows/gcp-dataflow.yml
+  push:
+    branches:
+      - main
+jobs:
+  wordcount:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: set up
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: run
+        run: |
+          go run pragmatic-cases/gcp/dataflow/wordcount/main.go --input gs://dataflow-samples/shakespeare/kinglear.txt --output output
+          wc -l output
