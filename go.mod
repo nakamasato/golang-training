@@ -9,16 +9,16 @@ require (
 	golang.org/x/net v0.30.0
 	golang.org/x/oauth2 v0.23.0
 	golang.org/x/sys v0.26.0 // indirect
-	k8s.io/api v0.31.1
-	k8s.io/apimachinery v0.31.1
-	k8s.io/client-go v0.31.1
-	k8s.io/kubectl v0.31.1
-	sigs.k8s.io/controller-runtime v0.19.0
+	k8s.io/api v0.31.2
+	k8s.io/apimachinery v0.31.2
+	k8s.io/client-go v0.31.2
+	k8s.io/kubectl v0.31.2
+	sigs.k8s.io/controller-runtime v0.19.1
 )
 
 require (
-	cloud.google.com/go/pubsub v1.45.0
-	cloud.google.com/go/secretmanager v1.14.1
+	cloud.google.com/go/pubsub v1.45.1
+	cloud.google.com/go/secretmanager v1.14.2
 	entgo.io/ent v0.14.1
 	github.com/99designs/gqlgen v0.17.55
 	github.com/DATA-DOG/go-sqlmock v1.5.2
@@ -41,13 +41,13 @@ require (
 	go.opentelemetry.io/otel/sdk v1.31.0
 	go.opentelemetry.io/otel/trace v1.31.0
 	golang.org/x/sync v0.8.0
-	google.golang.org/api v0.202.0
+	google.golang.org/api v0.203.0
 	google.golang.org/genproto v0.0.0-20241021214115-324edc3d5d38
 )
 
 require (
 	cloud.google.com/go v0.116.0 // indirect
-	cloud.google.com/go/auth v0.9.8 // indirect
+	cloud.google.com/go/auth v0.9.9 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.4 // indirect
 	cloud.google.com/go/compute v1.28.1 // indirect
 	cloud.google.com/go/compute/metadata v0.5.2 // indirect
