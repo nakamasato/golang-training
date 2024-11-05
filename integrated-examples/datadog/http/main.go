@@ -12,7 +12,9 @@ func main() {
 	defer tracer.Stop()
 	mux := httptrace.NewServeMux(httptrace.WithServiceName("my-service"))
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// nolint
 		w.Write([]byte("Hello World!\n"))
 	})
+	// nolint
 	http.ListenAndServe(":8080", mux)
 }
