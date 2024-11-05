@@ -35,9 +35,10 @@ go run integrated-examples/datadog/http/main.go
 curl localhost:8080
 ```
 
-
+![](datadog-http.png)
 
 ## References
 
-1. https://qiita.com/morieeeenyo/items/b117504115c54eaa6f6b
+1. [Datadog Agentを使ってローカル環境でDatadog APMにトレースを送信する](https://qiita.com/morieeeenyo/items/b117504115c54eaa6f6b)
+1. [MacOSからDatadog APMを送る (with Datadog Agent)](https://qiita.com/nakamasato/items/e51fcc9a98f3279b88d0)
 1. [Goのhttp.Requestのキャンセルの仕組みを理解する](https://qiita.com/behiron/items/9b6975de6ff470c71e06)
