@@ -14,10 +14,14 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/metric"
-	"go.opentelemetry.io/otel/sdk/trace"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/api/option"
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
+
+var tracer trace.Tracer
 
 // https://cloud.google.com/stackdriver/docs/instrumentation/setup/go
 func setupOpenTelemetry(ctx context.Context) (shutdown func(context.Context) error, err error) {
@@ -39,10 +43,15 @@ func setupOpenTelemetry(ctx context.Context) (shutdown func(context.Context) err
 
 	// Option1: OpenTelemetry Google Cloud Trace Exporter
 	// https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/blob/main/exporter/trace/README.md
-    texporter, err := texporter.New()
-    if err != nil {
-        log.Fatalf("unable to set up tracing: %v", err)
-    }
+	texporter, err := texporter.New(
+		// Disable spans created by the exporter.
+		texporter.WithTraceClientOptions(
+			[]option.ClientOption{option.WithTelemetryDisabled()},
+		),
+	)
+	if err != nil {
+		log.Fatalf("unable to set up tracing: %v", err)
+	}
 
 	// Option2: Configure Trace Export to send spans as OTLP
 	// texporter, err := autoexport.NewSpanExporter(ctx)
@@ -51,7 +60,7 @@ func setupOpenTelemetry(ctx context.Context) (shutdown func(context.Context) err
 	// 	return
 	// }
 
-	tp := trace.NewTracerProvider(trace.WithBatcher(texporter))
+	tp := sdktrace.NewTracerProvider(sdktrace.WithBatcher(texporter))
 	shutdownFuncs = append(shutdownFuncs, tp.Shutdown)
 	otel.SetTracerProvider(tp)
 
@@ -67,6 +76,9 @@ func setupOpenTelemetry(ctx context.Context) (shutdown func(context.Context) err
 	shutdownFuncs = append(shutdownFuncs, mp.Shutdown)
 	otel.SetMeterProvider(mp)
 
+	// Finally, set the tracer that can be used for this package.
+	tracer = tp.Tracer("pubsubpublisher")
+
 	return shutdown, nil
 }
 
@@ -80,11 +92,17 @@ func main() {
 	}
 	defer shutdown(ctx)
 
+	// custom root span
+	ctx, span := tracer.Start(ctx, "publish")
+	defer span.End()
+
 	projectId := os.Getenv("PROJECT_ID")
 	if projectId == "" {
 		log.Fatal("PROJECT_ID must be set")
 	}
-	client, err := pubsub.NewClient(ctx, projectId)
+	client, err := pubsub.NewClientWithConfig(ctx, projectId, &pubsub.ClientConfig{
+		EnableOpenTelemetryTracing: true,
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,6 +113,11 @@ func main() {
 		msg.Attributes = make(map[string]string)
 	}
 	otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(msg.Attributes))
+
+	for k, v := range msg.Attributes {
+		// traceparent is stored in googclient_traceparent
+		fmt.Printf("msg.attribute key: %s, value: %s\n", k, v)
+	}
 
 	res := topic.Publish(ctx, msg)
 	id, err := res.Get(ctx)
