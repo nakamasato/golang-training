@@ -80,7 +80,7 @@ go1.22
 1. [Integrated Examples](integrated-examples/)
     1. [CloudRun](integrated-examples/cloudrun/)
     1. [Dataflow](integrated-examples/dataflow/)
-    1. [trace](integrated-examples/trace/)
+    1. [Tracing with OpenTelemetry on GCP](integrated-examples/trace/)
     1. [gdrive](integrated-examples/gdrive/)
 
 ## References & readings

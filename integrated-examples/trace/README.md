@@ -1,4 +1,4 @@
-# Trace on GCP (Cloud Run)
+# Tracing with OpenTelemetry on GCP
 
 ![](diagram.drawio.svg)
 
