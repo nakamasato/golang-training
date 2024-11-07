@@ -17,10 +17,12 @@ require (
 )
 
 require (
+	cloud.google.com/go/cloudtasks v1.13.1
 	cloud.google.com/go/pubsub v1.45.1
 	entgo.io/ent v0.14.1
 	github.com/99designs/gqlgen v0.17.55
 	github.com/DATA-DOG/go-sqlmock v1.5.2
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.25.0
 	github.com/golang-migrate/migrate/v4 v4.18.1
 	github.com/gorilla/websocket v1.5.3
 	github.com/jessevdk/go-flags v1.6.1
@@ -29,12 +31,15 @@ require (
 	github.com/onsi/ginkgo/v2 v2.21.0
 	github.com/vektah/gqlparser/v2 v2.5.19
 	github.com/yudai/gojsondiff v1.0.0
+	go.opentelemetry.io/contrib/exporters/autoexport v0.56.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.56.0
+	go.opentelemetry.io/contrib/propagators/autoprop v0.56.0
 	go.opentelemetry.io/otel v1.31.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.17.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.31.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.31.0
 	go.opentelemetry.io/otel/sdk v1.31.0
+	go.opentelemetry.io/otel/sdk/metric v1.31.0
 	go.opentelemetry.io/otel/trace v1.31.0
 	golang.org/x/sync v0.8.0
 	google.golang.org/api v0.205.0
@@ -49,6 +54,7 @@ require (
 	cloud.google.com/go/iam v1.2.1 // indirect
 	cloud.google.com/go/profiler v0.4.1 // indirect
 	cloud.google.com/go/storage v1.43.0 // indirect
+	cloud.google.com/go/trace v1.11.2 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/DataDog/appsec-internal-go v1.8.0 // indirect
 	github.com/DataDog/datadog-agent/pkg/obfuscate v0.48.0 // indirect
@@ -57,6 +63,7 @@ require (
 	github.com/DataDog/go-libddwaf/v3 v3.4.0 // indirect
 	github.com/DataDog/go-tuf v1.1.0-0.5.2 // indirect
 	github.com/DataDog/sketches-go v1.4.5 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.49.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
@@ -89,7 +96,7 @@ require (
 	github.com/hashicorp/go-secure-stdlib/strutil v0.1.2 // indirect
 	github.com/hashicorp/go-sockaddr v1.0.2 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
-	github.com/klauspost/compress v1.17.9 // indirect
+	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
@@ -108,11 +115,27 @@ require (
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yudai/pp v2.0.1+incompatible // indirect
 	go.opencensus.io v0.24.0 // indirect
+	go.opentelemetry.io/contrib/bridges/prometheus v0.56.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.56.0 // indirect
+	go.opentelemetry.io/contrib/propagators/aws v1.31.0 // indirect
+	go.opentelemetry.io/contrib/propagators/b3 v1.31.0 // indirect
+	go.opentelemetry.io/contrib/propagators/jaeger v1.31.0 // indirect
+	go.opentelemetry.io/contrib/propagators/ot v1.31.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc v0.7.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp v0.7.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.31.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v1.31.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.31.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.31.0 // indirect
+	go.opentelemetry.io/otel/exporters/prometheus v0.53.0 // indirect
+	go.opentelemetry.io/otel/exporters/stdout/stdoutlog v0.7.0 // indirect
+	go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v1.31.0 // indirect
+	go.opentelemetry.io/otel/log v0.7.0 // indirect
 	go.opentelemetry.io/otel/metric v1.31.0 // indirect
+	go.opentelemetry.io/otel/sdk/log v0.7.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.3.1 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.28.0 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/tools v0.26.0 // indirect
@@ -155,7 +178,7 @@ require (
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.55.0 // indirect
+	github.com/prometheus/common v0.60.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/zclconf/go-cty v1.14.4 // indirect

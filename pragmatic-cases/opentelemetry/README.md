@@ -1,4 +1,4 @@
-# Open Telemetry
+# OpenTelemetry
 
 OTel’s goal is to provide a set of **standardized vendor-agnostic SDKs, APIs, and tools for ingesting, transforming, and sending data to an Observability back-end**
 
@@ -811,3 +811,4 @@ Ref:
 1. https://opentelemetry.io/docs/demo/architecture/ <- Really great demo
 1. [Tail Sampling Processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/tailsamplingprocessor/README.md#probabilistic-sampling-processor-compared-to-the-tail-sampling-processor-with-the-probabilistic-policy)
 1. [Probabilistic Sampling Processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/probabilisticsamplerprocessor)
+1. [OpenTelemetry on GCP](../../integrated-examples/trace/)
