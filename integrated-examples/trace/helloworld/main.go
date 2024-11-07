@@ -16,7 +16,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/trace"
+	// "go.opentelemetry.io/otel/trace"
 	"google.golang.org/api/option"
 
 	"go.opentelemetry.io/contrib/exporters/autoexport"
@@ -37,7 +37,7 @@ type queue struct {
 	url  string
 }
 
-var tracer trace.Tracer
+// var tracer trace.Tracer
 
 func main() {
 	ctx := context.Background()
@@ -47,6 +47,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	// nolint:errcheck
 	defer shutdown(ctx)
 
 	// Cloud Tasks client

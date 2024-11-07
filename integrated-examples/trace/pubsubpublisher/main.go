@@ -90,6 +90,7 @@ func main() {
 		slog.ErrorContext(ctx, "error setting up OpenTelemetry", slog.Any("error", err))
 		os.Exit(1)
 	}
+	// nolint:errcheck
 	defer shutdown(ctx)
 
 	// custom root span
