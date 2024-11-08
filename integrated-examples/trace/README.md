@@ -5,7 +5,7 @@
 ## Prerequisite
 
 ```
-export PROJECT=PROJECT_ID
+export PROJECT=<PROJECT_ID>
 export LOCATION_ID=asia-northeast1
 export QUEUE_ID=helloworld
 ```
@@ -31,7 +31,7 @@ gcloud config set compute/region $LOCATION_ID
 gcloud tasks queues create $QUEUE_ID --location $LOCATION_ID --project $PROJECT
 ```
 
-### Cloud Run - server
+### Cloud Run - server (push subscription http endpoint) + pull subscription
 
 build image
 
@@ -49,7 +49,7 @@ CLOUD_RUN_URL=https://helloworld-$PROJECT_NUMBER.$LOCATION_ID.run.app
 ```
 
 ```
-gcloud run deploy helloworld --image $LOCATION_ID-docker.pkg.dev/$PROJECT/cloud-run-source-deploy/helloworld:latest --set-env-vars=CLOUD_TASK_TARGET_URL=${CLOUD_RUN_URL}/helloworld,PROJECT_ID=$PROJECT,LOCATION_ID=$LOCATION_ID,QUEUE_ID=$QUEUE_ID,OTEL_SERVICE_NAME=helloworld --allow-unauthenticated --region $LOCATION_ID --project $PROJECT
+gcloud run deploy helloworld --image $LOCATION_ID-docker.pkg.dev/$PROJECT/cloud-run-source-deploy/helloworld:latest --set-env-vars=CLOUD_TASK_TARGET_URL=${CLOUD_RUN_URL}/helloworld,PROJECT_ID=$PROJECT,LOCATION_ID=$LOCATION_ID,QUEUE_ID=$QUEUE_ID,PUBSUB_SUBSCRIPTION_ID=helloworld-pull,OTEL_SERVICE_NAME=helloworld --allow-unauthenticated --region $LOCATION_ID --project $PROJECT
 ```
 
 Click on the url -> You'll `Hello, World`
@@ -74,8 +74,10 @@ Hello World!
 1. Create subscription
 
     ```
-    gcloud pubsub subscriptions create helloworld --topic helloworld --push-endpoint ${CLOUD_RUN_URL}/cloudtask --project $PROJECT
+    gcloud pubsub subscriptions create helloworld --push-no-wrapper --push-no-wrapper-write-metadata --topic helloworld --push-endpoint ${CLOUD_RUN_URL}/cloudtask --project $PROJECT
     ```
+
+    `--push-no-wrapper-write-metadata`: <- this is necessary to propagate traceparent via **header** ([ref](https://cloud.google.com/pubsub/docs/payload-unwrapping#unwrapped_message_with_write_metadata_enabled))
 
     ```
     gcloud pubsub subscriptions list --filter=topic=projects/$PROJECT/topics/helloworld --project $PROJECT
@@ -116,10 +118,21 @@ gcloud run jobs execute helloworld-pubsubpublisher --region $LOCATION_ID --proje
 
 ## Code & Trace
 
+### PubSub Publisher
+
+> [!NOTE]
+> Subscription must use unwrapped with metadata [ref](https://cloud.google.com/pubsub/docs/payload-unwrapping#unwrapped_message_with_write_metadata_enabled) to send the traceparent via header. The trace context is carried via msg.Attributes and is unwrapped to the header.
+
+```go
+attrs := map[string]string{"Content-Type": "application/json"}
+msg := &pubsub.Message{Data: []byte("hello world"), Attributes: attrs}
+otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(msg.Attributes))
+```
+
 Helloworld server: `/createCloudTaskHandler` -> `createCloudTaskHandler` -> Cloud Task -> `/hellworld` -> `hellohandler`
 
 
-HTTP Handler:
+### HTTP Handler
 
 ```go
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -132,7 +145,9 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-CloudTasks (headers & `r.Context()`):
+### CloudTasks request
+
+(headers & `r.Context()`):
 
 ```go
 	req := &cloudtaskspb.CreateTaskRequest{
@@ -158,6 +173,14 @@ CloudTasks (headers & `r.Context()`):
 
 ![](helloworld-trace.png)
 
+`publish` (helloworld-publisher)
+    -> `helloworld` (subscriber) `pull` (pubsub.Subscription)
+    -> cloudtasks create -> `/helloworld`
+
+> [!NOTE]
+> - Spans for publish and pull subscription are connected
+> - Span for Cloud Run service is not connected!
+
 ## Cleanup
 
 1. Cloud Run
@@ -181,8 +204,18 @@ CloudTasks (headers & `r.Context()`):
 
 ## Tips
 
+### Cloud Logging
+
+```
+(resource.type="cloud_run_job" AND resource.labels.job_name="helloworld-pubsubpublisher") OR (resource.type = "cloud_run_revision" AND resource.labels.service_name = "helloworld")
+```
+
 ### PubSub
 
+1. Purge messages
+    ```
+    gcloud pubsub subscriptions seek helloworld --time=2124-11-08T10:00:00Z --project $PROJECT
+    ```
 1. `EnableOpenTelemetryTracing` option in client
 
     This is added in [#10709 feat(pubsub): add opentelemetry tracing support](https://github.com/googleapis/google-cloud-go/pull/10709) and enables `enableTracing` in the client and messageIterator.

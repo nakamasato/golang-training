@@ -3,7 +3,7 @@ package main
 
 import (
 	"context"
-	"encoding/json"
+	// "encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -16,6 +16,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+
 	// "go.opentelemetry.io/otel/trace"
 	"google.golang.org/api/option"
 
@@ -68,6 +69,31 @@ func main() {
 		log.Printf("defaulting to port %s", port)
 	}
 
+	// pull subscriber
+	projectID := os.Getenv("PROJECT_ID")
+	subID := os.Getenv("PUBSUB_SUBSCRIPTION_ID")
+	if projectID == "" || subID == "" {
+		fmt.Println("PROJECT_ID and PUBSUB_SUBSCRIPTION_ID must be set")
+		os.Exit(1)
+	}
+	sampleRate := 1.0
+
+	go func() {
+		if err := subscribeOpenTelemetryTracing(
+			// os.Stdout implements io.Writer
+			// and is used to write the output of the program.
+			// This is useful for debugging.
+			// In production, use a log file or a service like Stackdriver Logging.
+			// https://cloud.google.com/logging/docs
+			os.Stdout,
+			projectID,
+			subID,
+			sampleRate,
+		); err != nil {
+			fmt.Printf("subscribeOpenTelemetryTracing: %v\n", err)
+		}
+	}()
+
 	// Start HTTP server.
 	log.Printf("listening on port %s", port)
 	if err := http.ListenAndServe(":"+port, srv); err != nil {
@@ -102,7 +128,7 @@ func (s *server) createCloudTaskHandler(w http.ResponseWriter, r *http.Request) 
 	// ctx, span := tracer.Start(r.Context(), "createCloudTask")
 	// defer span.End()
 
-	var m PubSubMessage
+	// var m PubSubMessage
 	body, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -110,25 +136,28 @@ func (s *server) createCloudTaskHandler(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
+	fmt.Printf("body: %s\n", body)
+
+	// The following process is not needed for unwrapped Pub/Sub messages.
 	// byte slice unmarshalling handles base64 decoding.
-	if err := json.Unmarshal(body, &m); err != nil {
-		log.Printf("json.Unmarshal: %v", err)
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
+	// if err := json.Unmarshal(body, &m); err != nil {
+	// 	log.Printf("json.Unmarshal: %v", err)
+	// 	http.Error(w, "Bad Request", http.StatusBadRequest)
+	// 	return
+	// }
 
 	// Pub/Sub メッセージの attributes から trace 情報を抽出してコンテキストに設定
-	carrier := propagation.MapCarrier(m.Message.Attributes)
-	for k, v := range carrier {
-		// traceparent is stored in googclient_traceparent
-		fmt.Printf("carrier key: %s, value: %s\n", k, v)
-	}
+	// carrier := propagation.MapCarrier(m.Message.Attributes)
+	// for k, v := range carrier {
+	// 	// traceparent is stored in googclient_traceparent
+	// 	fmt.Printf("carrier key: %s, value: %s\n", k, v)
+	// }
+
+	carrier := propagation.HeaderCarrier(r.Header)
 	for k, v := range r.Header {
 		// traceparent and tracestate is stored in the header from Cloud Tasks
 		fmt.Printf("header key: %s, value: %s\n", k, v)
 	}
-
-	// r.Header.Set("traceparent", carrier.Get("googclient_traceparent")) // Update traceparent with the value from Pub/Sub message
 
 	ctx := otel.GetTextMapPropagator().Extract(r.Context(), carrier)
 
@@ -149,10 +178,10 @@ func (s *server) createCloudTaskHandler(w http.ResponseWriter, r *http.Request) 
 					Url:        s.queue.url,
 					HttpMethod: cloudtaskspb.HttpMethod_GET,
 					Headers: map[string]string{
-						// "traceparent": r.Header.Get("traceparent"), // これにするとCloud Run /cloudtask から先がつながるが、 Pubsub Publishがつながらない
-						// "tracestate":  r.Header.Get("tracestate"), // 上とセット
+						"traceparent": r.Header.Get("traceparent"), // これにするとCloud Run /cloudtask から先がつながるが、 Pubsub Publishがつながらない
+						"tracestate":  r.Header.Get("tracestate"),  // 上とセット
 						// "traceparent": carrier.Get("googclient_traceparent"), // これはCloud PubSubの標準Tracingを使う場合で、 pubsub publishはつながるが Cloud Run /cloudtaskが繋がらない <- Cloud RunがRoot Spanになってしまう
-						"traceparent": carrier.Get("traceparent"), // これはCloud PubsubPublish側でCustom SpanをRoot Spanにするタイプで、pubsub publishはつながるが Cloud Run /cloudtaskが繋がらない <- Cloud RunがRoot Spanになってしまう
+						// "traceparent": carrier.Get("traceparent"), // これはCloud PubsubPublish側でCustom SpanをRoot Spanにするタイプで、pubsub publishはつながるが Cloud Run /cloudtaskが繋がらない <- Cloud RunがRoot Spanになってしまう
 					},
 					Body:                []byte{},
 					AuthorizationHeader: nil,
