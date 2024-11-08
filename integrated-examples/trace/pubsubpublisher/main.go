@@ -109,10 +109,8 @@ func main() {
 	}
 	topic := client.Topic("helloworld")
 
-	msg := &pubsub.Message{Data: []byte("hello world")}
-	if msg.Attributes == nil {
-		msg.Attributes = make(map[string]string)
-	}
+	attrs := map[string]string{"Content-Type": "application/json"}
+	msg := &pubsub.Message{Data: []byte("hello world"), Attributes: attrs}
 	otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(msg.Attributes))
 
 	for k, v := range msg.Attributes {
