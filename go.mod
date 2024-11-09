@@ -20,7 +20,7 @@ require (
 	cloud.google.com/go/cloudtasks v1.13.1
 	cloud.google.com/go/pubsub v1.45.1
 	entgo.io/ent v0.14.1
-	github.com/99designs/gqlgen v0.17.55
+	github.com/99designs/gqlgen v0.17.56
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.25.0
 	github.com/golang-migrate/migrate/v4 v4.18.1
@@ -71,7 +71,7 @@ require (
 	github.com/avast/retry-go/v4 v4.6.0 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/docker v27.3.1+incompatible // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
@@ -82,6 +82,7 @@ require (
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
+	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-github/v39 v39.2.0 // indirect
@@ -110,7 +111,7 @@ require (
 	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/sosodev/duration v1.3.1 // indirect
 	github.com/tinylib/msgp v1.2.1 // indirect
-	github.com/urfave/cli/v2 v2.27.4 // indirect
+	github.com/urfave/cli/v2 v2.27.5 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
