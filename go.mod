@@ -33,7 +33,7 @@ require (
 	github.com/yudai/gojsondiff v1.0.0
 	go.opentelemetry.io/contrib/exporters/autoexport v0.57.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.56.0
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.56.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.57.0
 	go.opentelemetry.io/contrib/propagators/autoprop v0.56.0
 	go.opentelemetry.io/otel v1.32.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.17.0
