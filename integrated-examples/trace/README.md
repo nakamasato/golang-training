@@ -291,6 +291,8 @@ func (t *spanContextLogHandler) Handle(ctx context.Context, record slog.Record) 
     1. [Cloud Pub/Sub経由でトレースを取得する](https://zenn.dev/google_cloud_jp/articles/20230626-pubsub-trace): `propagator.Extract` and `propagator.Inject`
     1. [仕様と実装から理解するOpenTelemetryの全体像](https://zenn.dev/ymtdzzz/articles/37c2856f46ea10)
     1. [OpenTelemetry で始める分散トレース](https://qiita.com/atsu_kg/items/c3ee8141e4638957a947)
+    1. [OpenTelemetry for Go + Cloud MonitoringでTrace Exemplarを使う](https://zenn.dev/google_cloud_jp/articles/20240305-trace-exemplar)
+    1. [dd-trace-goがどのようにcontext propagationを実装しているか](https://medium.com/@eyasy1217/dd-trace-go%E3%81%8C%E5%88%86%E6%95%A3%E3%83%88%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%B3%E3%82%B0%E3%82%92%E3%81%A9%E3%81%AE%E3%82%88%E3%81%86%E3%81%AB%E5%AE%9F%E8%A3%85%E3%81%97%E3%81%A6%E3%81%84%E3%82%8B%E3%81%8B-3410c1dc7030): Easy to understand propagator, span context, carrier
 1. GitHub
     1. [#10709 feat(pubsub): add opentelemetry tracing support](https://github.com/googleapis/google-cloud-go/pull/10709)
     1. [pubsub: extract trace information on push subscriptions #10828](https://github.com/googleapis/google-cloud-go/issues/10828) in [v1.42.0](https://github.com/googleapis/google-cloud-go/releases/tag/pubsub%2Fv1.42.0)
