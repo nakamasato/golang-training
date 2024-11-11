@@ -11,7 +11,33 @@ on:
       - main
 
 jobs:
+  paths-filter:
+    outputs:
+      changes: ${{ steps.changes.outputs.src }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            src:
+              - '**.go'
+              - 'go.*'
+              - .github/workflows/test.yml
+
+  status-check:
+    runs-on: ubuntu-latest
+    needs:
+      - test
+    permissions: {}
+    if: failure()
+    steps:
+      - run: exit 1
+
   test:
+    needs: paths-filter
+    if: needs.paths-filter.outputs.changes == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
