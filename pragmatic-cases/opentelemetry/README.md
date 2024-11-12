@@ -2,7 +2,7 @@
 
 OTel’s goal is to provide a set of **standardized vendor-agnostic SDKs, APIs, and tools for ingesting, transforming, and sending data to an Observability back-end**
 
-## Overview (WIP)
+## Overview
 
 ![](docs/overview.drawio.svg)
 
@@ -797,11 +797,17 @@ Ref:
 
 ![](docs/otel-collector.drawio.svg)
 
+## 6. More Examples
+
+[OpenTelemetry on GCP](../../integrated-examples/trace/)
+
 ## FAQ
 
 1. What's **Resource**?: The entity that the traces are generated from. (Service, service instance, etc.)
 1. [API](https://opentelemetry.io/docs/reference/specification/overview/#api) vs. [SDK](https://opentelemetry.io/docs/reference/specification/overview/#sdk):
+1. What's **Exporter**?: **Exporter** sends telemetry data to its backend tool (e.g. Datadog, Jaeger, Prometheus, etc)
 1. What's **TraceProvider**?: TracerProvider constructs Tracer with specified configuration and register it to use in the target app.
+1. What's **Tracer**?: Tracer is the creator of Spans.
 1. Trace vs. Span: a **Trace** can be thought of as a directed acyclic graph (DAG) of Spans, where the edges between Spans are defined as parent/child relationship. A **Span** is a single operation within a Trace
 1. OtelCollector Gateway？:
 
