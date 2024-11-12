@@ -2,6 +2,10 @@
 
 ![](diagram.drawio.svg)
 
+## Basics
+
+[OpenTelemetry](../../pragmatic-cases/opentelemetry/)
+
 ## Prerequisite
 
 ```
