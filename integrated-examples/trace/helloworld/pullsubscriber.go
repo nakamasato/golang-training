@@ -18,9 +18,6 @@ import (
 )
 
 func subscribeOpenTelemetryTracing(w io.Writer, projectID, subID string, sampleRate float64) error {
-	// projectID := "my-project-id"
-	// subID := "my-sub"
-	// sampleRate := "1.0"
 	ctx := context.Background()
 
 	exporter, err := texporter.New(texporter.WithProjectID(projectID),

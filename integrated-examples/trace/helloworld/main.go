@@ -178,10 +178,8 @@ func (s *server) createCloudTaskHandler(w http.ResponseWriter, r *http.Request) 
 					Url:        s.queue.url,
 					HttpMethod: cloudtaskspb.HttpMethod_GET,
 					Headers: map[string]string{
-						"traceparent": r.Header.Get("traceparent"), // これにするとCloud Run /cloudtask から先がつながるが、 Pubsub Publishがつながらない
-						"tracestate":  r.Header.Get("tracestate"),  // 上とセット
-						// "traceparent": carrier.Get("googclient_traceparent"), // これはCloud PubSubの標準Tracingを使う場合で、 pubsub publishはつながるが Cloud Run /cloudtaskが繋がらない <- Cloud RunがRoot Spanになってしまう
-						// "traceparent": carrier.Get("traceparent"), // これはCloud PubsubPublish側でCustom SpanをRoot Spanにするタイプで、pubsub publishはつながるが Cloud Run /cloudtaskが繋がらない <- Cloud RunがRoot Spanになってしまう
+						"traceparent": r.Header.Get("traceparent"), // propagate traceparent
+						"tracestate":  r.Header.Get("tracestate"),  // propagate tracestate
 					},
 					Body:                []byte{},
 					AuthorizationHeader: nil,
