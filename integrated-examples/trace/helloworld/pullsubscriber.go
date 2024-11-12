@@ -9,43 +9,10 @@ import (
 	"time"
 
 	"cloud.google.com/go/pubsub"
-	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/sdk/resource"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
-	"google.golang.org/api/option"
 )
 
-func subscribeOpenTelemetryTracing(w io.Writer, projectID, subID string, sampleRate float64) error {
+func subscribeOpenTelemetryTracing(w io.Writer, projectID, subID string) error {
 	ctx := context.Background()
-
-	exporter, err := texporter.New(texporter.WithProjectID(projectID),
-		// Disable spans created by the exporter.
-		texporter.WithTraceClientOptions(
-			[]option.ClientOption{option.WithTelemetryDisabled()},
-		),
-	)
-	if err != nil {
-		return fmt.Errorf("error instantiating exporter: %w", err)
-	}
-
-	resources := resource.NewWithAttributes(
-		semconv.SchemaURL,
-		semconv.ServiceNameKey.String("subscriber"),
-	)
-
-	// Instantiate a tracer provider with the following settings
-	tp := sdktrace.NewTracerProvider(
-		sdktrace.WithBatcher(exporter),
-		sdktrace.WithResource(resources),
-		sdktrace.WithSampler(
-			sdktrace.ParentBased(sdktrace.TraceIDRatioBased(sampleRate)),
-		),
-	)
-
-	defer tp.ForceFlush(ctx) // flushes any pending spans
-	otel.SetTracerProvider(tp)
 
 	// Create a new client with tracing enabled.
 	client, err := pubsub.NewClientWithConfig(ctx, projectID, &pubsub.ClientConfig{

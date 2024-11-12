@@ -76,7 +76,6 @@ func main() {
 		fmt.Println("PROJECT_ID and PUBSUB_SUBSCRIPTION_ID must be set")
 		os.Exit(1)
 	}
-	sampleRate := 1.0
 
 	go func() {
 		if err := subscribeOpenTelemetryTracing(
@@ -88,7 +87,6 @@ func main() {
 			os.Stdout,
 			projectID,
 			subID,
-			sampleRate,
 		); err != nil {
 			fmt.Printf("subscribeOpenTelemetryTracing: %v\n", err)
 		}
