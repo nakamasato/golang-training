@@ -179,11 +179,17 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 `publish` (helloworld-publisher)
     -> `helloworld` (subscriber) `pull` (pubsub.Subscription)
-    -> cloudtasks create -> `/helloworld`
+    -> `/cloudtasks` -> createCloudTaskHandler (custom span) -> `google.cloud.tasks.v2.CloudTasks/Create` -> `/helloworld` -> helloHandler
 
 > [!NOTE]
 > - Spans for publish and pull subscription are connected
 > - Span for Cloud Run service is not connected!
+
+![](pubsub-publisher-span.png)
+
+> [!WARN]
+> The span `google.pubsub.v1.Publisher.Publish` from pubsub client is not connected to the spans above
+> https://github.com/googleapis/google-cloud-go/issues/1347
 
 ## Cleanup
 
