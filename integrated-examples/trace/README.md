@@ -117,9 +117,6 @@ gcloud run jobs deploy helloworld-pubsubpublisher --image $LOCATION_ID-docker.pk
 gcloud run jobs execute helloworld-pubsubpublisher --region $LOCATION_ID --project $PROJECT
 ```
 
-![](publisher-trace.png)
-
-
 ## Code & Trace
 
 ### PubSub Publisher
@@ -177,9 +174,9 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 ![](helloworld-trace.png)
 
-`publish` (helloworld-publisher)
-    -> `helloworld` (subscriber) `pull` (pubsub.Subscription)
-    -> `/cloudtasks` -> createCloudTaskHandler (custom span) -> `google.cloud.tasks.v2.CloudTasks/Create` -> `/helloworld` -> helloHandler
+- `publish` (helloworld-publisher) (custom span)
+    - `helloworld` (subscriber) `pull` (pubsub.Subscription)
+    -  `/cloudtasks` -> createCloudTaskHandler (otelhttp span) -> `google.cloud.tasks.v2.CloudTasks/Create` -> `/helloworld` -> helloHandler (otelhttp span)
 
 > [!NOTE]
 > - Spans for publish and pull subscription are connected
@@ -187,7 +184,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 ![](pubsub-publisher-span.png)
 
-> [!WARN]
+> [!WARNING]
 > The span `google.pubsub.v1.Publisher.Publish` from pubsub client is not connected to the spans above
 > https://github.com/googleapis/google-cloud-go/issues/1347
 
