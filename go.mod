@@ -43,7 +43,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.32.0
 	go.opentelemetry.io/otel/trace v1.32.0
 	golang.org/x/sync v0.9.0
-	google.golang.org/api v0.206.0
+	google.golang.org/api v0.207.0
 	gopkg.in/DataDog/dd-trace-go.v1 v1.69.1
 )
 
@@ -141,9 +141,9 @@ require (
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/tools v0.26.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
-	google.golang.org/genproto v0.0.0-20241104194629-dd2ea8efbc28 // indirect
+	google.golang.org/genproto v0.0.0-20241113202542-65e8d215514f // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241104194629-dd2ea8efbc28 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20241104194629-dd2ea8efbc28 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20241113202542-65e8d215514f // indirect
 	gotest.tools/v3 v3.5.1 // indirect
 )
 
