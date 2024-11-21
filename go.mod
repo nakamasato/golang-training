@@ -11,8 +11,8 @@ require (
 	golang.org/x/sys v0.27.0 // indirect
 	k8s.io/api v0.31.3
 	k8s.io/apimachinery v0.31.3
-	k8s.io/client-go v0.31.2
-	k8s.io/kubectl v0.31.2
+	k8s.io/client-go v0.31.3
+	k8s.io/kubectl v0.31.3
 	sigs.k8s.io/controller-runtime v0.19.1
 )
 
