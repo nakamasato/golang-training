@@ -29,7 +29,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/lithammer/shortuuid/v4 v4.0.0
 	github.com/onsi/ginkgo/v2 v2.22.0
-	github.com/vektah/gqlparser/v2 v2.5.19
+	github.com/vektah/gqlparser/v2 v2.5.20
 	github.com/yudai/gojsondiff v1.0.0
 	go.opentelemetry.io/contrib/exporters/autoexport v0.57.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.57.0
@@ -77,7 +77,7 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.48.1 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.49.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/agnivade/levenshtein v1.1.1 // indirect
+	github.com/agnivade/levenshtein v1.2.0 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/avast/retry-go/v4 v4.6.0 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect

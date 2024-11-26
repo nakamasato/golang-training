@@ -115,6 +115,8 @@ github.com/agext/levenshtein v1.2.1 h1:QmvMAjj2aEICytGiWzmxoE0x2KZvE0fvmqMOfy2tj
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/agnivade/levenshtein v1.1.1 h1:QY8M92nrzkmr798gCo3kmMyqXFzdQVpxLlGPRBij0P8=
 github.com/agnivade/levenshtein v1.1.1/go.mod h1:veldBMzWxcCG2ZvUTKD2kJNRdCk5hVbJomOvKkmgYbo=
+github.com/agnivade/levenshtein v1.2.0 h1:U9L4IOT0Y3i0TIlUIDJ7rVUziKi/zPbrJGaFrtYH3SY=
+github.com/agnivade/levenshtein v1.2.0/go.mod h1:QVVI16kDrtSuwcpd0p1+xMC6Z/VfhtCyDIjcwga4/DU=
 github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883 h1:bvNMNQO63//z+xNgfBlViaCIJKLlCJ6/fmUseuG0wVQ=
 github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883/go.mod h1:rCTlJbsFo29Kk6CurOXKm700vrz8f0KW0JNfpkRJY/8=
 github.com/andybalholm/cascadia v1.3.2 h1:3Xi6Dw5lHF15JtdcmAHD3i1+T8plmv7BQ/nsViSLyss=
@@ -487,6 +489,8 @@ github.com/vektah/gqlparser/v2 v2.5.18 h1:zSND3GtutylAQ1JpWnTHcqtaRZjl+y3NROeW8v
 github.com/vektah/gqlparser/v2 v2.5.18/go.mod h1:6HLzf7JKv9Fi3APymudztFQNmLXR5qJeEo6BOFcXVfc=
 github.com/vektah/gqlparser/v2 v2.5.19 h1:bhCPCX1D4WWzCDvkPl4+TP1N8/kLrWnp43egplt7iSg=
 github.com/vektah/gqlparser/v2 v2.5.19/go.mod h1:y7kvl5bBlDeuWIvLtA9849ncyvx6/lj06RsMrEjVy3U=
+github.com/vektah/gqlparser/v2 v2.5.20 h1:kPaWbhBntxoZPaNdBaIPT1Kh0i1b/onb5kXgEdP5JCo=
+github.com/vektah/gqlparser/v2 v2.5.20/go.mod h1:xMl+ta8a5M1Yo1A1Iwt/k7gSpscwSnHZdw7tfhEGfTM=
 github.com/x448/float16 v0.8.4 h1:qLwI1I70+NjRFUR3zs1JPUCgaCXSh3SW62uAKT1mSBM=
 github.com/x448/float16 v0.8.4/go.mod h1:14CWIYCyZA/cWjXOioeEpHeN/83MdbZDRQHoFcYsOfg=
 github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 h1:gEOO8jv9F4OT7lGCjxCBTO/36wtF6j2nSip77qHd4x4=
