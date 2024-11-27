@@ -181,7 +181,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.28.1
+	ariga.io/atlas v0.29.0
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apache/beam/sdks/v2 v2.61.0
 	github.com/beorn7/perks v1.0.1 // indirect
