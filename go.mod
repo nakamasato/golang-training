@@ -27,7 +27,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/lib/pq v1.10.9
-	github.com/lithammer/shortuuid/v4 v4.0.0
+	github.com/lithammer/shortuuid/v4 v4.1.0
 	github.com/onsi/ginkgo/v2 v2.22.0
 	github.com/vektah/gqlparser/v2 v2.5.20
 	github.com/yudai/gojsondiff v1.0.0
