@@ -20,7 +20,7 @@ require (
 	cloud.google.com/go/cloudtasks v1.13.2
 	cloud.google.com/go/pubsub v1.45.3
 	entgo.io/ent v0.14.1
-	github.com/99designs/gqlgen v0.17.57
+	github.com/99designs/gqlgen v0.17.58
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.25.0
 	github.com/golang-migrate/migrate/v4 v4.18.1
