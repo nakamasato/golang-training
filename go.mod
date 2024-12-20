@@ -6,7 +6,7 @@ require (
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/onsi/gomega v1.36.1
 	github.com/prometheus/client_golang v1.20.5
-	golang.org/x/net v0.32.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/oauth2 v0.24.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	k8s.io/api v0.32.0
@@ -20,7 +20,7 @@ require (
 	cloud.google.com/go/cloudtasks v1.13.2
 	cloud.google.com/go/pubsub v1.45.3
 	entgo.io/ent v0.14.1
-	github.com/99designs/gqlgen v0.17.60
+	github.com/99designs/gqlgen v0.17.61
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.25.0
 	github.com/golang-migrate/migrate/v4 v4.18.1
