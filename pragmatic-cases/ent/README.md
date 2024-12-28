@@ -5,6 +5,19 @@
 1. [Getting Started](getting-started)
 1. [Simple Example](simple-example)
 
+## Tips
+
+1. Postgres [GIN index](https://www.postgresql.org/docs/current/gin.html) ([ref](https://github.com/ent/ent/blob/a85a22931191a4964a9a14a9083f025c1c74d37b/doc/md/schema-indexes.md))
+
+    ```go
+    index.Fields("c5").
+          Annotations(
+              entsql.IndexTypes(map[string]string{
+                  dialect.MySQL:    "FULLTEXT",
+                  dialect.Postgres: "GIN",
+              }),
+          ),
+    ```
 
 ## Ref
 
