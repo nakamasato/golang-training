@@ -18,6 +18,7 @@
               }),
           ),
     ```
+1. Upsert add `--feature sql/upsert` to ent/migrate.go (ref: [#4272](https://github.com/ent/ent/issues/4272), [doc](https://entgo.io/docs/feature-flags#upsert))
 
 ## Ref
 
