@@ -19,6 +19,14 @@
           ),
     ```
 1. Upsert add `--feature sql/upsert` to ent/migrate.go (ref: [#4272](https://github.com/ent/ent/issues/4272), [doc](https://entgo.io/docs/feature-flags#upsert))
+1. Postgres `JSONB`
+
+    ```go
+    field.JSON("metadata", map[string]interface{}{}).
+        SchemaType(map[string]string{
+            "postgres": "jsonb", // Specify PostgreSQL type
+        }).Default(map[string]interface{}{}),
+    ```
 
 ## Ref
 
