@@ -17,7 +17,7 @@ require (
 )
 
 require (
-	cloud.google.com/go/cloudtasks v1.13.2
+	cloud.google.com/go/cloudtasks v1.13.3
 	cloud.google.com/go/pubsub v1.45.3
 	entgo.io/ent v0.14.1
 	github.com/99designs/gqlgen v0.17.62
