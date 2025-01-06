@@ -44,7 +44,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.33.0
 	golang.org/x/sync v0.10.0
 	google.golang.org/api v0.214.0
-	gopkg.in/DataDog/dd-trace-go.v1 v1.70.1
+	gopkg.in/DataDog/dd-trace-go.v1 v1.70.2
 )
 
 require (
@@ -146,6 +146,7 @@ require (
 	go.opentelemetry.io/collector/component v0.104.0 // indirect
 	go.opentelemetry.io/collector/config/configtelemetry v0.104.0 // indirect
 	go.opentelemetry.io/collector/pdata v1.11.0 // indirect
+	go.opentelemetry.io/collector/pdata/pprofile v0.104.0 // indirect
 	go.opentelemetry.io/collector/semconv v0.104.0 // indirect
 	go.opentelemetry.io/contrib/bridges/prometheus v0.58.0 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.29.0 // indirect
