@@ -44,7 +44,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.33.0
 	golang.org/x/sync v0.10.0
 	google.golang.org/api v0.214.0
-	gopkg.in/DataDog/dd-trace-go.v1 v1.70.2
+	gopkg.in/DataDog/dd-trace-go.v1 v1.70.3
 )
 
 require (
