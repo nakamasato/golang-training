@@ -55,8 +55,8 @@ require (
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	cloud.google.com/go/iam v1.2.2 // indirect
 	cloud.google.com/go/monitoring v1.21.2 // indirect
-	cloud.google.com/go/profiler v0.4.1 // indirect
-	cloud.google.com/go/storage v1.45.0 // indirect
+	cloud.google.com/go/profiler v0.4.2 // indirect
+	cloud.google.com/go/storage v1.48.0 // indirect
 	cloud.google.com/go/trace v1.11.2 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/DataDog/appsec-internal-go v1.9.0 // indirect
@@ -186,7 +186,7 @@ require (
 require (
 	ariga.io/atlas v0.30.0
 	github.com/agext/levenshtein v1.2.1 // indirect
-	github.com/apache/beam/sdks/v2 v2.61.0
+	github.com/apache/beam/sdks/v2 v2.62.0
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
