@@ -23,7 +23,7 @@ require (
 	github.com/99designs/gqlgen v0.17.63
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.25.0
-	github.com/golang-migrate/migrate/v4 v4.18.1
+	github.com/golang-migrate/migrate/v4 v4.18.2
 	github.com/gorilla/websocket v1.5.3
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/lib/pq v1.10.9
