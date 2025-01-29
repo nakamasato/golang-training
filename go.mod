@@ -20,7 +20,7 @@ require (
 	cloud.google.com/go/cloudtasks v1.13.3
 	cloud.google.com/go/pubsub v1.45.3
 	entgo.io/ent v0.14.1
-	github.com/99designs/gqlgen v0.17.63
+	github.com/99designs/gqlgen v0.17.64
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.25.0
 	github.com/golang-migrate/migrate/v4 v4.18.2
@@ -29,7 +29,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/lithammer/shortuuid/v4 v4.2.0
 	github.com/onsi/ginkgo/v2 v2.22.2
-	github.com/vektah/gqlparser/v2 v2.5.21
+	github.com/vektah/gqlparser/v2 v2.5.22
 	github.com/yudai/gojsondiff v1.0.0
 	go.opentelemetry.io/contrib/exporters/autoexport v0.58.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.58.0
