@@ -2,7 +2,7 @@ module helloworld
 
 go 1.22.7
 
-toolchain go1.23.5
+toolchain go1.23.6
 
 require (
 	cloud.google.com/go/cloudsqlconn v1.14.2
