@@ -141,6 +141,7 @@ require (
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yudai/pp v2.0.1+incompatible // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
+	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/collector/component v0.104.0 // indirect
@@ -184,7 +185,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.30.0
+	ariga.io/atlas v0.31.0
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apache/beam/sdks/v2 v2.62.0
 	github.com/beorn7/perks v1.0.1 // indirect
