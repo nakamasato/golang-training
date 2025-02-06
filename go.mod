@@ -22,7 +22,7 @@ require (
 	entgo.io/ent v0.14.1
 	github.com/99designs/gqlgen v0.17.64
 	github.com/DATA-DOG/go-sqlmock v1.5.2
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.25.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.26.0
 	github.com/golang-migrate/migrate/v4 v4.18.2
 	github.com/gorilla/websocket v1.5.3
 	github.com/jessevdk/go-flags v1.6.1
