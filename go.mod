@@ -37,10 +37,10 @@ require (
 	go.opentelemetry.io/contrib/propagators/autoprop v0.58.0
 	go.opentelemetry.io/otel v1.34.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.17.0
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.33.0
-	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.33.0
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.34.0
+	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.34.0
 	go.opentelemetry.io/otel/sdk v1.34.0
-	go.opentelemetry.io/otel/sdk/metric v1.33.0
+	go.opentelemetry.io/otel/sdk/metric v1.34.0
 	go.opentelemetry.io/otel/trace v1.34.0
 	golang.org/x/sync v0.11.0
 	google.golang.org/api v0.215.0
