@@ -20,7 +20,7 @@ require (
 	cloud.google.com/go/cloudtasks v1.13.3
 	cloud.google.com/go/pubsub v1.45.3
 	entgo.io/ent v0.14.1
-	github.com/99designs/gqlgen v0.17.64
+	github.com/99designs/gqlgen v0.17.65
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.25.0
 	github.com/golang-migrate/migrate/v4 v4.18.2
@@ -223,7 +223,7 @@ require (
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.58.0
 	golang.org/x/mod v0.22.0 // indirect
 	golang.org/x/term v0.27.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	golang.org/x/time v0.8.0 // indirect
 	google.golang.org/grpc v1.68.1
 	google.golang.org/protobuf v1.36.5
