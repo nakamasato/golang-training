@@ -19,7 +19,7 @@ require (
 require (
 	cloud.google.com/go/cloudtasks v1.13.3
 	cloud.google.com/go/pubsub v1.45.3
-	entgo.io/ent v0.14.1
+	entgo.io/ent v0.14.2
 	github.com/99designs/gqlgen v0.17.66
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.25.0
@@ -185,7 +185,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.31.0
+	ariga.io/atlas v0.31.1-0.20250212144724-069be8033e83
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apache/beam/sdks/v2 v2.62.0
 	github.com/beorn7/perks v1.0.1 // indirect
