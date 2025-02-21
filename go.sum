@@ -401,6 +401,7 @@ github.com/hashicorp/hcl/v2 v2.23.0 h1:Fphj1/gCylPxHutVSEOf2fBOh1VE4AuLV7+kbJf3q
 github.com/hashicorp/hcl/v2 v2.23.0/go.mod h1:62ZYHrXgPoX8xBnzl8QzbWq4dyDsDtfCRgIq1rbJEvA=
 github.com/imdario/mergo v0.3.12 h1:b6R2BslTbIEToALKP7LxUvijTsNI9TAe80pLWN2g/HU=
 github.com/imdario/mergo v0.3.12/go.mod h1:jmQim1M+e3UYxmgPu/WyfjB3N3VflVyUjjjwH0dnCYA=
+github.com/imdario/mergo v0.3.16/go.mod h1:WBLT9ZmE3lPoWsEzCh9LPo3TiwVN+ZKEjmz+hD27ysY=
 github.com/jessevdk/go-flags v1.6.1 h1:Cvu5U8UGrLay1rZfv/zP7iLpSHGUZ/Ou68T0iX1bBK4=
 github.com/jessevdk/go-flags v1.6.1/go.mod h1:Mk8T1hIAWpOiJiHa9rJASDK2UGWji0EuPGBnNLMooyc=
 github.com/josharian/intern v1.0.0 h1:vlS4z54oSdjm0bgjRigI+G1HpF+tI+9rE5LLzOg8HmY=
@@ -1079,6 +1080,8 @@ gopkg.in/DataDog/dd-trace-go.v1 v1.71.0 h1:+Lr4YwJQGZuIOoIFNjMY5l7bGZblbKrwMtmbI
 gopkg.in/DataDog/dd-trace-go.v1 v1.71.0/go.mod h1:0M7D+g0aTIlQgxqTSWrmTjssl+POsL5TVDaX2QFKk4U=
 gopkg.in/DataDog/dd-trace-go.v1 v1.71.1 h1:Stsvs6JFJa2eXb00ZbeSwhFGMNUi05Fvgy0+BsYElOI=
 gopkg.in/DataDog/dd-trace-go.v1 v1.71.1/go.mod h1:TJ3mmLGqmuhqXyeKotCQhV0SptomjJMlHVr289zMczs=
+gopkg.in/DataDog/dd-trace-go.v1 v1.72.0 h1:/IcNYtMPGnmFW0TCRG7zwRubBxG2nF2D9saLhlXBs0o=
+gopkg.in/DataDog/dd-trace-go.v1 v1.72.0/go.mod h1:XqDhDqsLpThFnJc4z0FvAEItISIAUka+RHwmQ6EfN1U=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntNwaWcugrBjAiHlqqRiVk=
