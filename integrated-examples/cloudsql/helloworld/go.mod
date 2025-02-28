@@ -6,7 +6,7 @@ toolchain go1.24.0
 
 require (
 	cloud.google.com/go/cloudsqlconn v1.15.0
-	github.com/jackc/pgx/v4 v4.18.3
+	github.com/jackc/pgx/v5 v5.7.2
 	github.com/jackc/pgx/v5 v5.7.2
 )
 
