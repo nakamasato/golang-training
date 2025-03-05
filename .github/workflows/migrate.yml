@@ -55,7 +55,7 @@ jobs:
 
     services:
       db:
-        image: mysql:9.1
+        image: mysql:9.2
         ports:
           - 3306:3306
         env:

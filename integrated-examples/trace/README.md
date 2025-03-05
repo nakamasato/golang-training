@@ -77,11 +77,19 @@ Hello World!
 
 1. Create subscription
 
+   push:
+
     ```
     gcloud pubsub subscriptions create helloworld --push-no-wrapper --push-no-wrapper-write-metadata --topic helloworld --push-endpoint ${CLOUD_RUN_URL}/cloudtask --project $PROJECT
     ```
 
     `--push-no-wrapper-write-metadata`: <- this is necessary to propagate traceparent via **header** ([ref](https://cloud.google.com/pubsub/docs/payload-unwrapping#unwrapped_message_with_write_metadata_enabled))
+
+    pull:
+
+    ```
+    gcloud pubsub subscriptions create helloworld-pull --topic helloworld --project $PROJECT
+    ```
 
     ```
     gcloud pubsub subscriptions list --filter=topic=projects/$PROJECT/topics/helloworld --project $PROJECT
