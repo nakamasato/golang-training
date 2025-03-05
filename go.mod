@@ -29,6 +29,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/lithammer/shortuuid/v4 v4.0.0
 	github.com/onsi/ginkgo/v2 v2.21.0
+	github.com/spf13/cobra v1.8.1
 	github.com/vektah/gqlparser/v2 v2.5.19
 	github.com/yudai/gojsondiff v1.0.0
 	go.opentelemetry.io/contrib/exporters/autoexport v0.57.0
@@ -98,6 +99,7 @@ require (
 	github.com/hashicorp/go-secure-stdlib/strutil v0.1.2 // indirect
 	github.com/hashicorp/go-sockaddr v1.0.2 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
