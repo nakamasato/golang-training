@@ -30,7 +30,9 @@ var chidCmd = &cobra.Command{
 
 func main() {
 	cmd.AddCommand(chidCmd)
-	cmd.Execute()
+	if err := cmd.Execute(); err != nil {
+		fmt.Println(err)
+	}
 	fmt.Println("main")
 }
 
