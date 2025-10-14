@@ -18,7 +18,7 @@ require (
 
 require (
 	cloud.google.com/go/cloudtasks v1.13.4
-	cloud.google.com/go/pubsub v1.47.0
+	cloud.google.com/go/pubsub v1.50.1
 	entgo.io/ent v0.14.3
 	github.com/99designs/gqlgen v0.17.66
 	github.com/DATA-DOG/go-sqlmock v1.5.2
