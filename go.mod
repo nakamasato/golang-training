@@ -29,7 +29,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/lithammer/shortuuid/v4 v4.2.0
 	github.com/onsi/ginkgo/v2 v2.23.0
-	github.com/vektah/gqlparser/v2 v2.5.23
+	github.com/vektah/gqlparser/v2 v2.5.31
 	github.com/yudai/gojsondiff v1.0.0
 	go.opentelemetry.io/contrib/exporters/autoexport v0.60.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.60.0
