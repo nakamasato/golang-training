@@ -129,6 +129,8 @@ cloud.google.com/go/cloudsqlconn v1.24.0 h1:rMna5Tk00O10QY/9vgOcuzk1dXvRKCUS49Ag
 cloud.google.com/go/cloudsqlconn v1.24.0/go.mod h1:NS1CEi6zVhrSSK1ZQ1AYqWqrzoYR89jhSaElU9JHaNI=
 cloud.google.com/go/cloudsqlconn v1.25.1 h1:NSm9zyFySRjFivbOSGi0Mv5VS59SNel7OnWkkMmKUa8=
 cloud.google.com/go/cloudsqlconn v1.25.1/go.mod h1:yBjHpKuIGsmVTrqgMqfAvs1o3V0f8ee+wCiCkM61UjI=
+cloud.google.com/go/cloudsqlconn v1.25.2 h1:A3lxLrac+8FjYo3BSwg78uo5BtQOMwBdOKR/SNapqp0=
+cloud.google.com/go/cloudsqlconn v1.25.2/go.mod h1:yBjHpKuIGsmVTrqgMqfAvs1o3V0f8ee+wCiCkM61UjI=
 cloud.google.com/go/compute v1.20.1 h1:6aKEtlUiwEpJzM001l0yFkpXmUVXaN8W+fbkb2AZNbg=
 cloud.google.com/go/compute v1.20.1/go.mod h1:4tCnrn48xsqlwSAiLf1HXMQk8CONslYbdiEZc9FEIbM=
 cloud.google.com/go/compute v1.23.0 h1:tP41Zoavr8ptEqaW6j+LQOnyBBhO7OkOMAGrgLopTwY=
