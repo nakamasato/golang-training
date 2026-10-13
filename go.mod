@@ -58,7 +58,7 @@ require (
 	cloud.google.com/go/profiler v0.4.2 // indirect
 	cloud.google.com/go/storage v1.48.0 // indirect
 	cloud.google.com/go/trace v1.11.2 // indirect
-	filippo.io/edwards25519 v1.1.0 // indirect
+	filippo.io/edwards25519 v1.1.1 // indirect
 	github.com/DataDog/appsec-internal-go v1.9.0 // indirect
 	github.com/DataDog/datadog-agent/pkg/obfuscate v0.58.0 // indirect
 	github.com/DataDog/datadog-agent/pkg/proto v0.58.0 // indirect
